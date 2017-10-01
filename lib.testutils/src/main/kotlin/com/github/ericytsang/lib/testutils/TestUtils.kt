@@ -59,7 +59,7 @@ object TestUtils
 
     class ExpectedExceptionNotThrownException internal constructor():Exception()
 
-    fun exceptionExpected(block:()->Unit)
+    fun exceptionExpected(block:()->Unit):Exception
     {
         try
         {
@@ -73,6 +73,7 @@ object TestUtils
         catch (ex:Exception)
         {
             ex.printStackTrace(System.out)
+            return ex
         }
     }
 }
