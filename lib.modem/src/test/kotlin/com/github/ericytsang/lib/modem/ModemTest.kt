@@ -38,11 +38,9 @@ class ModemTest
     fun teardown()
     {
         println("fun teardown() ===============================")
-        Thread.sleep(100)
         conn1.close()
         conn2.close()
         TestUtils.assertAllWorkerThreadsDead(emptySet(),100)
-        Thread.sleep(100)
     }
 
     @Test
@@ -58,14 +56,9 @@ class ModemTest
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
         val t1 = thread {m1.connect(Unit)}
-        Thread.sleep(10)
-        assert(t1.isAlive)
-        val t2 = thread {m2.accept()}
-        Thread.sleep(10)
-        assert(!t1.isAlive)
-        assert(!t2.isAlive)
+        while (t1.state !in setOf(Thread.State.BLOCKED,Thread.State.WAITING,Thread.State.TIMED_WAITING));
+        m2.accept()
         t1.join()
-        t2.join()
         m1.close()
         m2.close()
     }

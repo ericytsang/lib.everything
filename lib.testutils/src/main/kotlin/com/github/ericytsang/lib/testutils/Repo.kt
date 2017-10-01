@@ -10,7 +10,7 @@ object TestUtils
         var threads = arrayOfNulls<Thread>(threadGroup.activeCount())
         while (threadGroup.enumerate(threads,true) === threads.size)
         {
-            threads = arrayOfNulls<Thread>(threads.size*2)
+            threads = arrayOfNulls(threads.size*2)
         }
         return threads
             .filterNotNull()

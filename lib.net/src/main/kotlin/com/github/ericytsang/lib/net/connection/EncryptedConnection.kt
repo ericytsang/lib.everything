@@ -55,18 +55,13 @@ class EncryptedConnection(val underlyingConnection:Connection,val encodedEncrypt
             authenticate(encryptedStreams.first,encryptedStreams.second)
             inputStream = encryptedStreams.first
             outputStream = encryptedStreams.second
-
-            // kill the kill on timeout thread because encryption and
-            // authentication setup has completed before the kill on timeout
-            // thread timed out...
-            killOnTimeout.interrupt()
         }
 
-        // if something goes wrong, clean up resources; do not close underlying
-        // stream otherwise since it will be used throughout the lifetime of
-        // this object
         catch (ex:Exception)
         {
+            // if something goes wrong, clean up resources; do not close underlying
+            // stream otherwise since it will be used throughout the lifetime of
+            // this object
             underlyingConnection.close()
             if (isTimedOut)
             {
@@ -76,6 +71,15 @@ class EncryptedConnection(val underlyingConnection:Connection,val encodedEncrypt
             {
                 throw AuthenticationException("authentication failed",ex)
             }
+        }
+
+        finally
+        {
+            // kill the kill on timeout thread because encryption and
+            // authentication setup has completed before the kill on timeout
+            // thread timed out...
+            killOnTimeout.interrupt()
+            killOnTimeout.join()
         }
     }
 

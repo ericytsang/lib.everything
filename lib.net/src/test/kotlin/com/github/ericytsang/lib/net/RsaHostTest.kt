@@ -4,6 +4,8 @@ import com.github.ericytsang.lib.net.host.RsaHost
 import com.github.ericytsang.lib.net.host.TcpClient
 import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.TcpServer
+import com.github.ericytsang.lib.testutils.TestUtils
+import org.junit.After
 import org.junit.Test
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -19,6 +21,12 @@ class RsaHostTest
     companion object
     {
         private const val TEST_PORT = 63294
+    }
+
+    @After
+    fun teardown()
+    {
+        TestUtils.assertAllWorkerThreadsDead(emptySet(),100)
     }
 
     @Test
