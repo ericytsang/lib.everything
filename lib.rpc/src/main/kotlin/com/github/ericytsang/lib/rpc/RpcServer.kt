@@ -1,34 +1,42 @@
 package com.github.ericytsang.lib.rpc
 
+import com.github.ericytsang.lib.concurrent.awaitTermination
 import com.github.ericytsang.lib.modem.Modem
 import com.github.ericytsang.lib.net.connection.Connection
-import com.github.ericytsang.lib.onlysetonce.OnlySetOnce
+import com.github.ericytsang.lib.onlycallonce.OneshotCall
 import java.io.Closeable
 import java.io.NotSerializableException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
-open class RpcServer<in Context>(val modem:Modem,private val context:Context):Closeable
+open class RpcServer<in Context>(val modem:Modem,private val context:Context,private val connectionHandlerExecutorService:ExecutorService = Executors.newCachedThreadPool()):Closeable
 {
-    private var closeStackTrace:Array<StackTraceElement>? by OnlySetOnce()
+    private val oneshotClose = OneshotCall
+        .builder<Unit>()
+        .serialized()
+        .ignoreSubsequent()
+        {
+            modem.close()
+            server.join()
+        }
 
     override fun close()
     {
-        try
-        {
-            closeStackTrace = Thread.currentThread().stackTrace
-            modem.close()
-            if (Thread.currentThread() != server) server.join()
-        }
-        catch (ex:Exception)
-        {
-            // ignore
-        }
+        oneshotClose.call(Unit)
+    }
+
+    private fun internalClose()
+    {
+        modem.close()
+        connectionHandlerExecutorService.shutdown()
+        connectionHandlerExecutorService.awaitTermination()
     }
 
     private val server:Thread = object:Thread()
@@ -41,21 +49,14 @@ open class RpcServer<in Context>(val modem:Modem,private val context:Context):Cl
                 {
                     modem.accept()
                 }
-                catch (ex:Exception)
+                catch (ex:/*Modem*/Exception)
                 {
-                    val closeStackTrace = closeStackTrace
-                    if (closeStackTrace != null)
-                    {
-                        onShutdown(true,IllegalArgumentException("server closed at ${closeStackTrace.joinToString("\n","\n","\n")}",ex))
-                    }
-                    else
-                    {
-                        close()
-                        onShutdown(false,ex)
-                    }
+                    internalClose()
+                    onShutdown(ex)
                     return
                 }
-                ConnectionHandler(connection).start()
+                connectionHandlerExecutorService
+                    .execute(ConnectionHandler(connection))
             }
         }
 
@@ -65,15 +66,12 @@ open class RpcServer<in Context>(val modem:Modem,private val context:Context):Cl
         }
     }
 
-    protected open fun onShutdown(wasClosedLocally:Boolean,cause:Exception)
+    protected open fun onShutdown(cause:/*Modem*/Exception)
     {
-        if (!wasClosedLocally)
-        {
-            throw cause
-        }
+        throw cause
     }
 
-    private inner class ConnectionHandler(val connection:Connection):Thread()
+    private inner class ConnectionHandler(val connection:Connection):Runnable
     {
         override fun run()
         {

@@ -1,4 +1,0 @@
-dependencies {
-    compile project(":lib.modem")
-    testCompile project(":lib.concurrent")
-}

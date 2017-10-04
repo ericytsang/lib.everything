@@ -3,6 +3,7 @@ package com.github.ericytsang.lib.rpc
 import com.github.ericytsang.lib.concurrent.future
 import com.github.ericytsang.lib.modem.Modem
 import com.github.ericytsang.lib.net.connection.TcpConnection
+import com.github.ericytsang.lib.testutils.TestUtils
 import org.junit.After
 import org.junit.Test
 import java.net.InetAddress
@@ -29,7 +30,7 @@ class RpcServerTest
 
     val rpcServer = object:RpcServer<Int>(modem1,5)
     {
-        override fun onShutdown(wasClosedLocally:Boolean,cause:Exception)
+        override fun onShutdown(cause:Exception)
         {
             shutdownCalled = true
         }
@@ -41,7 +42,7 @@ class RpcServerTest
         rpcServer.close()
         con1.close()
         con2.close()
-        TestUtils.assertAllWorkerThreadsDead(emptySet(),200)
+        TestUtils.assertAllWorkerThreadsDead()
     }
 
     @Test

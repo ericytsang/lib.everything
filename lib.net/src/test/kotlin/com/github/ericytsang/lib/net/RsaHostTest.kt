@@ -26,7 +26,7 @@ class RsaHostTest
     @After
     fun teardown()
     {
-        TestUtils.assertAllWorkerThreadsDead(emptySet(),100)
+        TestUtils.assertAllWorkerThreadsDead()
     }
 
     @Test

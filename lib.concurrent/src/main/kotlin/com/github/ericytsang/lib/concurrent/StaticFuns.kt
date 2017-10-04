@@ -1,7 +1,9 @@
 package com.github.ericytsang.lib.concurrent
 
 import java.io.Serializable
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
@@ -48,3 +50,11 @@ fun sleep(timeoutMillis:Long):SleepResult
 }
 
 data class SleepResult(val wasInterrupted:Boolean,val sleepDuration:Long):Serializable
+
+fun ExecutorService.awaitTermination()
+{
+    while (!isTerminated)
+    {
+        awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS)
+    }
+}

@@ -8,7 +8,7 @@ object TestUtils
     {
         val threadGroup = Thread.currentThread().threadGroup
         var threads = arrayOfNulls<Thread>(threadGroup.activeCount())
-        while (threadGroup.enumerate(threads,true) === threads.size)
+        while (threadGroup.enumerate(threads,true) == threads.size)
         {
             threads = arrayOfNulls(threads.size*2)
         }
@@ -27,14 +27,13 @@ object TestUtils
         // wait a maximum of timeout ms for threads to die
         if (timeout > 0)
         {
-            @Suppress("NAME_SHADOWING")
-            var timeout = timeout
+            var timeoutRemaining = timeout
             for (thread in workerThreads)
             {
-                timeout -= measureTimeMillis {
-                    thread.join(timeout)
+                timeoutRemaining -= measureTimeMillis {
+                    thread.join(timeoutRemaining)
                 }
-                if (timeout <= 0) break
+                if (timeoutRemaining <= 0) break
             }
         }
 

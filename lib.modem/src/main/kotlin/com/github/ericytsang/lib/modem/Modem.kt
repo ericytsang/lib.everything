@@ -265,6 +265,11 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
         else throw cause
     }
 
+    sealed class ModemException(message:String,cause:Throwable):RuntimeException(message,cause)
+    {
+        class UnderlyingConnectionClosedException(cause:Throwable):ModemException("underlying connection object was closed",cause)
+    }
+
     private inner class SimpleConnection:Connection
     {
         val connectLatch = CountDownLatch(1)
