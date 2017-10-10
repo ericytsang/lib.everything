@@ -27,7 +27,7 @@ class IntegrationTest
     val item6 = MockItem(5,Long.MIN_VALUE+5,false,"5")
 
     @Test
-    fun insertTest()
+    fun insert_test()
     {
         // insert records into master
         master.insertOrReplace(item1)
@@ -55,9 +55,9 @@ class IntegrationTest
     }
 
     @Test
-    fun undeleteTest()
+    fun undelete_test()
     {
-        delete2RecordsTest()
+        delete_2_records_test()
 
         // undelete a record
         master.insertOrReplace(item6)
@@ -78,9 +78,9 @@ class IntegrationTest
     }
 
     @Test
-    fun delete2RecordsTest()
+    fun delete_2_records_test()
     {
-        insertTest()
+        insert_test()
 
         // delete records from mirror2 & insert record into mirror1
         run {
@@ -106,9 +106,9 @@ class IntegrationTest
     }
 
     @Test
-    fun delete4RecordsTest()
+    fun delete_4_records_test()
     {
-        insertTest()
+        insert_test()
 
         // delete more records from mirror2 such that mirror1 will need to resync
         run {

@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream
 class MockItemTest
 {
     @Test
-    fun serializeableTest()
+    fun serializeable_test()
     {
         val out = ObjectOutputStream(ByteArrayOutputStream())
         out.writeObject(MockItem(0,0,false,""))

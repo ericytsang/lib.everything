@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.simplepipestream
+package com.github.ericytsang.lib.cipherstream
 
 import com.github.ericytsang.lib.abstractstream.AbstractInputStream
 

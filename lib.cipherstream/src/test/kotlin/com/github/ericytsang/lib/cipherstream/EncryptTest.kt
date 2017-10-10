@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.simplepipestream
+package com.github.ericytsang.lib.cipherstream
 
 import org.junit.Test
 import javax.crypto.spec.IvParameterSpec

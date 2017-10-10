@@ -8,7 +8,7 @@ class SimpleMasterRepoTest
     private val testSubject = MasterRepo(testSubjectAdapter)
 
     @Test
-    fun insertTest()
+    fun insert_test()
     {
         val item1 = MockItem(0,0,false,"0")
         val item2 = MockItem(1,0,false,"1")
@@ -35,7 +35,7 @@ class SimpleMasterRepoTest
     }
 
     @Test
-    fun replaceTest()
+    fun replace_test()
     {
         val itemV1 = MockItem(0,0,false,"0")
         val itemV2 = MockItem(0,0,true,"hello")
@@ -50,7 +50,7 @@ class SimpleMasterRepoTest
     }
 
     @Test
-    fun deleteTest()
+    fun delete_test()
     {
         // set up the test subject...insert items into it so we can delete some
         val item1 = MockItem(0,0,false,"0")

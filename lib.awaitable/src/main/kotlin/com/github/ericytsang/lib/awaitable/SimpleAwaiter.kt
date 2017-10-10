@@ -59,7 +59,9 @@ abstract class SimpleAwaiter private constructor(
         }
     }
 
-    private val createStackTrace = Thread.currentThread().stackTrace
+    private val createRecord = CreateRecord()
+
+    class CreateRecord internal constructor():Exception()
 
     private val closeLock = ReentrantLock()
 
@@ -81,7 +83,7 @@ abstract class SimpleAwaiter private constructor(
                 {
                     if (++consecutiveLoopCount > maxConsecutiveImmediateUpdates)
                     {
-                        throw RuntimeException("awaiter looping too much! created at:\n${createStackTrace.joinToString("\n")}")
+                        throw RuntimeException("awaiter looping too much!",createRecord)
                     }
                 }
                 else

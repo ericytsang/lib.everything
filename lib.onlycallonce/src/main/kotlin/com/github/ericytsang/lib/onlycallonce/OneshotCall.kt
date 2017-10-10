@@ -7,13 +7,13 @@ sealed class OneshotCall<in Input>
 {
     companion object
     {
-        fun <Input> builder() = Builder<Input>()
+        fun <Input> builder() = Builder1<Input>()
 
-        class Builder<Input>
+        class Builder1<Input> internal constructor()
         {
             private var wrap:(OneshotCall<Input>)->OneshotCall<Input> = {it}
 
-            fun serialized():Builder<Input>
+            fun serialized():Builder1<Input>
             {
                 wrap = {Serialized(it)}
                 return this
@@ -32,10 +32,15 @@ sealed class OneshotCall<in Input>
     }
 
     abstract fun call(input:Input)
+    abstract val callRecord:CallRecord?
+    val isVirgin:Boolean get() = callRecord == null
+
+    class CallRecord(val callingThread:Thread):Exception("oneshot call already used. first call by thread: $callingThread")
 
     class Serialized<in Input>(val wrappee:OneshotCall<Input>):OneshotCall<Input>()
     {
         private val callLock = ReentrantLock()
+        override val callRecord:CallRecord? get() = wrappee.callRecord
         override fun call(input:Input)
         {
             callLock.withLock {wrappee.call(input)}
@@ -44,46 +49,44 @@ sealed class OneshotCall<in Input>
 
     class IgnoreSubsequentCalls<in Input>(val callHandler:(Input)->Unit):OneshotCall<Input>()
     {
-        private var isFirstCall = true
-        private val callLock = ReentrantLock()
+        private val wrappee = ThrowOnSubsequentCalls(callHandler)
         override fun call(input:Input)
         {
-            val isFirstCall = callLock.withLock()
+            try
             {
-                val isFirstCall = isFirstCall
-                if (isFirstCall)
-                {
-                    this.isFirstCall = false
-                }
-                isFirstCall
+                wrappee.call(input)
             }
-            if (isFirstCall)
+            catch (ex:ThrowOnSubsequentCalls.AlreadyCalledException)
             {
-                callHandler(input)
+                // ignore
             }
         }
+        override val callRecord:CallRecord? get() = wrappee.callRecord
     }
 
     class ThrowOnSubsequentCalls<in Input>(val callHandler:(Input)->Unit):OneshotCall<Input>()
     {
-        private var stacktraceOfFirstCall:Array<StackTraceElement>? = null
+        override var callRecord:CallRecord? = null
+            private set
+            get() = callLock.withLock {field}
         private val callLock = ReentrantLock()
         override fun call(input:Input)
         {
             callLock.withLock()
             {
-                if (stacktraceOfFirstCall == null)
+                val callRecord = callRecord
+                if (callRecord == null)
                 {
-                    stacktraceOfFirstCall = Thread.currentThread().stackTrace
+                    this.callRecord = CallRecord(Thread.currentThread())
                 }
                 else
                 {
-                    throw Exception()
+                    throw AlreadyCalledException(callRecord)
                 }
             }
             return callHandler(input)
         }
-        class Exception:IllegalStateException()
+        class AlreadyCalledException(cause:CallRecord):Exception(cause)
     }
 }
 

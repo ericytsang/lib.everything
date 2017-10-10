@@ -1,18 +1,5 @@
 import org.gradle.jvm.tasks.Jar
 
-//buildscript {
-//    ext {
-//        kotlin_version = '1.1.51'
-//    }
-//    repositories {
-//        mavenCentral()
-//    }
-//    dependencies {
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//    }
-//}
-//
-
 plugins {
     maven
     `kotlin-dsl`
@@ -38,8 +25,16 @@ subprojects {
 
     dependencies {
         compile(kotlin("stdlib"))
-        testCompile("junit:junit:4.11")
+        testCompile("junit:junit:4.12")
         testCompile(kotlin("test-junit"))
+        testCompile("org.mockito:mockito-all:2.0.2-beta")
+        {
+            exclude("org.hamcrest","mockito-all")
+        }
+        if ("testutils" !in name)
+        {
+            testCompile(project(":lib.testutils"))
+        }
     }
 
     repositories {

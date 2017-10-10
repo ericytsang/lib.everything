@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.awaitable
 
+import com.github.ericytsang.lib.concurrent.awaitSuspended
 import com.github.ericytsang.lib.testutils.TestUtils
 import org.junit.After
 import org.junit.Test
@@ -15,7 +16,7 @@ class SimpleAwaiterTest
     }
 
     @Test
-    fun closeKillsWorkerTest()
+    fun close_kills_worker_test()
     {
         val awaitable = SimpleAwaitable()
         val awaiter = SimpleAwaiter.fromLambda(awaitable)
@@ -23,14 +24,13 @@ class SimpleAwaiterTest
             println("herro")
         } as SimpleAwaiter
         assert(awaiter.worker.isAlive)
-        Thread.sleep(100)
+        awaiter.worker.awaitSuspended()
         awaiter.close()
-        Thread.sleep(100)
-        assert(!awaiter.worker.isAlive)
+        awaiter.worker.join()
     }
 
     @Test
-    fun closeKillsAllWorkersTest()
+    fun close_kills_all_workers_test()
     {
         val awaitable1 = SimpleAwaitable()
         val awaitable2 = SimpleAwaitable()
@@ -45,7 +45,7 @@ class SimpleAwaiterTest
     }
 
     @Test
-    fun anyAwaitableSignalsLeadAwaiterTest()
+    fun any_awaitable_can_signal_lead_awaiter_test()
     {
         val awaitable1 = SimpleAwaitable()
         val awaitable2 = SimpleAwaitable()
@@ -89,29 +89,45 @@ class SimpleAwaiterTest
     }
 
     @Test
-    fun awaiterTest()
+    fun awaiter_test()
     {
         var signalCount = 0
+        var latch = CountDownLatch(1)
         val awaitable = SimpleAwaitable()
         val awaiter = SimpleAwaiter.fromLambda(awaitable)
         {
             signalCount++
+            latch.countDown()
         } as SimpleAwaiter
-        Thread.sleep(100)
+
+        latch.await()
+        awaiter.worker.awaitSuspended()
+
+        latch = CountDownLatch(1)
         awaitable.signalUpdated()
-        Thread.sleep(100)
+
+        latch.await()
+        awaiter.worker.awaitSuspended()
+
+        latch = CountDownLatch(1)
         awaitable.signalUpdated()
-        Thread.sleep(100)
+
+        latch.await()
+        awaiter.worker.awaitSuspended()
+
+        latch = CountDownLatch(1)
         awaitable.signalUpdated()
-        Thread.sleep(100)
+
+        latch.await()
+        awaiter.worker.awaitSuspended()
+
         assert(signalCount == 4) {signalCount}
         awaiter.close()
-        Thread.sleep(100)
-        assert(!awaiter.worker.isAlive)
+        awaiter.worker.join()
     }
 
     @Test
-    fun loopTooMuchTest()
+    fun loop_too_much_test()
     {
         var signalCount = 0
         val awaitable = SimpleAwaitable()
@@ -123,11 +139,11 @@ class SimpleAwaiterTest
         {
             awaitable.signalUpdated()
         }
-        assert(!awaiter.worker.isAlive)
+        awaiter.worker.join()
     }
 
     @Test
-    fun interruptDoesntWorkUntilAwaitingTest()
+    fun interrupt_does_not_work_until_awaiting_test()
     {
         val callbackLatch = CountDownLatch(1)
         val awaitable = SimpleAwaitable()
@@ -135,18 +151,14 @@ class SimpleAwaiterTest
         {
             callbackLatch.await()
         } as SimpleAwaiter
-        Thread.sleep(100)
+        awaiter.worker.awaitSuspended()
         assert(awaiter.worker.isAlive)
-        Thread.sleep(100)
         awaitable.signalUpdated()
-        Thread.sleep(100)
         val t = thread {awaiter.close()}
-        Thread.sleep(100)
+        t.awaitSuspended()
         assert(awaiter.worker.isAlive)
-        Thread.sleep(100)
         callbackLatch.countDown()
         t.join()
-        Thread.sleep(100)
-        assert(!awaiter.worker.isAlive)
+        awaiter.worker.join()
     }
 }

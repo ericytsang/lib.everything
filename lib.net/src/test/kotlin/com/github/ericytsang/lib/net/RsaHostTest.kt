@@ -104,7 +104,7 @@ class RsaHostTest
 
         // establish connections
         val q = ArrayBlockingQueue<()->Unit>(1)
-        thread {
+        val t = thread {
             try
             {
                 RsaHost().connect(RsaHost.Address(
@@ -129,6 +129,7 @@ class RsaHostTest
             }
         }
         catch (ex:AuthenticationException) {}
+        t.join()
         q.take().invoke()
     }
 

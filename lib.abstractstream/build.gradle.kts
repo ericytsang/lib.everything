@@ -1,3 +1,4 @@
 dependencies {
-    compile(project(":lib.onlysetonce"))
+    compile(project(":lib.onlycallonce"))
+    testCompile(project(":lib.streamtest"))
 }

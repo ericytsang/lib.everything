@@ -1,6 +1,9 @@
 package com.github.ericytsang.lib.streamtest
 
+import com.github.ericytsang.lib.concurrent.awaitSuspended
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.InputStream
@@ -15,11 +18,14 @@ import kotlin.concurrent.thread
  */
 abstract class StreamTest
 {
+    @JvmField
+    @Rule
+    val errorCollector = ErrorCollector()
     protected abstract val src:OutputStream
     protected abstract val sink:InputStream
 
     @Test
-    fun pipeByteArrays()
+    fun pipe_byte_arrays()
     {
         val written = byteArrayOf(0,2,5,6)
         val read = byteArrayOf(0,0,0,0)
@@ -30,7 +36,7 @@ abstract class StreamTest
     }
 
     @Test
-    fun pipeNegativeNumber()
+    fun pipe_negative_number()
     {
         src.write(-1)
         src.close()
@@ -38,27 +44,25 @@ abstract class StreamTest
     }
 
     @Test
-    fun pipeShorts()
+    fun pipe_shorts()
     {
         DataOutputStream(src).writeShort(0)
         DataOutputStream(src).writeShort(1)
         DataOutputStream(src).writeShort(-1)
-        src.close()
         assert(DataInputStream(sink).readShort() == 0.toShort())
         assert(DataInputStream(sink).readShort() == 1.toShort())
         assert(DataInputStream(sink).readShort() == (-1).toShort())
     }
 
     @Test
-    fun pipeStringObjects()
+    fun pipe_string_objects()
     {
         ObjectOutputStream(src).writeObject("hello!!!")
-        src.close()
         assert(ObjectInputStream(sink).readObject() == "hello!!!")
     }
 
     @Test
-    fun pipeMultiFieldObjects()
+    fun pipe_multi_field_objects()
     {
         ObjectOutputStream(src).writeObject(RuntimeException("blehh"))
         src.close()
@@ -66,29 +70,68 @@ abstract class StreamTest
     }
 
     @Test
-    fun simpleReadFirstThenWriteTest()
+    fun long_string_read_first_then_write()
     {
-        thread {
-            Thread.sleep(100)
-            src.write(234)
-            src.close()
+        val string = "asdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvdbvuidfgads" +
+            "biavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvuruibdfg,kbj" +
+            "xufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybsdufbcjbvhs" +
+            "uikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvdbvuidfga" +
+            "dsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvuruibdfg,k" +
+            "bjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybsdufbcjbv" +
+            "hsuikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvdbvuidf" +
+            "gadsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvuruibdfg" +
+            ",kbjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybsdufbcj" +
+            "bvhsuikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvdbvui" +
+            "dfgadsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvuruibd" +
+            "fg,kbjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybsdufb" +
+            "cjbvhsuikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvdbv" +
+            "uidfgadsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvurui" +
+            "bdfg,kbjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybsdu" +
+            "fbcjbvhsuikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgbvd" +
+            "bvuidfgadsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgvur" +
+            "uibdfg,kbjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgybs" +
+            "dufbcjbvhsuikdybgj,bgasdfm,bniuhdsbeubamdbiabdiauwemagianjkhfgb" +
+            "vdbvuidfgadsbiavbajdfhgjadjvaihjxbcvuiasfbdgjaxcgviabfdgkjhsfgv" +
+            "uruibdfg,kbjxufcergbjchbuvebkjhdbfguisdbkjhfbukyxghckjhbxkudfgy" +
+            "bsdufbcjbvhsuikdybgj,bg"
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(string == DataInputStream(sink).readUTF())
+            }
         }
-        assert(sink.read() == 234)
+        t.awaitSuspended()
+        DataOutputStream(src).writeUTF(string)
+        t.join()
     }
 
     @Test
-    fun complexReadFirstThenWriteTest()
+    fun simple_read_first_then_write_test()
     {
-        thread {
-            Thread.sleep(100)
-            ObjectOutputStream(src).writeObject(RuntimeException("blehh"))
-            src.close()
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(sink.read() == 234)
+            }
         }
-        ObjectInputStream(sink).readObject()
+        t.awaitSuspended()
+        src.write(234)
+        t.join()
     }
 
     @Test
-    fun pipeTestWellBeyondEof()
+    fun complex_read_first_then_write_test()
+    {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                ObjectInputStream(sink).readObject()
+            }
+        }
+        t.awaitSuspended()
+        ObjectOutputStream(src).writeObject(RuntimeException("blehh"))
+        t.join()
+    }
+
+    @Test
+    fun pipe_test_well_beyond_eof()
     {
         src.write(0)
         src.write(2)
@@ -116,7 +159,7 @@ abstract class StreamTest
     }
 
     @Test
-    fun pipeTestThreadInterrupt()
+    fun pipe_test_thread_interrupt()
     {
         src.write(0)
         src.write(2)
@@ -127,10 +170,6 @@ abstract class StreamTest
         src.write(129)
         src.write(254)
         src.write(255)
-        thread {
-            Thread.sleep(500)
-            src.close()
-        }
         assert(sink.read() == 0)
         assert(sink.read() == 2)
         assert(sink.read() == 5)
@@ -140,9 +179,18 @@ abstract class StreamTest
         assert(sink.read() == 129)
         assert(sink.read() == 254)
         assert(sink.read() == 255)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+            }
+        }
+        t.awaitSuspended()
+        src.close()
+        src.close()
+        src.close()
+        t.join()
     }
 }

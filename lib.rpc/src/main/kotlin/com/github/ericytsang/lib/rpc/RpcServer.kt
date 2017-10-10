@@ -26,10 +26,11 @@ open class RpcServer<in Context>(val modem:Modem,private val context:Context,pri
             modem.close()
             server.join()
         }
+        .let {{it.call(Unit)}}
 
     override fun close()
     {
-        oneshotClose.call(Unit)
+        oneshotClose()
     }
 
     private fun internalClose()

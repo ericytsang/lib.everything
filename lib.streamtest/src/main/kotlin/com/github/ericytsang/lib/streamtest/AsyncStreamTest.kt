@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.streamtest
 
+import com.github.ericytsang.lib.concurrent.awaitSuspended
 import org.junit.After
 import org.junit.Test
 import java.io.DataInputStream
@@ -10,6 +11,7 @@ import java.io.ObjectOutputStream
 import java.io.OutputStream
 import java.util.Arrays
 import java.util.LinkedHashSet
+import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.thread
 
 /**
@@ -30,7 +32,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeByteArrays()
+    fun pipe_byte_arrays()
     {
         val written = byteArrayOf(0,2,5,6)
         val read = byteArrayOf(0,0,0,0)
@@ -44,7 +46,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeNegativeNumber()
+    fun pipe_negative_number()
     {
         ts += thread {
             try
@@ -71,7 +73,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeShorts()
+    fun pipe_shorts()
     {
         ts += thread {
             try
@@ -102,7 +104,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeStringObjects()
+    fun pipe_string_objects()
     {
         ts += thread {
             try
@@ -128,7 +130,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeMultiFieldObjects()
+    fun pipe_multi_field_objects()
     {
         ts += thread {
             try
@@ -154,7 +156,7 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeTestWellBeyondEof()
+    fun pipe_test_well_beyond_eof()
     {
         ts += thread {
             try
@@ -201,8 +203,34 @@ abstract class AsyncStreamTest
     }
 
     @Test
-    fun pipeTestThreadInterrupt()
+    fun pipe_test_thread_interrupt()
     {
+        val arriveAtEndOfStream = CountDownLatch(1)
+        val t1 = thread {
+            try
+            {
+                assert(sink.read() == 0)
+                assert(sink.read() == 2)
+                assert(sink.read() == 5)
+                assert(sink.read() == 6)
+                assert(sink.read() == 127)
+                assert(sink.read() == 128)
+                assert(sink.read() == 129)
+                assert(sink.read() == 254)
+                assert(sink.read() == 255)
+                arriveAtEndOfStream.countDown()
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+            }
+            catch (ex:Exception)
+            {
+                exception = ex
+            }
+        }
+        ts += t1
+
         ts += thread {
             try
             {
@@ -215,31 +243,9 @@ abstract class AsyncStreamTest
                 src.write(129)
                 src.write(254)
                 src.write(255)
-                Thread.sleep(500)
+                arriveAtEndOfStream.await()
+                t1.awaitSuspended()
                 src.close()
-            }
-            catch (ex:Exception)
-            {
-                exception = ex
-            }
-        }
-
-        ts += thread {
-            try
-            {
-                assert(sink.read() == 0)
-                assert(sink.read() == 2)
-                assert(sink.read() == 5)
-                assert(sink.read() == 6)
-                assert(sink.read() == 127)
-                assert(sink.read() == 128)
-                assert(sink.read() == 129)
-                assert(sink.read() == 254)
-                assert(sink.read() == 255)
-                assert(sink.read() == -1)
-                assert(sink.read() == -1)
-                assert(sink.read() == -1)
-                assert(sink.read() == -1)
             }
             catch (ex:Exception)
             {

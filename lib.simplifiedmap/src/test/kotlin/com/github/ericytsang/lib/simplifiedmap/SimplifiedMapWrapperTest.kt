@@ -8,7 +8,7 @@ class SimplifiedMapWrapperTest
         .let {SimplifiedMapWrapper(it)}
 
     @Test
-    fun getTest()
+    fun get_test()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -16,7 +16,7 @@ class SimplifiedMapWrapperTest
     }
 
     @Test
-    fun removeTest()
+    fun remove_test()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -28,7 +28,7 @@ class SimplifiedMapWrapperTest
     }
 
     @Test
-    fun setTest()
+    fun set_test()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -40,7 +40,7 @@ class SimplifiedMapWrapperTest
     }
 
     @Test
-    fun clearTest()
+    fun clear_test()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)

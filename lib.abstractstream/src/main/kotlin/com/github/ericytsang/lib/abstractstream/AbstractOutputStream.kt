@@ -1,6 +1,6 @@
 package com.github.ericytsang.lib.abstractstream
 
-import com.github.ericytsang.lib.onlysetonce.OnlySetOnce
+import com.github.ericytsang.lib.onlycallonce.OneshotCall
 import java.io.OutputStream
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -13,22 +13,19 @@ abstract class AbstractOutputStream:OutputStream()
 
     final override fun write(b:ByteArray,off:Int,len:Int) = writeMutex.withLock {doWrite(b,off,len)}
 
-    final override fun close()
-    {
-        try
+    final override fun close() = oneShotCloseCaller()
+    private val oneShotCloseCaller = OneshotCall
+        .builder<Unit>()
+        .ignoreSubsequent()
         {
             closeStackTrace = Thread.currentThread().stackTrace
             oneShotClose()
         }
-        catch (ex:OnlySetOnce.Exception)
-        {
-            // ignore subsequent calls to close.
-        }
-    }
+        .let {{it.call(Unit)}}
 
     val isClosed get() = closeStackTrace != null
 
-    var closeStackTrace:Array<StackTraceElement>? by OnlySetOnce()
+    var closeStackTrace:Array<StackTraceElement>? = null
         private set
 
     private val writeMutex = ReentrantLock()

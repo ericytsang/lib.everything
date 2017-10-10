@@ -1,7 +1,5 @@
-package com.github.ericytsang.lib.simplepipestream
+package com.github.ericytsang.lib.cipherstream
 
-import com.github.ericytsang.lib.cipherstream.CipherInputStream
-import com.github.ericytsang.lib.cipherstream.CipherOutputStream
 import com.github.ericytsang.lib.streamtest.AsyncStreamTest
 import java.io.InputStream
 import java.io.OutputStream

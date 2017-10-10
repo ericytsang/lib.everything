@@ -58,3 +58,21 @@ fun ExecutorService.awaitTermination()
         awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS)
     }
 }
+
+private val suspendedThreadStates = setOf(
+    Thread.State.TIMED_WAITING,
+    Thread.State.WAITING,
+    Thread.State.BLOCKED)
+
+val Thread.isSuspended:Boolean get()
+{
+    return state in suspendedThreadStates
+}
+
+fun Thread.awaitSuspended()
+{
+    while (state !in suspendedThreadStates)
+    {
+        Thread.yield()
+    }
+}

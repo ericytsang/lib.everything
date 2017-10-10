@@ -4,9 +4,8 @@ import kotlin.system.measureTimeMillis
 
 object TestUtils
 {
-    fun getAllWorkerThreads(excludeCurrentThread:Boolean,exceptions:Set<String>):List<Thread>
+    fun getAllChildrenOfThreadGroup(threadGroup:ThreadGroup,excludeCurrentThread:Boolean,exceptions:Set<String>):List<Thread>
     {
-        val threadGroup = Thread.currentThread().threadGroup
         var threads = arrayOfNulls<Thread>(threadGroup.activeCount())
         while (threadGroup.enumerate(threads,true) == threads.size)
         {
@@ -19,10 +18,10 @@ object TestUtils
             .filter {!it.isDaemon}
     }
 
-    fun assertAllWorkerThreadsDead(exceptions:Set<String> = emptySet(),timeout:Long = 1)
+    fun assertAllWorkerThreadsDead(threadGroup:ThreadGroup = Thread.currentThread().threadGroup,exceptions:Set<String> = emptySet(),timeout:Long = 1)
     {
         // get worker threads
-        val workerThreads = getAllWorkerThreads(true,exceptions)
+        val workerThreads = getAllChildrenOfThreadGroup(threadGroup,true,exceptions)
 
         // wait a maximum of timeout ms for threads to die
         if (timeout > 0)

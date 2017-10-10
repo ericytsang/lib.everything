@@ -11,18 +11,23 @@ class CipherOutputStream(_underlyingStream:OutputStream,val cipher:Cipher):Abstr
 
     override fun doWrite(b:ByteArray,off:Int,len:Int) = synchronized(underlyingStream)
     {
-        val data = cipher.update(b,off,len) ?: return
+        val data = cipher.update(b,off,len) ?: return _flush()
         underlyingStream.writeChar('c'.toInt())
+        underlyingStream.writeInt(data.size)
+        underlyingStream.write(data)
+        _flush()
+    }
+
+    private fun _flush() = synchronized(underlyingStream)
+    {
+        val data = cipher.doFinal() ?: return
+        underlyingStream.writeChar('f'.toInt())
         underlyingStream.writeInt(data.size)
         underlyingStream.write(data)
     }
 
     override fun flush() = synchronized(underlyingStream)
     {
-        val data = cipher.doFinal() ?: return
-        underlyingStream.writeChar('f'.toInt())
-        underlyingStream.writeInt(data.size)
-        underlyingStream.write(data)
         underlyingStream.flush()
     }
 

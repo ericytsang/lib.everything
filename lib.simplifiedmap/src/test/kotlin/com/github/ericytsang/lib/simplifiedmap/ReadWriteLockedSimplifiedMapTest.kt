@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.simplifiedmap
 
+import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
 import org.junit.Test
 import kotlin.concurrent.write
 
@@ -10,7 +11,7 @@ class ReadWriteLockedSimplifiedMapTest
         .let {ReadWriteLockedSimplifiedMapWrapper(it)}
 
     @Test
-    fun getTest()
+    fun get_test()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -18,7 +19,7 @@ class ReadWriteLockedSimplifiedMapTest
     }
 
     @Test
-    fun removeTestWithLock()
+    fun remove_test_with_lock()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -30,7 +31,7 @@ class ReadWriteLockedSimplifiedMapTest
     }
 
     @Test
-    fun setTestWithLock()
+    fun set_test_with_lock()
     {
         assert(map["a"] == 3)
         assert(map["b"] == 4)
@@ -42,7 +43,7 @@ class ReadWriteLockedSimplifiedMapTest
     }
 
     @Test
-    fun removeTestNoLock()
+    fun remove_test_no_lock()
     {
         // check state
         assert(map["a"] == 3)
@@ -50,18 +51,8 @@ class ReadWriteLockedSimplifiedMapTest
         assert(map["c"] == null)
 
         // try to manipulate map
-        try
-        {
+        exceptionExpected {
             map["b"] = null
-            throw AssertionError()
-        }
-        catch (ex:AssertionError)
-        {
-            throw ex
-        }
-        catch (ex:Exception)
-        {
-            ex.printStackTrace(System.out)
         }
 
         // state should not have changed
@@ -71,7 +62,7 @@ class ReadWriteLockedSimplifiedMapTest
     }
 
     @Test
-    fun setTestNoLock()
+    fun set_test_no_lock()
     {
         // check state
         assert(map["a"] == 3)
@@ -79,19 +70,8 @@ class ReadWriteLockedSimplifiedMapTest
         assert(map["c"] == null)
 
         // try to manipulate map
-        try
-        {
+        exceptionExpected {
             map["b"] = 7
-            assert(false)
-            throw AssertionError()
-        }
-        catch (ex:AssertionError)
-        {
-            throw ex
-        }
-        catch (ex:Exception)
-        {
-            ex.printStackTrace(System.out)
         }
 
         // state should not have changed

@@ -1,95 +1,105 @@
 package com.github.ericytsang.lib.awaitable
 
-import com.github.ericytsang.lib.concurrent.future
-import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.concurrent.awaitSuspended
+import com.github.ericytsang.lib.testutils.TestUtils.assertAllWorkerThreadsDead
+import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
-import java.lang.Thread.currentThread
-import java.lang.Thread.sleep
+import org.junit.rules.ErrorCollector
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.concurrent.thread
 
 class SimpleAwaitableTest
 {
+    @JvmField
+    @Rule
+    val errorCollector = ErrorCollector()
     val simpleAwaitable = SimpleAwaitable()
 
     @After
     fun teardown()
     {
-        TestUtils.assertAllWorkerThreadsDead()
+        assertAllWorkerThreadsDead()
     }
 
     @Test
-    fun updateStampTest()
+    fun update_stamp_test()
     {
         assert(simpleAwaitable.updateStamp == simpleAwaitable.updateStamp)
         assert(simpleAwaitable.updateStamp == simpleAwaitable.updateStamp)
     }
 
     @Test
-    fun awaitUpdateUnblocksTest()
+    fun await_update_unblocks_test()
     {
         simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp+1)
     }
 
     @Test
-    fun awaitUpdateBlocksTest()
+    fun await_update_blocks_test()
     {
         val originalUpdateStamp = simpleAwaitable.updateStamp
-        val blocked = future {
+        val q = ArrayBlockingQueue<Long>(1)
+        val blocked = thread {
             val us = simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp)
             assert(us == simpleAwaitable.updateStamp)
-            us
+            q.put(us)
         }
-        sleep(100)
-        assert(!blocked.isDone)
+        blocked.awaitSuspended()
+        assert(blocked.isAlive)
+        assert(q.isEmpty())
         simpleAwaitable.signalUpdated(simpleAwaitable.updateStamp)
-        sleep(100)
-        assert(!blocked.isDone)
+        blocked.awaitSuspended()
+        assert(blocked.isAlive)
+        assert(q.isEmpty())
         simpleAwaitable.signalUpdated(simpleAwaitable.updateStamp)
-        sleep(100)
-        assert(!blocked.isDone)
+        blocked.awaitSuspended()
+        assert(blocked.isAlive)
+        assert(q.isEmpty())
         val triggeringUs = simpleAwaitable.updateStamp+1
         simpleAwaitable.signalUpdated(triggeringUs)
-        sleep(100)
-        assert(blocked.isDone)
+        blocked.join()
         assert(originalUpdateStamp != simpleAwaitable.updateStamp)
-        assert(blocked.get() == triggeringUs)
+        assert(q.take() == triggeringUs)
     }
 
     @Test
-    fun interruptTest()
+    fun interrupt_test()
     {
         val originalUpdateStamp = simpleAwaitable.updateStamp
-        var t = Thread()
-        val blocked = future {
-            t = currentThread()
-            simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp)
+        val t = thread {
+            errorCollector.checkSucceeds {
+                val ex = exceptionExpected {
+                    simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp)
+                }
+                assert(ex is InterruptedException)
+            }
         }
-        sleep(100)
-        assert(!blocked.isDone)
+        t.awaitSuspended()
+        assert(t.isAlive)
+
         t.interrupt()
-        sleep(100)
-        assert(blocked.isDone)
+        t.join()
         assert(originalUpdateStamp == simpleAwaitable.updateStamp)
-        val ex = TestUtils.exceptionExpected{blocked.get()}
-        assert(ex.cause is InterruptedException)
     }
 
     @Test
-    fun awaitUpdateBlocksMultipleThreadsTest()
+    fun await_update_blocks_multiple_threads_test()
     {
         val originalUpdateStamp = simpleAwaitable.updateStamp
         val blocked = (1..5).map {
-            future {
-                val us = simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp)
-                assert(us == simpleAwaitable.updateStamp)
+            thread {
+                errorCollector.checkSucceeds {
+                    val us = simpleAwaitable.awaitUpdate(simpleAwaitable.updateStamp)
+                    assert(us == simpleAwaitable.updateStamp)
+                }
             }
         }
-        sleep(100)
-        assert(!blocked.all {it.isDone})
+        blocked.forEach {it.awaitSuspended()}
+        assert(blocked.all {it.isAlive})
         simpleAwaitable.signalUpdated()
-        sleep(100)
-        assert(blocked.all {it.isDone})
+        blocked.forEach {it.join()}
         assert(originalUpdateStamp != simpleAwaitable.updateStamp)
-        blocked.forEach {it.get()}
     }
 }

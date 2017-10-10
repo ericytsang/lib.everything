@@ -3,12 +3,13 @@ package com.github.ericytsang.lib.modem
 import com.github.ericytsang.lib.regulatedstream.RegulatedOutputStream
 import com.github.ericytsang.lib.abstractstream.AbstractInputStream
 import com.github.ericytsang.lib.abstractstream.AbstractOutputStream
+import com.github.ericytsang.lib.concurrent.CloseableQueue
 import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.Client
 import com.github.ericytsang.lib.net.host.Server
-import com.github.ericytsang.lib.onlysetonce.OnlySetOnce
-import com.github.ericytsang.lib.simplepipestream.SimplePipedInputStream
-import com.github.ericytsang.lib.simplepipestream.SimplePipedOutputStream
+import com.github.ericytsang.lib.onlycallonce.OneshotCall
+import com.github.ericytsang.lib.cipherstream.SimplePipedInputStream
+import com.github.ericytsang.lib.cipherstream.SimplePipedOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.ConnectException
@@ -26,10 +27,9 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
         const val RECV_WINDOW_SIZE_PER_CONNECTION = 8*1024
     }
 
-    private val createStackTrace = Thread.currentThread().stackTrace
-
     override fun connect(remoteAddress:Unit):Connection
     {
+        initialize()
         val connection = connectionsByLocalPortMutex.withLock()
         {
             val localPort = makeNewConnectionOnLocalPort()
@@ -40,27 +40,31 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
         connection.connectLatch.await()
         val connectionState = connection.state
             as? SimpleConnection.Connected
-            ?: throwClosedExceptionIfClosedOrRethrow(ConnectException("connection refused"))
+            ?: run()
+        {
+            if (oneshotClose.isVirgin)
+            {
+                throw ConnectException("connection refused")
+            }
+            else
+            {
+                throw ModemException.ClosedException(oneshotClose.callRecord!!)
+            }
+        }
         sender.send(Message.Ack(connectionState.remotePort,RECV_WINDOW_SIZE_PER_CONNECTION))
         return connection
     }
 
     override fun accept():Connection
     {
-        val inboundConnect = inboundConnectQueueAccess.withLock()
+        initialize()
+        val inboundConnect = try
         {
-            while (inboundConnectQueue.isEmpty() && closeStacktrace == null)
-            {
-                inboundConnectQueuePutOrCloseEvent.await()
-            }
-            if (closeStacktrace == null)
-            {
-                inboundConnectQueue.take()
-            }
-            else
-            {
-                throwClosedExceptionIfClosedOrRethrow(RuntimeException())
-            }
+            inboundConnectQueue.take()
+        }
+        catch (ex:CloseableQueue.ClosedException)
+        {
+            throw ModemException.ClosedException(oneshotClose.callRecord!!)
         }
         connectionsByLocalPortMutex.withLock()
         {
@@ -73,38 +77,61 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
         }
     }
 
-    private var closeStacktrace:Array<StackTraceElement>? by OnlySetOnce()
-
-    override fun close()
-    {
-        try
+    /**
+     * starts internal threads for sending and receiving data.
+     */
+    fun initialize() = oneshotInitialize()
+    private val oneshotInitialize = OneshotCall
+        .builder<Unit>()
+        .serialized()
+        .ignoreSubsequent()
         {
-            closeStacktrace = Thread.currentThread().stackTrace
+            sender.start()
+            reader.start()
+        }
+        .let {{it.call(Unit)}}
+
+    /**
+     * stops both internal threads. all subsequent calls to send or read should
+     * be rejected.
+     */
+    override fun close() = oneshotClose.call(false)
+    private val oneshotClose:OneshotCall<Boolean> = OneshotCall
+        .builder<Boolean>()
+        .serialized()
+        .ignoreSubsequent()
+        {
+            isClosedByRemote->
+
+            // close connection
             multiplexedConnection.close()
-            reader.join(10000)
-            if (reader.isAlive || sender.isAlive)
+
+            // shutdown threads
+            sender.interrupt()
+            sender.join()
+            if (Thread.currentThread() != reader) reader.join()
+
+            // abort pending accepts
+            inboundConnectQueue.close()
+
+            // close all existing de-multiplexed streams.
+            connectionsByLocalPortMutex.withLock()
             {
-                throw RuntimeException("reader and/or sender thread not dying..." +
-                    "reader thread stacktrace:${reader.stackTrace.joinToString("\n","\nvvvv\n","\n^^^^\n")}" +
-                    "sender thread stacktrace:${sender.stackTrace.joinToString("\n","\nvvvv\n","\n^^^^\n")}")
+                connectionsByLocalPort.values.toList()
+                    .forEach(SimpleConnection::modemDeadClose)
             }
         }
-        catch (ex:OnlySetOnce.Exception)
-        {
-            // ignore exception...we only want to do close stuff once...
-        }
-    }
 
-    private val inboundConnectQueue = LinkedBlockingQueue<Message.Connect>(backlogSize)
-    private val inboundConnectQueueAccess = ReentrantLock()
-    private val inboundConnectQueuePutOrCloseEvent = inboundConnectQueueAccess.newCondition()
+    private val inboundConnectQueue = CloseableQueue<Message.Connect>(LinkedBlockingQueue(backlogSize))
 
     private val connectionsByLocalPortMutex = ReentrantLock()
     private val connectionsByLocalPort = linkedMapOf<Int,SimpleConnection>()
 
     private fun makeNewConnectionOnLocalPort():Int = connectionsByLocalPortMutex.withLock()
     {
-        val unusedPort = (Int.MIN_VALUE..Int.MAX_VALUE).find {it !in connectionsByLocalPort.keys} ?: throw RuntimeException("failed to allocate port for new connection")
+        val unusedPort = (Int.MIN_VALUE..Int.MAX_VALUE)
+            .find {it !in connectionsByLocalPort.keys}
+            ?: throw RuntimeException("failed to allocate port for new connection")
         connectionsByLocalPort[unusedPort] = SimpleConnection()
         unusedPort
     }
@@ -120,9 +147,9 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
 
         fun send(message:Message)
         {
-            if (closeStacktrace != null)
+            if (!isAlive)
             {
-                throwClosedExceptionIfClosedOrRethrow(IllegalStateException("already closed"))
+                throw IllegalStateException("already closed")
             }
             messages.put({message})
         }
@@ -145,7 +172,7 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
             {
                 messages.take().invoke()
             }
-            catch (ex:InterruptedException)
+            catch (ex:PoisonException)
             {
                 return
             }
@@ -156,8 +183,6 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
             }
             catch (ex:Exception)
             {
-                multiplexedConnection.close()
-                RuntimeException("underlying stream closed for modem created at:${createStackTrace.joinToString("\n","\nvvvv\n","\n^^^^\n")}",ex).printStackTrace(System.out)
                 return
             }
             run()
@@ -165,58 +190,27 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
 
         override fun interrupt()
         {
-            messages.put {throw InterruptedException()}
-            super.interrupt()
+            messages.put {throw PoisonException()}
         }
 
-        init
-        {
-            start()
-        }
+        private inner class PoisonException:Exception()
     }
 
     private val reader = object:Thread()
     {
-        val dataI by lazy {multiplexedConnection.inputStream.buffered()}
+        val multiplexedIs = multiplexedConnection.inputStream.buffered()
 
         override tailrec fun run()
         {
             val message = try
             {
-                Message.parse(dataI)
-            }
-            catch (ex:ArrayIndexOutOfBoundsException)
-            {
-                throw ex
+                Message.parse(multiplexedIs)
             }
             catch (ex:Exception)
             {
-                try
+                if (oneshotClose.isVirgin)
                 {
-                    closeStacktrace = Thread.currentThread().stackTrace
-                }
-                catch (ex:OnlySetOnce.Exception)
-                {
-                    // ignore
-                }
-
-                RuntimeException("underlying stream closed for modem created at:${createStackTrace.joinToString("\n","\nvvvv\n","\n^^^^\n")}",ex).printStackTrace(System.out)
-
-                // abort pending accepts
-                inboundConnectQueueAccess.withLock()
-                {
-                    inboundConnectQueuePutOrCloseEvent.signalAll()
-                }
-
-                // close the sender
-                sender.interrupt()
-                sender.join()
-
-                // close all existing de-multiplexed streams.
-                connectionsByLocalPortMutex.withLock()
-                {
-                    connectionsByLocalPort.values.toList()
-                        .forEach(SimpleConnection::modemDeadClose)
+                    oneshotClose.call(true)
                 }
                 return
             }
@@ -226,17 +220,11 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
                 {
                     is Message.Connect ->
                     {
-                        if (inboundConnectQueue.offer(message))
-                        {
-                            inboundConnectQueueAccess.withLock()
-                            {
-                                inboundConnectQueuePutOrCloseEvent.signal()
-                            }
-                        }
-                        else
+                        if (!inboundConnectQueue.offer(message))
                         {
                             sender.send(Message.RejectConnect(message.srcPort))
                         }
+                        Unit
                     }
                     is Message.RejectConnect -> connectionsByLocalPort[message.dstPort]!!.receive(message)
                     is Message.Accept -> connectionsByLocalPort[message.dstPort]!!.receive(message)
@@ -249,25 +237,11 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
             }
             run()
         }
-
-        init
-        {
-            start()
-        }
-    }
-
-    private fun throwClosedExceptionIfClosedOrRethrow(cause:Throwable):Nothing
-    {
-        if (closeStacktrace != null)
-        {
-            throw IllegalStateException("modem created at:${createStackTrace.joinToString("\n","\nvvvv\n","\n^^^^\n")}has been closed at the following stacktrace:\n${closeStacktrace!!.joinToString("\n","\nvvvv\n","\n^^^^\n")}",cause)
-        }
-        else throw cause
     }
 
     sealed class ModemException(message:String,cause:Throwable):RuntimeException(message,cause)
     {
-        class UnderlyingConnectionClosedException(cause:Throwable):ModemException("underlying connection object was closed",cause)
+        class ClosedException(cause:OneshotCall.CallRecord):ModemException("underlying connection object was closed",cause)
     }
 
     private inner class SimpleConnection:Connection

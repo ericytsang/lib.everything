@@ -4,6 +4,7 @@ import com.github.ericytsang.lib.concurrent.future
 import com.github.ericytsang.lib.modem.Modem
 import com.github.ericytsang.lib.net.connection.TcpConnection
 import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
 import org.junit.After
 import org.junit.Test
 import java.net.InetAddress
@@ -91,20 +92,10 @@ class RpcServerTest
             Thread.sleep(100)
             currentThread.interrupt()
         }
-        try
-        {
+        val ex = exceptionExpected {
             functionCall.callFromClient(modem2)
         }
-        catch (ex:AssertionError)
-        {
-            throw ex
-        }
-        catch (ex:Exception)
-        {
-            println("==== expected exception start ====")
-            ex.printStackTrace(System.out)
-            println("==== expected exception end ====")
-        }
+        assert(ex is RpcFunction.RemoteException)
         interrupter.join()
     }
 

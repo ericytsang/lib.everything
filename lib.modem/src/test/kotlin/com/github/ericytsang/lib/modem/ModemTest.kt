@@ -1,15 +1,24 @@
 package com.github.ericytsang.lib.modem
 
+import com.github.ericytsang.lib.concurrent.awaitSuspended
 import com.github.ericytsang.lib.concurrent.future
 import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.TcpClient
 import com.github.ericytsang.lib.net.host.TcpServer
+import com.github.ericytsang.lib.testutils.TestUtils.assertAllWorkerThreadsDead
+import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
+import org.hamcrest.CoreMatchers.`is`
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.net.ConnectException
 import java.net.InetAddress
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 class ModemTest
@@ -18,6 +27,9 @@ class ModemTest
     {
         const val TEST_PORT = 55652
     }
+    @JvmField
+    @Rule
+    val errorCollector = ErrorCollector()
     val conn1:Connection
     val conn2:Connection
     init
@@ -25,12 +37,13 @@ class ModemTest
         val tcpClient = TcpClient.anySrcPort()
         val tcpServer = TcpServer(TEST_PORT)
         val q = LinkedBlockingQueue<Connection>()
-        kotlin.concurrent.thread()
+        val t = thread()
         {
             q.put(tcpServer.accept())
         }
         conn1 = tcpClient.connect(TcpClient.Address(InetAddress.getByName("localhost"),TEST_PORT))
         conn2 = q.take()
+        t.join()
         tcpServer.close()
     }
 
@@ -40,18 +53,18 @@ class ModemTest
         println("fun teardown() ===============================")
         conn1.close()
         conn2.close()
-        TestUtils.assertAllWorkerThreadsDead(emptySet(),100)
+        assertAllWorkerThreadsDead()
     }
 
     @Test
-    fun instantiateTest()
+    fun instantiate_test()
     {
         Modem(conn1)
         Modem(conn2)
     }
 
     @Test
-    fun connectAcceptTest()
+    fun connect_accept_test()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
@@ -64,7 +77,7 @@ class ModemTest
     }
 
     @Test
-    fun concurrentConversationsTest1()
+    fun concurrent_conversations_test_1()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
@@ -84,7 +97,7 @@ class ModemTest
     }
 
     @Test
-    fun concurrentConversationsTest2()
+    fun concurrent_conversations_test_2()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
@@ -101,41 +114,34 @@ class ModemTest
             thread {(Byte.MIN_VALUE..Byte.MAX_VALUE).forEach {if (it%10 == 0) println(it);conn1s[1].outputStream.let(::DataOutputStream).writeInt(it)}},
             thread {(Byte.MIN_VALUE..Byte.MAX_VALUE).forEach {if (it%10 == 0) println(it);assert(conn2s[1].inputStream.let(::DataInputStream).readInt() == it)}})
         joinableThreads.forEach {it.join()}
-        Thread.sleep(250)
-        hangingThreads.all {it.isAlive}
+        hangingThreads.forEach {it.join()}
         m1.close()
         m2.close()
         hangingThreads.forEach {it.stop()}
     }
 
     @Test
-    fun closingBreaksOngoingConnect()
+    fun closing_breaks_ongoing_connect()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
-        thread {
-            Thread.sleep(100)
-            m1.close()
+        val t = thread {
+            val ex = exceptionExpected {
+                m1.connect(Unit)
+            }
+            errorCollector.checkSucceeds {
+                assert(ex is Modem.ModemException.ClosedException)
+            }
         }
-        try
-        {
-            m1.connect(Unit)
-            throw AssertionError()
-        }
-        catch (ex:AssertionError)
-        {
-            throw ex
-        }
-        catch (ex:Exception)
-        {
-            ex.printStackTrace(System.out)
-        }
+        t.awaitSuspended()
+        m1.close()
+        t.join()
         m1.close()
         m2.close()
     }
 
     @Test
-    fun closingBreaksOngoingConnections()
+    fun closing_breaks_ongoing_connections()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
@@ -151,215 +157,189 @@ class ModemTest
     }
 
     @Test
-    fun overflowConnectsGetRefused()
+    fun overflow_connects_get_refused()
     {
         val m1 = Modem(conn1,3)
         val m2 = Modem(conn2)
-        val threads = (1..3).map {thread {m2.connect(Unit)}}
-        Thread.sleep(100)
-        check(threads.all {it.isAlive})
-        try
-        {
-            m2.connect(Unit)
-            throw AssertionError()
+        val connectionRefusedCount = AtomicInteger(0)
+        val doneLatch = CountDownLatch(1)
+        val threads = (1..4).map {
+            thread {
+                errorCollector.checkSucceeds {
+                    val ex = exceptionExpected {
+                        m2.connect(Unit)
+                    }
+                    if (ex is ConnectException)
+                    {
+                        assert(connectionRefusedCount.getAndIncrement() == 0)
+                        doneLatch.countDown()
+                    }
+                    else
+                    {
+                        assert(connectionRefusedCount.get() == 1)
+                        assert(ex is Modem.ModemException.ClosedException)
+                    }
+                }
+            }
         }
-        catch (ex:AssertionError)
-        {
-            throw ex
-        }
-        catch (ex:Exception)
-        {
-            ex.printStackTrace(System.out)
-        }
+        m1.initialize()
+        doneLatch.await()
         m1.close()
         threads.forEach {it.join()}
         m2.close()
     }
 
     @Test
-    fun closeUnderlyingConnectionAbortsConnect1()
+    fun close_underlying_connection_aborts_connect_1()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
         val thread = thread {
-            try
-            {
-                m2.connect(Unit)
-                throw AssertionError()
-            }
-            catch (ex:AssertionError)
-            {
-                throw ex
-            }
-            catch (ex:Exception)
-            {
-                ex.printStackTrace(System.out)
+            errorCollector.checkSucceeds {
+                exceptionExpected {
+                    m2.connect(Unit)
+                }
             }
         }
-        Thread.sleep(100)
-        check(thread.isAlive)
+        thread.awaitSuspended()
         conn1.close()
         thread.join()
-        m2.close()
-    }
-
-    @Test
-    fun closeUnderlyingConnectionAbortsConnect2()
-    {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
-        val thread = thread {
-            try
-            {
-                m2.connect(Unit)
-                throw AssertionError()
-            }
-            catch (ex:AssertionError)
-            {
-                throw ex
-            }
-            catch (ex:Exception)
-            {
-                ex.printStackTrace(System.out)
-            }
-        }
-        Thread.sleep(100)
-        check(thread.isAlive)
-        conn2.close()
-        thread.join()
-        m2.close()
-    }
-
-    @Test
-    fun closeUnderlyingConnectionAbortsAccept1()
-    {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
-        val thread = thread {
-            try
-            {
-                m2.accept()
-                throw AssertionError()
-            }
-            catch (ex:AssertionError)
-            {
-                throw ex
-            }
-            catch (ex:Exception)
-            {
-                ex.printStackTrace(System.out)
-            }
-        }
-        Thread.sleep(100)
-        check(thread.isAlive)
-        conn1.close()
-        thread.join()
-        m2.close()
-    }
-
-    @Test
-    fun closeUnderlyingConnectionAbortsAccept2()
-    {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
-        val thread = thread {
-            try
-            {
-                m2.accept()
-                throw AssertionError()
-            }
-            catch (ex:AssertionError)
-            {
-                throw ex
-            }
-            catch (ex:Exception)
-            {
-                ex.printStackTrace(System.out)
-            }
-        }
-        Thread.sleep(100)
-        check(thread.isAlive)
-        conn2.close()
-        thread.join()
-        m2.close()
-    }
-
-    @Test
-    fun closingBreaksOngoingRead()
-    {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
-        val t = future {
-            val connection = m2.accept()
-            check(connection.inputStream.read() == -1)
-        }
-        m1.connect(Unit)
-        Thread.sleep(100)
         m1.close()
-        t.get()
         m2.close()
     }
 
     @Test
-    fun closingUnderlyingConnectionBreaksOngoingRead1()
+    fun close_underlying_connection_aborts_connect_2()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
-        val t = future {
-            val connection = m2.accept()
-            check(connection.inputStream.read() == -1)
+        val thread = thread {
+            errorCollector.checkSucceeds {
+                exceptionExpected {
+                    m2.connect(Unit)
+                }
+            }
         }
-        m1.connect(Unit)
-        Thread.sleep(100)
-        conn1.close()
-        t.get()
-        m2.close()
-    }
-
-    @Test
-    fun closingUnderlyingConnectionBreaksOngoingRead2()
-    {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
-        val t = future {
-            val connection = m2.accept()
-            check(connection.inputStream.read() == -1)
-        }
-        m1.connect(Unit)
-        Thread.sleep(100)
+        thread.awaitSuspended()
         conn2.close()
-        t.get()
+        thread.join()
+        m1.close()
         m2.close()
     }
 
     @Test
-    fun closingBreaksOngoingAccept()
+    fun close_underlying_connection_aborts_accept_1()
+    {
+        val m1 = Modem(conn1)
+        val m2 = Modem(conn2)
+        val thread = thread {
+            errorCollector.checkSucceeds {
+                exceptionExpected {
+                    m2.accept()
+                }
+            }
+        }
+        thread.awaitSuspended()
+        conn1.close()
+        thread.join()
+        m1.close()
+        m2.close()
+    }
+
+    @Test
+    fun close_underlying_connection_aborts_accept_2()
+    {
+        val m1 = Modem(conn1)
+        val m2 = Modem(conn2)
+        val thread = thread {
+            errorCollector.checkSucceeds {
+                exceptionExpected {
+                    m2.accept()
+                }
+            }
+        }
+        thread.awaitSuspended()
+        conn2.close()
+        thread.join()
+        m1.close()
+        m2.close()
+    }
+
+    @Test
+    fun closing_breaks_ongoing_read()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
         val t = thread {
-            Thread.sleep(100)
-            m1.close()
+            val connection = m2.accept()
+            errorCollector.checkSucceeds {
+                check(connection.inputStream.read() == -1)
+            }
         }
-        try
-        {
-            m1.accept()
-            throw AssertionError()
+        m1.connect(Unit)
+        t.awaitSuspended()
+        m1.close()
+        t.join()
+        m2.close()
+    }
+
+    @Test
+    fun closing_underlying_connection_breaks_ongoing_read_1()
+    {
+        val m1 = Modem(conn1)
+        val m2 = Modem(conn2)
+        val t = thread {
+            val connection = m2.accept()
+            errorCollector.checkSucceeds {
+                check(connection.inputStream.read() == -1)
+            }
         }
-        catch (ex:AssertionError)
-        {
-            throw ex
+        m1.connect(Unit)
+        t.awaitSuspended()
+        conn1.close()
+        t.join()
+        m2.close()
+    }
+
+    @Test
+    fun closing_underlying_connection_breaks_ongoing_read_2()
+    {
+        val m1 = Modem(conn1)
+        val m2 = Modem(conn2)
+        val t = thread {
+            val connection = m2.accept()
+            errorCollector.checkSucceeds {
+                check(connection.inputStream.read() == -1)
+            }
         }
-        catch (ex:Exception)
-        {
-            ex.printStackTrace(System.out)
-        }
+        m1.connect(Unit)
+        t.awaitSuspended()
+        conn2.close()
+        t.join()
         m1.close()
         m2.close()
     }
 
     @Test
-    fun halfCloseTest()
+    fun closing_breaks_ongoing_accept()
+    {
+        val m1 = Modem(conn1)
+        val m2 = Modem(conn2)
+        val t = thread {
+            errorCollector.checkSucceeds {
+                exceptionExpected {
+                    m1.accept()
+                }
+            }
+        }
+        t.awaitSuspended()
+        m1.close()
+        t.join()
+        m2.close()
+    }
+
+    @Test
+    fun half_close_test()
     {
         val m1 = Modem(conn1)
         val m2 = Modem(conn2)
@@ -374,7 +354,6 @@ class ModemTest
             thread {(Byte.MIN_VALUE..Byte.MAX_VALUE).forEach {if (it%10 == 0) println(it);assert(conn1.inputStream.let(::DataInputStream).readInt() == it)}})
         threads.forEach {it.join()}
         conn2.outputStream.close()
-        Thread.sleep(100)
         m1.close()
         m2.close()
     }
