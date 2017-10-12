@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stx:transform
+    xmlns:stx="http://stx.sourceforge.net/2002/ns" xmlns="http://www.w3.org/HTML/1998/html4"
+    xmlns:joost="http://joost.sf.net/extension" xmlns:js="urn:javascript"
+    xmlns:stx-ext="java:StxExtensions" output-method="joost:html" version="1.0">
+    <stx:template match="node()|@*" priority="-1">
+        <stx:copy>
+            <stx:process-attributes />
+            <stx:process-children />
+        </stx:copy>
+    </stx:template>
+    <stx:template match="text()">
+        <stx:value-of select="stx-ext:unescapeHtml(.)" />
+    </stx:template>
+</stx:transform>

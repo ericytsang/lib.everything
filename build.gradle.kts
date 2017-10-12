@@ -25,7 +25,9 @@ subprojects {
 
     dependencies {
         compile(kotlin("stdlib"))
+        compile(kotlin("reflect"))
         testCompile("junit:junit:4.12")
+        testCompile(kotlin("test"))
         testCompile(kotlin("test-junit"))
         testCompile("org.mockito:mockito-all:2.0.2-beta")
         {
