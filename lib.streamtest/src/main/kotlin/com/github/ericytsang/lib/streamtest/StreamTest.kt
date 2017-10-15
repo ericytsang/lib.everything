@@ -29,44 +29,70 @@ abstract class StreamTest
     {
         val written = byteArrayOf(0,2,5,6)
         val read = byteArrayOf(0,0,0,0)
+        val t = thread {
+            errorCollector.checkSucceeds {
+                DataInputStream(sink).readFully(read)
+            }
+        }
         src.write(written)
         src.close()
-        DataInputStream(sink).readFully(read)
+        t.join()
         assert(Arrays.equals(written,read))
     }
 
     @Test
     fun pipe_negative_number()
     {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(sink.read() == 0xFF)
+            }
+        }
         src.write(-1)
         src.close()
-        assert(sink.read() == 0xFF)
+        t.join()
     }
 
     @Test
     fun pipe_shorts()
     {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(DataInputStream(sink).readShort() == 0.toShort())
+                assert(DataInputStream(sink).readShort() == 1.toShort())
+                assert(DataInputStream(sink).readShort() == (-1).toShort())
+            }
+        }
         DataOutputStream(src).writeShort(0)
         DataOutputStream(src).writeShort(1)
         DataOutputStream(src).writeShort(-1)
-        assert(DataInputStream(sink).readShort() == 0.toShort())
-        assert(DataInputStream(sink).readShort() == 1.toShort())
-        assert(DataInputStream(sink).readShort() == (-1).toShort())
+        t.join()
     }
 
     @Test
     fun pipe_string_objects()
     {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(ObjectInputStream(sink).readObject() == "hello!!!")
+            }
+        }
         ObjectOutputStream(src).writeObject("hello!!!")
-        assert(ObjectInputStream(sink).readObject() == "hello!!!")
+        src.close()
+        t.join()
     }
 
     @Test
     fun pipe_multi_field_objects()
     {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                ObjectInputStream(sink).readObject()
+            }
+        }
         ObjectOutputStream(src).writeObject(RuntimeException("blehh"))
         src.close()
-        ObjectInputStream(sink).readObject()
+        t.join()
     }
 
     @Test
@@ -131,8 +157,25 @@ abstract class StreamTest
     }
 
     @Test
-    fun pipe_test_well_beyond_eof()
+    fun pipe_test_beyond_eof()
     {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(sink.read() == 0)
+                assert(sink.read() == 2)
+                assert(sink.read() == 5)
+                assert(sink.read() == 6)
+                assert(sink.read() == 127)
+                assert(sink.read() == 128)
+                assert(sink.read() == 129)
+                assert(sink.read() == 254)
+                assert(sink.read() == 255)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+                assert(sink.read() == -1)
+            }
+        }
         src.write(0)
         src.write(2)
         src.write(5)
@@ -143,19 +186,7 @@ abstract class StreamTest
         src.write(254)
         src.write(255)
         src.close()
-        assert(sink.read() == 0)
-        assert(sink.read() == 2)
-        assert(sink.read() == 5)
-        assert(sink.read() == 6)
-        assert(sink.read() == 127)
-        assert(sink.read() == 128)
-        assert(sink.read() == 129)
-        assert(sink.read() == 254)
-        assert(sink.read() == 255)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
-        assert(sink.read() == -1)
+        t.join()
     }
 
     @Test

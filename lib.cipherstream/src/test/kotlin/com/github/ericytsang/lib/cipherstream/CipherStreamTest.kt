@@ -11,7 +11,7 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.concurrent.thread
 
-class SerialStreamTest:StreamTest()
+class CipherStreamTest:StreamTest()
 {
     override val sink:InputStream
     override val src:OutputStream

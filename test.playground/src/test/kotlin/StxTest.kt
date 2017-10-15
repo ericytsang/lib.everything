@@ -56,7 +56,7 @@ class StxTest
         transformTest("<root>&amp;</root>")
     }
 
-    @Test @Ignore
+    @Test
     fun testUnescapeHtml()
     {
         println(StxExtensions.unescapeHtml("&amp;"))

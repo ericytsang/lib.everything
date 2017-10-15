@@ -9,7 +9,7 @@ plugins {
 subprojects {
 
     group = "com.github.ericytsang"
-    version = "30.0.0"
+    version = "35.0.0"
 
     repositories {
         jcenter()
