@@ -7,7 +7,7 @@ plugins {
 subprojects {
 
     group = "com.github.ericytsang"
-    version = "35.1.0"
+    version = "35.1.0-develop"
 
     repositories {
         jcenter()
