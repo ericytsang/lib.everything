@@ -1,9 +1,7 @@
 import org.gradle.jvm.tasks.Jar
 
 plugins {
-    maven
     `kotlin-dsl`
-    kotlin("jvm")
 }
 
 subprojects {
@@ -18,6 +16,11 @@ subprojects {
     plugins.apply("maven")
     plugins.apply("kotlin")
 
+    plugins {
+        maven
+        kotlin("jvm")
+    }
+
     tasks.withType(JavaCompile::class.java) {
         sourceCompatibility = JavaVersion.VERSION_1_6.toString()
         targetCompatibility = JavaVersion.VERSION_1_6.toString()
@@ -26,13 +29,6 @@ subprojects {
     dependencies {
         compile(kotlin("stdlib"))
         compile(kotlin("reflect"))
-        testCompile("junit:junit:4.12")
-        testCompile(kotlin("test"))
-        testCompile(kotlin("test-junit"))
-        testCompile("org.mockito:mockito-all:2.0.2-beta")
-        {
-            exclude("org.hamcrest","mockito-all")
-        }
         if ("testutils" !in name)
         {
             testCompile(project(":lib.testutils"))
