@@ -61,16 +61,23 @@ val installCommitAllAndPushTask = task("install_add_all_commit_and_increment_ver
         .filter {name != it.name}
         .filter {"install" in it.name})
     actions.apply {} += Action<Task> {
-        Runtime.getRuntime().exec("git add --all").waitFor()
-        Runtime.getRuntime().exec("git commit -s -m \"v$version\"").waitFor()
-        Runtime.getRuntime().exec("git push origin master").waitFor()
 
         val properties = JavaProperties()
         val propsFile = File("gradle.properties")
         properties.load(propsFile.inputStream())
+        val commitMessage = properties["commit_message"]
+            ?.toString()
+            ?.takeIf {!it.isBlank()}
+            ?:throw RuntimeException("must add a commit message to gradle.properties file")
+
+        check(Runtime.getRuntime().exec("git add --all").waitFor() == 0)
+        check(Runtime.getRuntime().exec("git commit -s -m \"v$version: $commitMessage\"").waitFor() == 0)
+        check(Runtime.getRuntime().exec("git push").waitFor() == 0)
+
         val currVresionNumber = properties["artifact_version"].toString().toLong()
         val nextVersionNumber = currVresionNumber.plus(1)
-        properties.setProperty("artifact_version",nextVersionNumber.toString())
+        properties["artifact_version"] = nextVersionNumber.toString()
+        properties["commit_message"] = ""
         properties.store(propsFile.outputStream(),null)
     }
 }
