@@ -68,7 +68,7 @@ val installCommitAllAndPushTask = task("install_add_all_commit_and_increment_ver
         val commitMessage = properties["commit_message"]
             ?.toString()
             ?.takeIf {!it.isBlank()}
-            ?:throw RuntimeException("must add a commit message to gradle.properties file")
+            ?:"no comment"
 
         check(Runtime.getRuntime().exec("git add --all").waitFor() == 0)
         check(Runtime.getRuntime().exec("git commit -s -m \"v$version: $commitMessage\"").waitFor() == 0)
