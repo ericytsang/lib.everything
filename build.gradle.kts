@@ -83,9 +83,7 @@ fun commitAllAndIncrementPropertiesFile(makeTagToo:Boolean)
 
 val installCommitAllAndPushTask = task("install_commit_and_push")
 {
-    dependsOn.addAll(tasks
-        .filter {name != it.name}
-        .filter {"install" in it.name})
+    dependsOn.add(tasks.findByPath(":install"))
     actions.apply {} += Action<Task> {
         commitAllAndIncrementPropertiesFile(false)
     }

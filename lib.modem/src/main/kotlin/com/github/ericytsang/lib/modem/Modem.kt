@@ -8,8 +8,8 @@ import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.Client
 import com.github.ericytsang.lib.net.host.Server
 import com.github.ericytsang.lib.onlycallonce.OneshotCall
-import com.github.ericytsang.lib.cipherstream.SimplePipedInputStream
-import com.github.ericytsang.lib.cipherstream.SimplePipedOutputStream
+import com.github.ericytsang.lib.simplepipestream.SimplePipedInputStream
+import com.github.ericytsang.lib.simplepipestream.SimplePipedOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.ConnectException
