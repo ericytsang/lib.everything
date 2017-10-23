@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.cipherstream
+package com.github.ericytsang.lib.simplepipestream
 
 import com.github.ericytsang.lib.abstractstream.AbstractOutputStream
 import java.util.concurrent.ArrayBlockingQueue
