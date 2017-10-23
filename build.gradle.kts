@@ -55,38 +55,46 @@ allprojects {
     }
 }
 
-val installCommitAllAndPushTask = task("install_add_all_commit_and_increment_version_number")
+fun commitAllAndIncrementPropertiesFile(makeTagToo:Boolean)
+{
+    val properties = JavaProperties()
+    val propsFile = File("gradle.properties")
+    properties.load(propsFile.inputStream())
+    val commitMessage = properties["commit_message"]
+        ?.toString()
+        ?.takeIf {!it.isBlank()}
+        ?:throw RuntimeException("must add commit message")
+
+    check(Runtime.getRuntime().exec("git add --all").waitFor() == 0)
+    check(Runtime.getRuntime().exec("git commit -s -m \"v$version: $commitMessage\"").waitFor() == 0)
+    check(Runtime.getRuntime().exec("git push").waitFor() == 0)
+    if (makeTagToo)
+    {
+        check(Runtime.getRuntime().exec("git tag -a \"$version\" -m \"v$version: $commitMessage\"").waitFor() == 0)
+        check(Runtime.getRuntime().exec("git push origin $version").waitFor() == 0)
+    }
+
+    val currVresionNumber = properties["artifact_version"].toString().toLong()
+    val nextVersionNumber = currVresionNumber.plus(1)
+    properties["artifact_version"] = nextVersionNumber.toString()
+    properties["commit_message"] = ""
+    properties.store(propsFile.outputStream(),null)
+}
+
+val installCommitAllAndPushTask = task("install_commit_and_push")
 {
     dependsOn.addAll(tasks
         .filter {name != it.name}
         .filter {"install" in it.name})
     actions.apply {} += Action<Task> {
-
-        val properties = JavaProperties()
-        val propsFile = File("gradle.properties")
-        properties.load(propsFile.inputStream())
-        val commitMessage = properties["commit_message"]
-            ?.toString()
-            ?.takeIf {!it.isBlank()}
-            ?:"no comment"
-
-        check(Runtime.getRuntime().exec("git add --all").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git commit -s -m \"v$version: $commitMessage\"").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git push").waitFor() == 0)
-
-        val currVresionNumber = properties["artifact_version"].toString().toLong()
-        val nextVersionNumber = currVresionNumber.plus(1)
-        properties["artifact_version"] = nextVersionNumber.toString()
-        properties["commit_message"] = ""
-        properties.store(propsFile.outputStream(),null)
+        commitAllAndIncrementPropertiesFile(false)
     }
 }
 
-task("tag_and_push")
+task("install_commit_tag_and_push")
 {
     dependsOn.add(installCommitAllAndPushTask)
     actions.apply {} += Action<Task> {
-        Runtime.getRuntime().exec("git tag -a \"$version\" -m \"release v$version\"").waitFor()
-        Runtime.getRuntime().exec("git push origin $version").waitFor()
+        commitAllAndIncrementPropertiesFile(true)
     }
 }
