@@ -93,7 +93,7 @@ val installCommitAllAndPushTask = task("install_commit_and_push")
 
 task("install_commit_tag_and_push")
 {
-    dependsOn.add(installCommitAllAndPushTask)
+    dependsOn.addAll(installCommitAllAndPushTask.dependsOn)
     actions.apply {} += Action<Task> {
         commitAllAndIncrementPropertiesFile(true)
     }
