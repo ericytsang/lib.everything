@@ -1,5 +1,7 @@
 package com.github.ericytsang.lib.cipherstream
 
+import com.github.ericytsang.lib.simplepipestream.SimplePipedInputStream
+import com.github.ericytsang.lib.simplepipestream.SimplePipedOutputStream
 import com.github.ericytsang.lib.streamtest.StreamTest
 import org.junit.Test
 import java.io.DataInputStream
