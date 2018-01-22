@@ -12,7 +12,7 @@ plugins {
 allprojects {
 
     group = "com.github.ericytsang"
-    version = "35.2.11"
+    version = "36.0.0"
 
     repositories {
         jcenter()
