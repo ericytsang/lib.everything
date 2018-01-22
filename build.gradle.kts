@@ -1,5 +1,8 @@
+import org.apache.tools.ant.taskdefs.Java
+import org.gradle.internal.impldep.org.apache.commons.io.output.ByteArrayOutputStream
 import org.gradle.internal.impldep.org.bouncycastle.util.Properties
 import org.gradle.jvm.tasks.Jar
+import org.jetbrains.kotlin.com.intellij.util.io.DataInputOutputUtil
 import java.util.Properties as JavaProperties
 
 plugins {
@@ -9,7 +12,7 @@ plugins {
 allprojects {
 
     group = "com.github.ericytsang"
-    version = "35.2."+properties["artifact_version"]!!
+    version = "35.2.11"
 
     repositories {
         jcenter()
@@ -55,47 +58,30 @@ allprojects {
     }
 }
 
-fun commitAllAndIncrementPropertiesFile(makeTagToo:Boolean)
-{
-    val properties = JavaProperties()
-    val propsFile = File("gradle.properties")
-    properties.load(propsFile.inputStream())
-    val commitMessage = properties["commit_message"]
-        ?.toString()
-        ?.takeIf {!it.isBlank()}
-        ?:throw RuntimeException("must add commit message")
-
-    check(Runtime.getRuntime().exec("git add --all").waitFor() == 0)
-    check(Runtime.getRuntime().exec("git commit -s -m \"v$version: $commitMessage\"").waitFor() == 0)
-    check(Runtime.getRuntime().exec("git push").waitFor() == 0)
-    if (makeTagToo)
-    {
-        check(Runtime.getRuntime().exec("git tag -a \"$version\" -m \"v$version: $commitMessage\"").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git push origin $version").waitFor() == 0)
-    }
-
-    val currVresionNumber = properties["artifact_version"].toString().toLong()
-    val nextVersionNumber = currVresionNumber.plus(1)
-    properties["artifact_version"] = nextVersionNumber.toString()
-    properties["commit_message"] = ""
-    properties.store(propsFile.outputStream(),null)
-}
-
-val installCommitAllAndPushTask = task("install_commit_and_push")
+task("install_tag_and_push")
 {
     dependsOn.addAll(allprojects
         .iterator().asSequence()
         .flatMap {it.tasks.toList().asSequence()}
         .filter {it.name == "install"})
+
     actions.apply {} += Action<Task> {
-        commitAllAndIncrementPropertiesFile(false)
+
+        // make sure working branch is clean
+        if (!isWorkingBranchClean()) throw Exception("working branch not clean")
+
+        // add tag and push
+        check(Runtime.getRuntime().exec("git tag -a \"$version\" -m \"v$version\"").waitFor() == 0)
+        check(Runtime.getRuntime().exec("git push origin $version").waitFor() == 0)
     }
 }
 
-task("install_commit_tag_and_push")
+fun isWorkingBranchClean():Boolean
 {
-    dependsOn.addAll(installCommitAllAndPushTask.dependsOn)
-    actions.apply {} += Action<Task> {
-        commitAllAndIncrementPropertiesFile(true)
-    }
+    val process = Runtime.getRuntime().exec("git status")
+    val dataRead = ByteArray(1024)
+    val len = process.inputStream.read(dataRead)
+    val processOutput = String(dataRead,0,len)
+    check(process.waitFor() == 0)
+    return "nothing to commit, working tree clean" in processOutput
 }
