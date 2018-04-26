@@ -2,29 +2,21 @@ import org.apache.tools.ant.taskdefs.Java
 import org.gradle.internal.impldep.org.apache.commons.io.output.ByteArrayOutputStream
 import org.gradle.internal.impldep.org.bouncycastle.util.Properties
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.com.intellij.util.io.DataInputOutputUtil
 import java.util.Properties as JavaProperties
 
 plugins {
     `kotlin-dsl`
 }
 
-allprojects {
+subprojects {
+
+    val kotlinVersion = "1.2.40"
 
     group = "com.github.ericytsang"
     version = "36.0.0"
 
-    repositories {
-        jcenter()
-    }
-
     plugins.apply("maven")
     plugins.apply("kotlin")
-
-    plugins {
-        maven
-        kotlin("jvm")
-    }
 
     tasks.withType(JavaCompile::class.java) {
         sourceCompatibility = JavaVersion.VERSION_1_6.toString()
@@ -32,19 +24,17 @@ allprojects {
     }
 
     dependencies {
-        compile(kotlin("stdlib"))
-        compile(kotlin("reflect"))
-        if ("testutils" !in name)
+        compile(kotlin("stdlib",kotlinVersion))
+        compile(kotlin("reflect",kotlinVersion))
+        if (name != "lib.testutils")
         {
             testCompile(project(":lib.testutils"))
         }
     }
 
     repositories {
-        mavenCentral()
-        mavenLocal()
-        maven("https://jitpack.io")
         jcenter()
+        mavenCentral()
     }
 
     val sourcesJarTask = task("sourcesJar",Jar::class) {
