@@ -50,6 +50,7 @@ subprojects {
 
 task("install_tag_and_push")
 {
+    // install all modules
     dependsOn.addAll(allprojects
         .iterator().asSequence()
         .flatMap {it.tasks.toList().asSequence()}
@@ -59,6 +60,10 @@ task("install_tag_and_push")
 
         // make sure working branch is clean
         if (!isWorkingBranchClean()) throw Exception("working branch not clean")
+
+        // make sure there is no conflicting release
+        check(Runtime.getRuntime().exec("git fetch").waitFor() == 0)
+        check(Runtime.getRuntime().exec("git tag -l | grep -Fx $version").waitFor() == 0,{"release already exists; please update version number"})
 
         // add tag and push
         check(Runtime.getRuntime().exec("git tag -a \"$version\" -m \"v$version\"").waitFor() == 0)
