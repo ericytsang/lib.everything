@@ -63,7 +63,7 @@ task("install_tag_and_push")
 
         // make sure there is no conflicting release
         check(Runtime.getRuntime().exec("git fetch").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git tag -l | grep -Fx $version").waitFor() == 0,{"release already exists; please update version number"})
+        check(Runtime.getRuntime().exec("git tag -l | grep -Fx $version").waitFor() == 0,{"a tag with the name \"$version\" already exists; please update version number"})
 
         // add tag and push
         check(Runtime.getRuntime().exec("git tag -a \"$version\" -m \"v$version\"").waitFor() == 0)
