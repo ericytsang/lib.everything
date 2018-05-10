@@ -91,9 +91,19 @@ fun executeCommand(
 {
     val process = Runtime.getRuntime().exec(command)
     val outputOfProcess = StringBuilder()
-    val dataRead = ByteArray(1024)
-    val len = process.inputStream.read(dataRead)
-    outputOfProcess.append(String(dataRead,0,len))
+    val dataRead = ByteArray(5)
+    while(true)
+    {
+        val len = process.inputStream.read(dataRead)
+        if (len != -1)
+        {
+            outputOfProcess.append(String(dataRead,0,len))
+        }
+        else
+        {
+            break
+        }
+    }
     process.waitFor()
     if (outputShouldContain !in outputOfProcess.toString())
     {
