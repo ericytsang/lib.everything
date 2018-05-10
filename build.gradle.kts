@@ -87,7 +87,7 @@ fun executeCommand(
 fun executeCommand(
         command:String,
         predicate:(output:String)->Boolean,
-        failureMessage:(actualOutput:String)->String={"output of command \"$command\" did not contain \"$outputShouldContain\". raw output:\n$it"})
+        failureMessage:(actualOutput:String)->String={"output of command \"$command\" did not satisfy predicate. raw output:\n$it"})
 {
     val process = Runtime.getRuntime().exec(command)
     val outputOfProcess = StringBuilder()
@@ -105,7 +105,7 @@ fun executeCommand(
         }
     }
     process.waitFor()
-    if (outputShouldContain !in outputOfProcess.toString())
+    if (!predicate(outputOfProcess.toString()))
     {
         throw Exception(failureMessage(outputOfProcess.toString()))
     }
