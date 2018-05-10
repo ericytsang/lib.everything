@@ -7,7 +7,7 @@ plugins {
     `kotlin-dsl`
 }
 
-val projectVersion = "36.0.2"
+val projectVersion = "36.0.1"
 
 subprojects {
 
@@ -60,11 +60,11 @@ task("install_tag_and_push")
     actions.apply {} += Action<Task> {
 
         // make sure working branch is clean
-        executeCommand("git status","nothing to commit, working tree clean",{"working branch not clean"})
+        executeCommand("git status",{"nothing to commit, working tree clean" in it},{"working branch not clean"})
 
         // make sure there is no conflicting release
         executeCommand("git fetch",0)
-        executeCommand("git tag -l | grep -Fx $projectVersion",projectVersion,{"a tag with the name \"$projectVersion\" already exists; please update version number:\n$it"})
+        executeCommand("git tag -l | grep -Fx $projectVersion",{projectVersion !in it},{"a tag with the name \"$projectVersion\" already exists; please update version number:\n$it"})
 
         // add tag and push
         executeCommand("git tag -a \"$projectVersion\" -m \"v$projectVersion\"",0)
@@ -86,7 +86,7 @@ fun executeCommand(
 
 fun executeCommand(
         command:String,
-        outputShouldContain:String,
+        predicate:(output:String)->Boolean,
         failureMessage:(actualOutput:String)->String={"output of command \"$command\" did not contain \"$outputShouldContain\". raw output:\n$it"})
 {
     val process = Runtime.getRuntime().exec(command)
