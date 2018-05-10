@@ -1,5 +1,4 @@
 import org.apache.tools.ant.taskdefs.Java
-import org.gradle.internal.impldep.org.apache.commons.io.output.ByteArrayOutputStream
 import org.gradle.internal.impldep.org.bouncycastle.util.Properties
 import org.gradle.jvm.tasks.Jar
 import java.util.Properties as JavaProperties
@@ -61,11 +60,11 @@ task("install_tag_and_push")
     actions.apply {} += Action<Task> {
 
         // make sure working branch is clean
-        if (!isWorkingBranchClean()) throw Exception("working branch not clean")
+        executeCommand("git status","nothing to commit, working tree clean","working branch not clean")
 
         // make sure there is no conflicting release
-        check(Runtime.getRuntime().exec("git fetch").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git tag -l | grep -Fx $projectVersion").waitFor() == 1,{"a tag with the name \"$projectVersion\" already exists; please update version number"})
+        executeCommand("git fetch",0)
+        executeCommand("git tag -l | grep -Fx $projectVersion",projectVersion,"a tag with the name \"$projectVersion\" already exists; please update version number")
 
         // add tag and push
         check(Runtime.getRuntime().exec("git tag -a \"$projectVersion\" -m \"v$projectVersion\"").waitFor() == 0)
@@ -73,12 +72,37 @@ task("install_tag_and_push")
     }
 }
 
-fun isWorkingBranchClean():Boolean
+fun isThereAnExistingReleaseNamed(name:String):Boolean
 {
-    val process = Runtime.getRuntime().exec("git status")
+    executeCommand("git fetch",0)
+    executeCommand("git status","nothing to commit, working tree clean","working branch not clean")
+}
+
+fun executeCommand(
+        command:String,
+        expectedReturnValue:Int=0,
+        failureMessage:String="execution of command: \"$command\" returned return: \"$expectedReturnValue\"")
+{
+    val returnValue = Runtime.getRuntime().exec(command).waitFor()
+    if (returnValue != expectedReturnValue)
+    {
+        throw Exception(failureMessage,Exception("return value of command: $returnValue"))
+    }
+}
+
+fun executeCommand(
+        command:String,
+        expectedOutput:String,
+        failureMessage:String="output of command: \"$command\" did not contain: \"$expectedOutput\"")
+{
+    val process = Runtime.getRuntime().exec(command)
+    val outputOfProcess = StringBuilder()
     val dataRead = ByteArray(1024)
     val len = process.inputStream.read(dataRead)
-    val processOutput = String(dataRead,0,len)
-    check(process.waitFor() == 0)
-    return "nothing to commit, working tree clean" in processOutput
+    outputOfProcess.append(String(dataRead,0,len))
+    process.waitFor()
+    if (expectedOutput !in outputOfProcess.toString())
+    {
+        throw Exception(failureMessage,Exception("output of command:\n$outputOfProcess"))
+    }
 }
