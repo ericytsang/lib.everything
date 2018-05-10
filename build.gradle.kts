@@ -1,6 +1,7 @@
 import org.apache.tools.ant.taskdefs.Java
 import org.gradle.internal.impldep.org.bouncycastle.util.Properties
 import org.gradle.jvm.tasks.Jar
+import java.io.InputStream
 import java.util.Properties as JavaProperties
 
 plugins {
@@ -77,7 +78,18 @@ fun executeCommand(
         expectedReturnValue:Int=0,
         failureMessage:(actual:Int)->String={"execution of command \"$command\" returned $it instead of $expectedReturnValue"})
 {
-    val returnValue = Runtime.getRuntime().exec(command).waitFor()
+    // execute process
+    println("$ $command")
+    val process = Runtime.getRuntime().exec(command)
+
+    // read process output
+    process.inputStream.copyTo(System.out)
+    println()
+
+    // await process termination
+    val returnValue = process.waitFor()
+
+    // fail if predicate not satisfied
     if (returnValue != expectedReturnValue)
     {
         throw Exception(failureMessage(returnValue))
@@ -89,24 +101,20 @@ fun executeCommand(
         predicate:(output:String)->Boolean,
         failureMessage:(actualOutput:String)->String={"output of command \"$command\" did not satisfy predicate. raw output:\n$it"})
 {
+    // execute process
+    println("$ $command")
     val process = Runtime.getRuntime().exec(command)
-    val outputOfProcess = StringBuilder()
-    val dataRead = ByteArray(5)
-    while(true)
-    {
-        val len = process.inputStream.read(dataRead)
-        if (len != -1)
-        {
-            outputOfProcess.append(String(dataRead,0,len))
-        }
-        else
-        {
-            break
-        }
-    }
+
+    // read process output
+    val outputOfProcess = String(process.inputStream.readBytes())
+    println(outputOfProcess)
+
+    // await process termination
     process.waitFor()
-    if (!predicate(outputOfProcess.toString()))
+
+    // fail if predicate not satisfied
+    if (!predicate(outputOfProcess))
     {
-        throw Exception(failureMessage(outputOfProcess.toString()))
+        throw Exception(failureMessage(outputOfProcess))
     }
 }
