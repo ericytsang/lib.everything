@@ -60,40 +60,34 @@ task("install_tag_and_push")
     actions.apply {} += Action<Task> {
 
         // make sure working branch is clean
-        executeCommand("git status","nothing to commit, working tree clean","working branch not clean")
+        executeCommand("git status","nothing to commit, working tree clean",{"working branch not clean"})
 
         // make sure there is no conflicting release
         executeCommand("git fetch",0)
-        executeCommand("git tag -l | grep -Fx $projectVersion",projectVersion,"a tag with the name \"$projectVersion\" already exists; please update version number")
+        executeCommand("git tag -l | grep -Fx $projectVersion",projectVersion,{"a tag with the name \"$projectVersion\" already exists; please update version number:\n$it"})
 
         // add tag and push
-        check(Runtime.getRuntime().exec("git tag -a \"$projectVersion\" -m \"v$projectVersion\"").waitFor() == 0)
-        check(Runtime.getRuntime().exec("git push origin $projectVersion").waitFor() == 0)
+        executeCommand("git tag -a \"$projectVersion\" -m \"v$projectVersion\"",0)
+        executeCommand("git push origin $projectVersion",0)
     }
-}
-
-fun isThereAnExistingReleaseNamed(name:String):Boolean
-{
-    executeCommand("git fetch",0)
-    executeCommand("git status","nothing to commit, working tree clean","working branch not clean")
 }
 
 fun executeCommand(
         command:String,
         expectedReturnValue:Int=0,
-        failureMessage:String="execution of command: \"$command\" returned return: \"$expectedReturnValue\"")
+        failureMessage:(actual:Int)->String={"execution of command \"$command\" returned $it instead of $expectedReturnValue"})
 {
     val returnValue = Runtime.getRuntime().exec(command).waitFor()
     if (returnValue != expectedReturnValue)
     {
-        throw Exception(failureMessage,Exception("return value of command: $returnValue"))
+        throw Exception(failureMessage(returnValue))
     }
 }
 
 fun executeCommand(
         command:String,
-        expectedOutput:String,
-        failureMessage:String="output of command: \"$command\" did not contain: \"$expectedOutput\"")
+        outputShouldContain:String,
+        failureMessage:(actualOutput:String)->String={"output of command \"$command\" did not contain \"$outputShouldContain\". raw output:\n$it"})
 {
     val process = Runtime.getRuntime().exec(command)
     val outputOfProcess = StringBuilder()
@@ -101,8 +95,8 @@ fun executeCommand(
     val len = process.inputStream.read(dataRead)
     outputOfProcess.append(String(dataRead,0,len))
     process.waitFor()
-    if (expectedOutput !in outputOfProcess.toString())
+    if (outputShouldContain !in outputOfProcess.toString())
     {
-        throw Exception(failureMessage,Exception("output of command:\n$outputOfProcess"))
+        throw Exception(failureMessage(outputOfProcess.toString()))
     }
 }
