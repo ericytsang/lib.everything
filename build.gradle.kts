@@ -7,7 +7,7 @@ plugins {
     `kotlin-dsl`
 }
 
-val projectVersion = "36.0.1"
+val projectVersion = "36.0.2"
 
 subprojects {
 
