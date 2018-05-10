@@ -8,7 +8,7 @@ plugins {
     `kotlin-dsl`
 }
 
-val projectVersion = "36.0.1"
+val projectVersion = "36.0.2"
 
 subprojects {
 
@@ -65,7 +65,7 @@ task("install_tag_and_push")
 
         // make sure there is no conflicting release
         executeCommand("git fetch",0)
-        executeCommand("git tag -l | grep -Fx $projectVersion",{projectVersion !in it},{"a tag with the name \"$projectVersion\" already exists; please update version number:\n$it"})
+        executeCommand("git tag -l",{projectVersion !in it.split("\n")},{"a tag with the name \"$projectVersion\" already exists; please update version number:\n$it"})
 
         // add tag and push
         executeCommand("git tag -a \"$projectVersion\" -m \"v$projectVersion\"",0)
