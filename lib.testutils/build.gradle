@@ -1,10 +1,16 @@
+apply plugin: "kotlin"
+
 dependencies {
+
+    // kotlin
+    compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+
+    // project dependencies
     compile(project(":lib.concurrent"))
+
+    // external dependencies
+    compile("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     compile("junit:junit:4.12")
-    compile(kotlin("test"))
-    compile(kotlin("test-junit"))
     compile("org.mockito:mockito-all:2.0.2-beta")
-    {
-        exclude("org.hamcrest","mockito-all")
-    }
 }

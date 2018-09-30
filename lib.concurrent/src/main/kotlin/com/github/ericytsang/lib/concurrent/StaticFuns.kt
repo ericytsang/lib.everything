@@ -71,7 +71,7 @@ val Thread.isSuspended:Boolean get()
 
 fun Thread.awaitSuspended()
 {
-    while (state !in suspendedThreadStates)
+    while (!isSuspended)
     {
         Thread.yield()
     }

@@ -1,7 +1,5 @@
 package com.github.ericytsang.lib.concurrent
 
-val thread = Thread()
-
 fun Thread.mutableThread():MutableThread
 {
     return ThreadToMutableThreadAdapter(this)

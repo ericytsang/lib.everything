@@ -1,15 +1,24 @@
 package com.github.ericytsang.lib.datastore
 
+import com.github.ericytsang.lib.testutils.TestUtils
 import io.reactivex.Flowable
 import io.reactivex.Observable
+import io.reactivex.internal.schedulers.ComputationScheduler
 import io.reactivex.internal.schedulers.ExecutorScheduler
 import io.reactivex.subjects.PublishSubject
+import org.junit.After
+import org.junit.Ignore
+import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
-import kotlin.test.Test
 
 class RxJavaTests
 {
+    @After
+    fun teardown()
+    {
+        TestUtils.assertAllWorkerThreadsDead()
+    }
 
     @Test
     fun what_thread_does_rxjava_Observable_onNext_get_called_on()
@@ -20,19 +29,23 @@ class RxJavaTests
     }
 
     @Test
+    @Ignore
     fun what_thread_does_rxjava_FlowableSubject_onNext_get_called_on()
     {
         println("${Thread.currentThread()}: running the unit test")
         var count = 0
-        val scheduler = ExecutorScheduler(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
+        var shouldStop = false
+        val isStopped = CountDownLatch(1)
+        val scheduler = ComputationScheduler {Thread(it)}
         val observable = PublishSubject
                 .create<Int>()
                 {
-                    while (true)
+                    while (!shouldStop)
                     {
                         println("${Thread.currentThread()}: $count // publish")
                         it.onNext(++count)
                     }
+                    isStopped.countDown()
                 }
                 .subscribeOn(scheduler)
         val disposable1 = observable.forEach()
@@ -47,14 +60,17 @@ class RxJavaTests
         Thread.sleep(1000)
         disposable1.dispose()
         disposable2.dispose()
+        shouldStop = true
+        isStopped.await()
         scheduler.shutdown()
     }
 
     @Test
+    @Ignore
     fun what_thread_does_rxjava_FlowableSubject2_onNext_get_called_on()
     {
         println("${Thread.currentThread()}: running the unit test")
-        val scheduler = ExecutorScheduler(Executors.newFixedThreadPool(100))
+        val scheduler = ComputationScheduler {Thread(it)}
         var count = 0
         val observable = Flowable
                 .generate<Int>()
@@ -79,11 +95,12 @@ class RxJavaTests
     }
 
     @Test
+    @Ignore
     fun backpressure_demo()
     {
 
         println("${Thread.currentThread()}: running the unit test")
-        val scheduler = ExecutorScheduler(Executors.newFixedThreadPool(100))
+        val scheduler = ComputationScheduler {Thread(it)}
         val latch = CountDownLatch(1)
         val observable = Flowable
                 .generate<Int>()
