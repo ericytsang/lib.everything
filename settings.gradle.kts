@@ -1,5 +1,5 @@
 include("lib.abstractstream")
-// include("lib.android")
+include("lib.android")
 include("lib.awaitable")
 include("lib.cipherstream")
 include("lib.concurrent")
