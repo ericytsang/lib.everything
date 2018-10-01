@@ -14,12 +14,12 @@ buildscript {
 allprojects {
 
     repositories {
+        mavenLocal()
+        mavenCentral()
         jcenter()
         google()
-        mavenCentral()
-        maven {url "https://maven.fabric.io/public"}
         maven {url "https://maven.google.com/"}
-        mavenLocal()
+        maven {url "https://maven.fabric.io/public"}
     }
 
     tasks.withType(JavaCompile) {
