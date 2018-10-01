@@ -1,4 +1,5 @@
 apply plugin: "kotlin"
+apply plugin: "kotlin-kapt"
 
 dependencies {
 
@@ -26,4 +27,5 @@ dependencies {
     compile("com.cedarsoft.serialization:stax-mate:3.0.0")
     compile("com.thoughtworks.xstream:xstream:1.4.2")
     compile("org.apache.commons:commons-lang3:3.4")
+    compile("com.google.collections:google-collections:1.0-rc2")
 }
