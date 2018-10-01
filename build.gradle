@@ -1,39 +1,24 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
 
     repositories {
-        jcenter()
         google()
-        mavenCentral()
-        mavenLocal()
-    }
-
-    ext {
-        application_version_code = 1
-        application_version_name = "1.0.0"
-        kotlin_version = "1.2.70"
-        room_version = "1.1.1"
-        paging_version = "1.0.1"
-        work_manager_version = "1.0.0-alpha05"
-        android_support_version = "27.1.1"
-        firebase_version = "12.0.1"
-        anko_version = "0.10.4"
+        jcenter()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:3.1.4"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("com.android.tools.build:gradle:$android_gradle_version")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
 
-subprojects {
+allprojects {
+
     repositories {
         jcenter()
         google()
         mavenCentral()
-        maven { url 'https://maven.fabric.io/public' }
-        maven { url 'https://maven.google.com/' }
+        maven {url "https://maven.fabric.io/public"}
+        maven {url "https://maven.google.com/"}
         mavenLocal()
     }
 
