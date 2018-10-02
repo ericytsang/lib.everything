@@ -1,5 +1,5 @@
 include("lib.abstractstream")
-include("lib.android") // comment this line out to run all unit tests in the project
+include("lib.android")
 include("lib.awaitable")
 include("lib.cipherstream")
 include("lib.concurrent")
