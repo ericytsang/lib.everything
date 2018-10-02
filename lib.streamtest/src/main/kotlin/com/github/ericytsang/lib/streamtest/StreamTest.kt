@@ -54,6 +54,18 @@ abstract class StreamTest
     }
 
     @Test
+    fun pipe_number_then_read_until_EOF()
+    {
+        val t = thread {
+            errorCollector.checkSucceeds {
+                assert(sink.read() == -1)
+            }
+        }
+        t.awaitSuspended()
+        src.close()
+    }
+
+    @Test
     fun pipe_shorts()
     {
         val t = thread {
