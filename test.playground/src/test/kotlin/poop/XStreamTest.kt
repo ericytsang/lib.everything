@@ -26,7 +26,7 @@ class XStreamTest
     private val xStream = XStream()
 
     @Test
-    fun marshallingTest1()
+    fun marshalling_test1()
     {
         val bos = ByteArrayOutputStream()
         val h = XppDriver().createWriter(bos)
@@ -36,7 +36,7 @@ class XStreamTest
     }
 
     @Test
-    fun marshallingTest2()
+    fun marshalling_test2()
     {
         val bos = ByteArrayOutputStream()
         val h = RawXmlWriter(bos)
@@ -46,14 +46,14 @@ class XStreamTest
     }
 
     @Test
-    fun marshallingTest3()
+    fun marshalling_test3()
     {
         val result = xStream.toXML(m)
         println(result)
     }
 
     @Test
-    fun marshallModels()
+    fun marshall_models()
     {
         val teamBlog = Blog(Author("Guilherme Silveira"))
         teamBlog.entries.add(Entry("first","My first blog entry."))

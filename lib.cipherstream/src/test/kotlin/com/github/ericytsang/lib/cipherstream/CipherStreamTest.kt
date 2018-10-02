@@ -42,7 +42,7 @@ class CipherStreamTest:StreamTest()
     }
 
     @Test
-    fun flushTestSingleBlock()
+    fun flush_test_single_block()
     {
         val sentData = "hey friend".toByteArray()
         val receivedData = ByteArray(sentData.size)
@@ -56,7 +56,7 @@ class CipherStreamTest:StreamTest()
     }
 
     @Test
-    fun flushTestMultiBlock()
+    fun flush_test_multi_block()
     {
         val sentData = "hey friend long long long long long long long long long long long long long long long long long long long long long long long long long long string".toByteArray()
         val receivedData = ByteArray(sentData.size)

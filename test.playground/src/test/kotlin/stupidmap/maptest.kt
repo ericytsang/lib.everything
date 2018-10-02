@@ -6,28 +6,28 @@ import kotlin.test.assertEquals
 class maptest
 {
     @Test
-    fun putIfAbsent()
+    fun put_if_absent()
     {
         val map = mutableMapOf<String,String>()
         assertEquals(null,map.putIfAbsent("hi","hi"))
     }
 
     @Test
-    fun putIfAbsentOnExistingValue()
+    fun put_if_absent_on_existing_value()
     {
         val map = mutableMapOf("hi" to "bye")
         assertEquals("bye",map.putIfAbsent("hi","hi"))
     }
 
     @Test
-    fun computeIfAbsent()
+    fun compute_if_absent()
     {
         val map = mutableMapOf<String,String>()
         assertEquals("hi",map.computeIfAbsent("hi") {"hi"})
     }
 
     @Test
-    fun computeIfAbsentOnExistingValue()
+    fun compute_if_absent_on_existing_value()
     {
         val map = mutableMapOf("hi" to "bye")
         assertEquals("bye",map.computeIfAbsent("hi") {"hi"})

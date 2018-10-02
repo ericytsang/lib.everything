@@ -47,7 +47,7 @@ class RpcServerTest
     }
 
     @Test
-    fun returnNonNullTest()
+    fun return_non_null_test()
     {
         assert(TestAddRpcFunction(79).callFromClient(modem2) == 79+5)
         assert(TestAddRpcFunction(90).callFromClient(modem2) == 90+5)
@@ -60,14 +60,14 @@ class RpcServerTest
     }
 
     @Test
-    fun returnNullTest()
+    fun return_null_test()
     {
         val functionCall = TestNummRpcFunction(79)
         assert(functionCall.callFromClient(modem2) == null)
     }
 
     @Test
-    fun remoteExceptionTest()
+    fun remote_exception_test()
     {
         val functionCall = TestExceptionRpcFunction(79)
         try
@@ -84,7 +84,7 @@ class RpcServerTest
     }
 
     @Test
-    fun interruptedTest()
+    fun interrupted_test()
     {
         val functionCall = TestSleepRpcFunction(5000)
         val currentThread = Thread.currentThread()
@@ -100,7 +100,7 @@ class RpcServerTest
     }
 
     @Test
-    fun preemptiveInterruptedTest()
+    fun preemptive_interrupted_test()
     {
         val functionCall = TestSleepRpcFunction(5000)
         try
@@ -121,7 +121,7 @@ class RpcServerTest
     }
 
     @Test
-    fun remoteInterruptTest()
+    fun remote_interrupt_test()
     {
         val functionCall = TestRemoteInterrupt(5000)
         functionCall.callFromClient(modem2)
@@ -129,7 +129,7 @@ class RpcServerTest
     }
 
     @Test
-    fun underlyingModemDiesCallsOnShutdown()
+    fun underlying_modem_dies_calls_on_shutdown()
     {
         modem2.close()
         Thread.sleep(100)
@@ -137,7 +137,7 @@ class RpcServerTest
     }
 
     @Test
-    fun underlyingModemDiesDuringFunctionCall()
+    fun underlying_modem_dies_during_function_call()
     {
         val functionCall = TestSleepRpcFunction(10000)
         val t = thread {
@@ -159,7 +159,7 @@ class RpcServerTest
     }
 
     @Test
-    fun shutdownServerDuringLongRunningFunctionCall()
+    fun shutdown_server_during_long_running_function_call()
     {
         val functionCall = TestSleepRpcFunction(100000)
         val t = thread {

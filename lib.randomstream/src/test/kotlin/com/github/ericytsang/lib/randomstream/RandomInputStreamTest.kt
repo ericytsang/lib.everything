@@ -8,7 +8,7 @@ class RandomInputStreamTest
     val randomInputStream = RandomInputStream()
 
     @Test
-    fun generatesAllCombinationsOfBits()
+    fun generates_all_combinations_of_bits()
     {
         val allBytes = (Byte.MIN_VALUE..Byte.MAX_VALUE).toMutableSet()
         val ba = byteArrayOf(0)
@@ -21,7 +21,7 @@ class RandomInputStreamTest
     }
 
     @Test
-    fun canBeUsedWithDataInputStream()
+    fun can_be_used_with_data_input_stream()
     {
         println(DataInputStream(randomInputStream).readLong())
         println(DataInputStream(randomInputStream).readLong())

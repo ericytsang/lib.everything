@@ -57,7 +57,7 @@ class StxTest
     }
 
     @Test
-    fun testUnescapeHtml()
+    fun test_unescape_html()
     {
         println(StxExtensions.unescapeHtml("&amp;"))
     }

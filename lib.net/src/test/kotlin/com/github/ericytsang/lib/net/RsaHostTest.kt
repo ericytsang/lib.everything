@@ -30,7 +30,7 @@ class RsaHostTest
     }
 
     @Test
-    fun generalTest()
+    fun general_test()
     {
         // generate keypairs
         val serverKeypair = run()
@@ -86,7 +86,7 @@ class RsaHostTest
     }
 
     @Test
-    fun badKeysTest()
+    fun bad_keys_test()
     {
         // generate keypairs
         val serverKeypair = run()
@@ -134,7 +134,7 @@ class RsaHostTest
     }
 
     @Test
-    fun timeoutTest()
+    fun timeout_test()
     {
         // generate keypairs
         val serverKeypair = run()
@@ -169,7 +169,7 @@ class RsaHostTest
     }
 
     @Test
-    fun randomLongs()
+    fun random_longs()
     {
         for (i in 1..30)
         {

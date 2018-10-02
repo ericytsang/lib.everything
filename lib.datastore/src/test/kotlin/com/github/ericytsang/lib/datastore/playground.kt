@@ -8,13 +8,13 @@ class RandomTests
     val list = listOf(0,1,2,3,4,5,6,7,8,9,10)
 
     @Test
-    fun listIteratorNextIndex()
+    fun list_iterator_next_index()
     {
         assertEquals(9,list.listIterator(9).nextIndex())
     }
 
     @Test
-    fun linkedHashSetMovesItemFromMiddleToBeginningAgainIfAccessed()
+    fun linked_hash_set_moves_item_from_middle_to_beginning_again_if_accessed()
     {
         val set = LinkedHashSet<Int>()
         set.put(1)

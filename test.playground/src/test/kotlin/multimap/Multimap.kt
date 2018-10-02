@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 class MultimapTest
 {
     @Test
-    fun whatDoesGetReturn()
+    fun what_does_get_return()
     {
         val multimap = ArrayListMultimap.create<String,Double>()
         assertEquals(emptyList<Double>(),multimap.get("hehhs"))
