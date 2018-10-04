@@ -20,11 +20,24 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE):Client<Unit>,Server
+class Modem
+private constructor(
+        val multiplexedConnection:Connection,
+        backlogSize:Int = Int.MAX_VALUE)
+    :
+        Client<Unit>,
+        Server
 {
     companion object
     {
         const val RECV_WINDOW_SIZE_PER_CONNECTION = 8*1024
+
+        fun create(
+                multiplexedConnection:Connection,
+                backlogSize:Int = Int.MAX_VALUE):Modem
+        {
+            return Modem(multiplexedConnection,backlogSize).apply {initialize()}
+        }
     }
 
     override fun connect(remoteAddress:Unit):Connection
@@ -80,7 +93,7 @@ class Modem(val multiplexedConnection:Connection,backlogSize:Int = Int.MAX_VALUE
     /**
      * starts internal threads for sending and receiving data.
      */
-    fun initialize() = oneshotInitialize()
+    private fun initialize() = oneshotInitialize()
     private val oneshotInitialize = OneshotCall
         .builder<Unit>()
         .serialized()

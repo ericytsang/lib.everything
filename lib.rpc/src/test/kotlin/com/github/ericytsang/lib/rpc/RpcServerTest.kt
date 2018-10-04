@@ -24,8 +24,8 @@ class RpcServerTest
     }
     val con1 = TcpConnection(Socket(InetAddress.getLocalHost(),PORT))
     val con2 = TcpConnection(connectionMaker.get())
-    val modem1 = Modem(con1)
-    val modem2 = Modem(con2)
+    val modem1 = Modem.create(con1)
+    val modem2 = Modem.create(con2)
 
     var shutdownCalled = false
 

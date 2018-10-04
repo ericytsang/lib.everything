@@ -59,15 +59,15 @@ class ModemTest
     @Test
     fun instantiate_test()
     {
-        Modem(conn1)
-        Modem(conn2)
+        Modem.create(conn1)
+        Modem.create(conn2)
     }
 
     @Test
     fun connect_accept_test()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t1 = thread {m1.connect(Unit)}
         while (t1.state !in setOf(Thread.State.BLOCKED,Thread.State.WAITING,Thread.State.TIMED_WAITING));
         m2.accept()
@@ -79,8 +79,8 @@ class ModemTest
     @Test
     fun concurrent_conversations_test_1()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val q = LinkedBlockingQueue<Connection>()
         thread {(1..5).forEach {q.put(m2.accept())}}
         val conn1s = (1..5).map {m1.connect(Unit)}
@@ -99,8 +99,8 @@ class ModemTest
     @Test
     fun concurrent_conversations_test_2()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val q = LinkedBlockingQueue<Connection>()
         thread {(1..5).forEach {q.put(m2.accept())}}
         val conn1s = (1..5).map {m1.connect(Unit)}
@@ -123,8 +123,8 @@ class ModemTest
     @Test
     fun closing_breaks_ongoing_connect()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t = thread {
             val ex = exceptionExpected {
                 m1.connect(Unit)
@@ -143,8 +143,8 @@ class ModemTest
     @Test
     fun closing_breaks_ongoing_connections()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val q = LinkedBlockingQueue<Connection>()
         thread {(1..5).forEach {q.put(m2.accept())}}
         (1..5).map {m1.connect(Unit)}
@@ -159,8 +159,8 @@ class ModemTest
     @Test
     fun overflow_connects_get_refused()
     {
-        val m1 = Modem(conn1,3)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1,3)
+        val m2 = Modem.create(conn2)
         val connectionRefusedCount = AtomicInteger(0)
         val doneLatch = CountDownLatch(1)
         val threads = (1..4).map {
@@ -182,7 +182,6 @@ class ModemTest
                 }
             }
         }
-        m1.initialize()
         doneLatch.await()
         m1.close()
         threads.forEach {it.join()}
@@ -192,8 +191,8 @@ class ModemTest
     @Test
     fun close_underlying_connection_aborts_connect_1()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val thread = thread {
             errorCollector.checkSucceeds {
                 exceptionExpected {
@@ -211,8 +210,8 @@ class ModemTest
     @Test
     fun close_underlying_connection_aborts_connect_2()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val thread = thread {
             errorCollector.checkSucceeds {
                 exceptionExpected {
@@ -230,8 +229,8 @@ class ModemTest
     @Test
     fun close_underlying_connection_aborts_accept_1()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val thread = thread {
             errorCollector.checkSucceeds {
                 exceptionExpected {
@@ -249,8 +248,8 @@ class ModemTest
     @Test
     fun close_underlying_connection_aborts_accept_2()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val thread = thread {
             errorCollector.checkSucceeds {
                 exceptionExpected {
@@ -268,8 +267,8 @@ class ModemTest
     @Test
     fun closing_breaks_ongoing_read()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t = thread {
             val connection = m2.accept()
             errorCollector.checkSucceeds {
@@ -286,8 +285,8 @@ class ModemTest
     @Test
     fun closing_underlying_connection_breaks_ongoing_read_1()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t = thread {
             val connection = m2.accept()
             errorCollector.checkSucceeds {
@@ -304,8 +303,8 @@ class ModemTest
     @Test
     fun closing_underlying_connection_breaks_ongoing_read_2()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t = thread {
             val connection = m2.accept()
             errorCollector.checkSucceeds {
@@ -323,8 +322,8 @@ class ModemTest
     @Test
     fun closing_breaks_ongoing_accept()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val t = thread {
             errorCollector.checkSucceeds {
                 exceptionExpected {
@@ -341,8 +340,8 @@ class ModemTest
     @Test
     fun half_close_test()
     {
-        val m1 = Modem(conn1)
-        val m2 = Modem(conn2)
+        val m1 = Modem.create(conn1)
+        val m2 = Modem.create(conn2)
         val q = LinkedBlockingQueue<Connection>()
         thread {(1..1).forEach {q.put(m2.accept())}}
         val conn1 = m1.connect(Unit)
