@@ -6,6 +6,7 @@ import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.TcpServer
 import com.github.ericytsang.lib.testutils.TestUtils
 import org.junit.After
+import org.junit.Ignore
 import org.junit.Test
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -134,6 +135,7 @@ class RsaHostTest
     }
 
     @Test
+    @Ignore
     fun timeout_test()
     {
         // generate keypairs
