@@ -11,6 +11,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.OutputStream
 import java.util.Arrays
+import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.thread
 
 /**
@@ -204,15 +205,20 @@ abstract class StreamTest
     @Test
     fun pipe_test_thread_interrupt()
     {
-        src.write(0)
-        src.write(2)
-        src.write(5)
-        src.write(6)
-        src.write(127)
-        src.write(128)
-        src.write(129)
-        src.write(254)
-        src.write(255)
+        val latch = CountDownLatch(1)
+        val t1 = thread()
+        {
+            src.write(0)
+            src.write(2)
+            src.write(5)
+            src.write(6)
+            src.write(127)
+            src.write(128)
+            src.write(129)
+            src.write(254)
+            src.write(255)
+            latch.await()
+        }
         assert(sink.read() == 0)
         assert(sink.read() == 2)
         assert(sink.read() == 5)
@@ -222,7 +228,7 @@ abstract class StreamTest
         assert(sink.read() == 129)
         assert(sink.read() == 254)
         assert(sink.read() == 255)
-        val t = thread {
+        val t2 = thread {
             errorCollector.checkSucceeds {
                 assert(sink.read() == -1)
                 assert(sink.read() == -1)
@@ -230,10 +236,12 @@ abstract class StreamTest
                 assert(sink.read() == -1)
             }
         }
-        t.awaitSuspended()
+        t2.awaitSuspended()
         src.close()
         src.close()
         src.close()
-        t.join()
+        t2.join()
+        latch.countDown()
+        t1.join()
     }
 }

@@ -8,5 +8,5 @@ import java.io.PipedOutputStream
 class StreamTestTest:StreamTest()
 {
     override val src:OutputStream = PipedOutputStream()
-    override val sink:InputStream = PipedInputStream(src as PipedOutputStream,1024)
+    override val sink:InputStream = PipedInputStream(src as PipedOutputStream,5)
 }
