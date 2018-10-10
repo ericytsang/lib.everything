@@ -60,9 +60,10 @@ fun ExecutorService.awaitTermination()
 }
 
 private val suspendedThreadStates = setOf(
-    Thread.State.TIMED_WAITING,
-    Thread.State.WAITING,
-    Thread.State.BLOCKED)
+        Thread.State.TIMED_WAITING,
+        Thread.State.WAITING,
+        Thread.State.BLOCKED,
+        Thread.State.TERMINATED)
 
 val Thread.isSuspended:Boolean get()
 {
