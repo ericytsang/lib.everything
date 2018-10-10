@@ -44,6 +44,27 @@ class Tests
     }
 
     @Test
+    fun reads_in_all_elements_until_queue_is_full()
+    {
+        val pipedOs = SimplePipedOutputStream(2048)
+        val pipedIs = SimplePipedInputStream(pipedOs)
+        val typedOs = TypedOutputStream<Int>(pipedOs)
+        val typedIs = TypedInputStream(Int::class,pipedIs,2)
+        val expected = listOf(1,2,3,4,5)
+
+        expected.forEach {typedOs.send(it)}
+        assertEquals(1,typedIs.readOne())
+        typedIs.reader.awaitSuspended()
+        assertEquals(2,typedIs.readOne())
+        assertEquals(3,typedIs.readOne())
+        assertEquals(4,typedIs.readOne())
+        assertEquals(5,typedIs.readOne())
+
+        typedOs.close()
+        typedIs.close()
+    }
+
+    @Test
     fun returns_null_when_stream_is_EOF()
     {
         val typedIs = TypedInputStream(Int::class,ByteArrayInputStream(ByteArray(0)))

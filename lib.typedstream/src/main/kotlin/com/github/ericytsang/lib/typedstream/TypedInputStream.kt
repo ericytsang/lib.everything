@@ -4,7 +4,6 @@ import java.io.Closeable
 import java.io.InputStream
 import java.io.ObjectInputStream
 import java.io.Serializable
-import java.lang.RuntimeException
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -36,7 +35,7 @@ class TypedInputStream<Message:Serializable>(
                 {
                     val serialized = objectIs.readObject()
                     val message = messageClass.cast(serialized)
-                    backlog.add(Poisonous.Data(message))
+                    backlog.put(Poisonous.Data(message))
                 }
                 catch (e:Throwable)
                 {
@@ -48,7 +47,7 @@ class TypedInputStream<Message:Serializable>(
                     break
                 }
             }
-            backlog.add(Poisonous.Poison())
+            backlog.put(Poisonous.Poison())
         }
     }
 
@@ -66,7 +65,7 @@ class TypedInputStream<Message:Serializable>(
         val data = newMessages.filterIsInstance<Poisonous.Data<Message>>()
 
         // put all poison back into the backlog for subsequent calls to read...
-        backlog.addAll(poison)
+        poison.forEach {backlog.put(it)}
 
         // return null if there was only poison left in the backlog;
         // return data otherwise
@@ -94,7 +93,7 @@ class TypedInputStream<Message:Serializable>(
             is Poisonous.Poison ->
             {
                 // put poison back into the backlog for subsequent calls to read...
-                backlog.add(newMessage)
+                backlog.put(newMessage)
                 null
             }
             is Poisonous.Data ->
