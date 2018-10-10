@@ -4,6 +4,7 @@ import com.github.ericytsang.lib.concurrent.awaitSuspended
 import com.github.ericytsang.lib.simplepipestream.SimplePipedInputStream
 import com.github.ericytsang.lib.simplepipestream.SimplePipedOutputStream
 import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
 import org.junit.After
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -93,5 +94,34 @@ class Tests
     {
         val stream = TypedOutputStream<Serializable>(ByteArrayOutputStream())
         stream.close()
+    }
+
+    @Test
+    fun writing_to_a_closed_output_stream()
+    {
+        val stream = TypedOutputStream<Int>(ByteArrayOutputStream())
+        stream.close()
+        exceptionExpected {
+            stream.send(1)
+        }
+    }
+
+    @Test
+    fun writing_to_an_output_stream_with_closed_input_stream()
+    {
+        val pipedOs = SimplePipedOutputStream(2048)
+        val pipedIs = SimplePipedInputStream(pipedOs)
+        val typedOs = TypedOutputStream<Int>(pipedOs)
+        val typedIs = TypedInputStream(Int::class,pipedIs)
+        typedIs.close()
+
+        for (i in 1..1000)
+        {
+            typedOs.send(i)
+        }
+
+        exceptionExpected {
+            typedOs.close()
+        }
     }
 }
