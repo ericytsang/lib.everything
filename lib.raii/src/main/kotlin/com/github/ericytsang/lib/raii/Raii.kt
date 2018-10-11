@@ -1,10 +1,10 @@
-package com.github.ericytsang.multiwindow.app.android
+package com.github.ericytsang.lib.raii
 
 import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
-// todo: move to library?
-class Raii<Raii:Closeable>:Closeable
+class Raii<Raii:Closeable>:Closeable,ReadOnlyRaii<Raii>
 {
     companion object
     {
@@ -14,16 +14,19 @@ class Raii<Raii:Closeable>:Closeable
         }
     }
 
-    var obj:Raii? = null
+    override var obj:Raii? = null
+        private set
 
     private val lock = ReentrantLock()
+    private val unblockWhenObjIsInitialized = lock.newCondition()
 
-    fun open(raiiInstanceFactory:()->Raii):Raii = synchronized(lock)
+    fun open(raiiInstanceFactory:()->Raii):Raii = lock.withLock()
     {
         close()
         val raiiObject = raiiInstanceFactory()
-        this.obj = raiiObject
-        return@synchronized raiiObject
+        obj = raiiObject
+        unblockWhenObjIsInitialized.signalAll()
+        return raiiObject
     }
 
     override fun close()
@@ -31,11 +34,36 @@ class Raii<Raii:Closeable>:Closeable
         getAndClose()
     }
 
-    fun getAndClose():Raii? = synchronized(lock)
+    fun getAndClose():Raii? = lock.withLock()
     {
         obj?.close()
         val raiiObject = obj
-        this.obj = null
-        raiiObject
+        obj = null
+        return raiiObject
     }
+
+    override fun blockingGetNonNullObj():Raii = lock.withLock()
+    {
+        val returnedObj:Raii
+        while (true)
+        {
+            val obj = this.obj
+            if (obj != null)
+            {
+                returnedObj = obj
+                break
+            }
+            else
+            {
+                unblockWhenObjIsInitialized.await()
+            }
+        }
+        returnedObj
+    }
+}
+
+interface ReadOnlyRaii<Raii:Closeable>
+{
+    val obj:Raii?
+    fun blockingGetNonNullObj():Raii
 }

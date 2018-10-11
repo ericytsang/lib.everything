@@ -48,20 +48,4 @@ class SimplifiedMapWrapperTest
         assert(map["a"] == null)
         assert(map["b"] == null)
     }
-
-    val hi = object:SimplifiedMap<Int,Int>
-    {
-        override fun set(key:Int,value:Int?):Int?
-        {
-            throw UnsupportedOperationException("not implemented") // todo
-        }
-
-        override fun get(key:Int):Int?
-        {
-            throw UnsupportedOperationException("not implemented") // todo
-        }
-
-        override val keys:Set<Int>
-            get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    }
 }

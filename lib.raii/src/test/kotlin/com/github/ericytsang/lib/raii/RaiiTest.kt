@@ -1,12 +1,14 @@
 package com.github.ericytsang.lib.raii
 
-import com.github.ericytsang.multiwindow.app.android.Raii
+import com.github.ericytsang.lib.concurrent.awaitSuspended
 import org.junit.Test
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import java.io.Closeable
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.concurrent.thread
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
@@ -47,5 +49,37 @@ class RaiiTest
         verify(closeable,never()).close()
         assertSame(closeable,raii.getAndClose())
         verify(closeable).close()
+    }
+
+    @Test
+    fun blockingGetNonNullObj_returns_once_raii_is_open()
+    {
+        val raii = Raii<Closeable>()
+        val q = ArrayBlockingQueue<Closeable>(1)
+        val t = thread {
+            q.put(raii.blockingGetNonNullObj())
+        }
+        t.awaitSuspended()
+        raii.open {closeable}
+        t.join()
+        assertSame(closeable,q.take())
+    }
+
+    @Test
+    fun blockingGetNonNullObj_does_not_return_when_closed_then_returns_once_raii_is_open()
+    {
+        val raii = Raii<Closeable>()
+        val q = ArrayBlockingQueue<Closeable>(1)
+        val t = thread {
+            q.put(raii.blockingGetNonNullObj())
+        }
+        t.awaitSuspended()
+        raii.getAndClose()
+        raii.close()
+        t.awaitSuspended()
+        check(t.isAlive)
+        raii.open {closeable}
+        t.join()
+        assertSame(closeable,q.take())
     }
 }
