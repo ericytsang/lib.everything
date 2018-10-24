@@ -60,10 +60,16 @@ class Raii<Raii:Closeable>:Closeable,ReadOnlyRaii<Raii>
         }
         returnedObj
     }
+
+    override fun <Return:Any> doIfOpen(block:(Raii)->Return):Return? = lock.withLock()
+    {
+        block(obj?:return@withLock null)
+    }
 }
 
 interface ReadOnlyRaii<Raii:Closeable>
 {
     val obj:Raii?
     fun blockingGetNonNullObj():Raii
+    fun <Return:Any> doIfOpen(block:(Raii)->Return):Return?
 }
