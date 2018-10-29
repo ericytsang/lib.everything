@@ -8,17 +8,16 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-class TypedOutputStream<Message:Serializable>(
-        underlyingStream:OutputStream)
+class TypedOutputStream(
+        private val objectOs:ObjectOutputStream)
     :Closeable
 {
     private val instantiationSite = getFileNameAndLine(StacktraceIndex(1))
-    private val objectOs = ObjectOutputStream(underlyingStream)
     private val sender = Executors.newSingleThreadExecutor {
         thread(start = false,name = "$instantiationSite -> ${getFileNameAndLine(StacktraceIndex())}") {it.run()}
     }
 
-    fun send(message:Message)
+    fun send(message:Serializable)
     {
         sender.submit {objectOs.writeObject(message)}
     }

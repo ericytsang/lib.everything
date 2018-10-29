@@ -11,20 +11,34 @@ import kotlin.concurrent.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
-class TypedInputStream<Message:Serializable>(
-        val messageClass:KClass<Message>,
-        underlyingStream:InputStream,
-        backlogSize:Int = 10)
+class TypedInputStream(
+        backlogSize:Int = 10,
+        underlyingStream:()->ObjectInputStream)
     :Closeable
 {
-    private val instantiationSite = listOf(1,2)
+    companion object
+    {
+        fun of(
+                underlyingStream:InputStream,
+                backlogSize:Int = 10)
+                :TypedInputStream
+        {
+            return TypedInputStream(backlogSize)
+            {
+                ObjectInputStream(underlyingStream)
+            }
+        }
+    }
+
+    private val instantiationSite = (0..3)
             .map {StacktraceIndex(it)}
             .map {getFileNameAndLine(it)}
             .find {this::class.simpleName!! !in it}!!
             .toString()
+    private val instantiationStackTrace = Throwable()
     private val readLock = ReentrantLock()
-    private val objectIs by lazy {ObjectInputStream(underlyingStream)}
-    private val backlog = ArrayBlockingQueue<Poisonous<Message>>(backlogSize)
+    private val objectIs by lazy {underlyingStream()}
+    private val backlog = ArrayBlockingQueue<Poisonous>(backlogSize)
     internal val reader by lazy()
     {
         thread(name = getFileNameAndLine(StacktraceIndex()))
@@ -34,8 +48,8 @@ class TypedInputStream<Message:Serializable>(
                 try
                 {
                     val serialized = objectIs.readObject()
-                    val message = messageClass.cast(serialized)
-                    backlog.put(Poisonous.Data(message))
+                    serialized as Serializable
+                    backlog.put(Poisonous.Data(serialized))
                 }
                 catch (e:Throwable)
                 {
@@ -43,6 +57,8 @@ class TypedInputStream<Message:Serializable>(
                     {
                         Exception("${this::class.simpleName} instantiated at $instantiationSite says: stream closed by remote",e)
                                 .printStackTrace(System.out)
+                        print("Instantiation site of ${this::class.simpleName}: ")
+                        instantiationStackTrace.printStackTrace(System.out)
                     }
                     break
                 }
@@ -57,12 +73,12 @@ class TypedInputStream<Message:Serializable>(
      * are no more messages because the stream is closed either by a call to
      * [close], or by EOF.
      */
-    fun readAll():List<Message>? = readLock.withLock()
+    fun <Message:Any> readAll(messageClass:KClass<Message>):List<Message>? = readLock.withLock()
     {
-        reader
+        reader // initialize the lazy value
         val newMessages = generateSequence {backlog.poll()}.toList()
-        val poison = newMessages.filterIsInstance<Poisonous.Poison<Message>>()
-        val data = newMessages.filterIsInstance<Poisonous.Data<Message>>()
+        val poison = newMessages.filterIsInstance<Poisonous.Poison>()
+        val data = newMessages.filterIsInstance<Poisonous.Data>()
 
         // put all poison back into the backlog for subsequent calls to read...
         poison.forEach {backlog.put(it)}
@@ -75,7 +91,10 @@ class TypedInputStream<Message:Serializable>(
         }
         else
         {
-            data.map {it.payload}
+            data.asSequence()
+                    .map {it.payload}
+                    .map {messageClass.cast(it)}
+                    .toList()
         }
     }
 
@@ -84,7 +103,7 @@ class TypedInputStream<Message:Serializable>(
      * [readOne], blocking if necessary, or null if there are no more messages
      * because the stream is closed either by a call to [close], or by EOF.
      */
-    fun readOne():Message? = readLock.withLock()
+    fun <Message:Any> readOne(messageClass:KClass<Message>):Message? = readLock.withLock()
     {
         reader
         val newMessage = backlog.take()
@@ -98,7 +117,7 @@ class TypedInputStream<Message:Serializable>(
             }
             is Poisonous.Data ->
             {
-                newMessage.payload
+                messageClass.cast(newMessage.payload)
             }
         }
     }
@@ -118,9 +137,9 @@ class TypedInputStream<Message:Serializable>(
         reader.join()
     }
 
-    private sealed class Poisonous<Payload:Any>
+    private sealed class Poisonous
     {
-        class Poison<Payload:Any>:Poisonous<Payload>()
-        class Data<Payload:Any>(val payload:Payload):Poisonous<Payload>()
+        class Poison:Poisonous()
+        class Data(val payload:Serializable):Poisonous()
     }
 }
