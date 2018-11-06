@@ -9,6 +9,7 @@ import org.junit.After
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 import kotlin.test.assertEquals
@@ -24,7 +25,7 @@ class Tests
     @Test
     fun can_instantiate_input_stream_without_being_blocked_in_the_constructor()
     {
-        val stream = TypedInputStream.of(ByteArrayInputStream(ByteArray(0)))
+        val stream = TypedInputStream {ObjectInputStream(ByteArrayInputStream(ByteArray(0)))}
         stream.close()
     }
 
@@ -34,7 +35,7 @@ class Tests
         val pipedOs = SimplePipedOutputStream(2048)
         val pipedIs = SimplePipedInputStream(pipedOs)
         val typedOs = TypedOutputStream(ObjectOutputStream(pipedOs))
-        val typedIs = TypedInputStream.of(pipedIs)
+        val typedIs = TypedInputStream {ObjectInputStream(pipedIs)}
         val expected = listOf(1,2,3,4,5)
 
         expected.forEach {typedOs.send(it)}
@@ -51,7 +52,7 @@ class Tests
         val pipedOs = SimplePipedOutputStream(2048)
         val pipedIs = SimplePipedInputStream(pipedOs)
         val typedOs = TypedOutputStream(ObjectOutputStream(pipedOs))
-        val typedIs = TypedInputStream.of(pipedIs,2)
+        val typedIs = TypedInputStream(2) {ObjectInputStream(pipedIs)}
         val expected = listOf(1,2,3,4,5)
 
         expected.forEach {typedOs.send(it)}
@@ -69,7 +70,7 @@ class Tests
     @Test
     fun returns_null_when_stream_is_EOF()
     {
-        val typedIs = TypedInputStream.of(ByteArrayInputStream(ByteArray(0)))
+        val typedIs = TypedInputStream {ObjectInputStream(ByteArrayInputStream(ByteArray(0)))}
         typedIs.reader.awaitSuspended()
         assertEquals(null,typedIs.readAll(Int::class))
         typedIs.close()
@@ -81,7 +82,7 @@ class Tests
         val pipedOs = SimplePipedOutputStream(2048)
         val pipedIs = SimplePipedInputStream(pipedOs)
         val typedOs = TypedOutputStream(ObjectOutputStream(pipedOs))
-        val typedIs = TypedInputStream.of(pipedIs)
+        val typedIs = TypedInputStream {ObjectInputStream(pipedIs)}
 
         typedIs.reader.awaitSuspended()
         assertEquals(emptyList(),typedIs.readAll(Int::class))
@@ -113,7 +114,7 @@ class Tests
         val pipedOs = SimplePipedOutputStream(2048)
         val pipedIs = SimplePipedInputStream(pipedOs)
         val typedOs = TypedOutputStream(ObjectOutputStream(pipedOs))
-        val typedIs = TypedInputStream.of(pipedIs)
+        val typedIs = TypedInputStream {ObjectInputStream(pipedIs)}
         typedIs.close()
 
         for (i in 1..1000)

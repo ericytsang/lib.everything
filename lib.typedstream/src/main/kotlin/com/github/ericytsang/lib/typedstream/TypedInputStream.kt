@@ -16,20 +16,6 @@ class TypedInputStream(
         underlyingStream:()->ObjectInputStream)
     :Closeable
 {
-    companion object
-    {
-        fun of(
-                underlyingStream:InputStream,
-                backlogSize:Int = 10)
-                :TypedInputStream
-        {
-            return TypedInputStream(backlogSize)
-            {
-                ObjectInputStream(underlyingStream)
-            }
-        }
-    }
-
     private val instantiationSite = (0..3)
             .map {StacktraceIndex(it)}
             .map {getFileNameAndLine(it)}
