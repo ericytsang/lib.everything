@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.typedstream
+package com.github.ericytsang.lib.getfileandline
 
 import java.lang.Exception
 
