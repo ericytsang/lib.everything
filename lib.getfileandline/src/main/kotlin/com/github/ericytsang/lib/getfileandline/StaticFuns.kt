@@ -8,8 +8,19 @@ data class StacktraceIndex(
     val index = 1+indexOffset
 }
 
-fun getFileNameAndLine(stacktraceIndex:StacktraceIndex):String
+/**
+ * the file and line number, or null if index is out of bounds.
+ */
+fun getFileNameAndLine(stacktraceIndex:StacktraceIndex):String?
 {
-    val stacktrace = Exception().stackTrace[stacktraceIndex.index]
-    return "${stacktrace.fileName}:${stacktrace.lineNumber}"
+    val stacktrace = Exception().stackTrace
+    val stacktraceTray = try
+    {
+        stacktrace[stacktraceIndex.index]
+    }
+    catch (e:ArrayIndexOutOfBoundsException)
+    {
+        null
+    }
+    return stacktraceTray?.let {"${it.fileName}:${it.lineNumber}"}
 }
