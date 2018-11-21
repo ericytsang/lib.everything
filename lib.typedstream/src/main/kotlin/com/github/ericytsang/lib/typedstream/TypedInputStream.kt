@@ -1,5 +1,7 @@
 package com.github.ericytsang.lib.typedstream
 
+import com.github.ericytsang.lib.getfileandline.StacktraceIndex
+import com.github.ericytsang.lib.getfileandline.getFileNameAndLine
 import java.io.Closeable
 import java.io.InputStream
 import java.io.ObjectInputStream
@@ -18,7 +20,7 @@ class TypedInputStream(
 {
     private val instantiationSite = (0..3)
             .map {StacktraceIndex(it)}
-            .map {getFileNameAndLine(it)}
+            .mapNotNull {getFileNameAndLine(it)}
             .find {this::class.simpleName!! !in it}!!
             .toString()
     private val instantiationStackTrace = Throwable()
