@@ -10,6 +10,7 @@ import org.mockito.Mockito.verify
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
+import java.util.Random
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -33,17 +34,20 @@ class WrappedWithBufferedIoStreans
                 it.run()
             }
         }
-        val buffOsSize = 640000
+        val buffOsSize = 2048
         val byteOs = ByteArrayOutputStream()
         val streamThatShouldBeFlushed = spy(ObjectOutputStream(BufferedOutputStream(byteOs,buffOsSize)))
         val typeOs = TypedOutputStream(streamThatShouldBeFlushed,executorService)
 
+        // log every time flush is called
+        doAnswer {Throwable().printStackTrace(System.out)}.`when`(streamThatShouldBeFlushed).flush()
+
         // do test
-        unblockAfterVerification.countDown()
-        for(i in 0..1000)
+        for(i in 0..100)
         {
             typeOs.send(i)
         }
+        unblockAfterVerification.countDown()
         typeOs.close()
 
         // verify
