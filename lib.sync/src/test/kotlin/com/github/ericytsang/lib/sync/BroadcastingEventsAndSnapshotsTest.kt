@@ -105,20 +105,4 @@ class BroadcastingEventsAndSnapshotsTest
             verify(slave).apply(events)
         }
     }
-
-    open class MockMaster:Master<Event,Request>
-    {
-        override fun getPendingEvents():List<Event>? = emptyList()
-        override fun generateSnapshot():List<Event>? = emptyList()
-        override fun process(requests:List<Request>) = Unit
-        override fun close() = Unit
-    }
-    open class MockSlave:Slave<Event,Request>
-    {
-        override fun apply(events:List<Event>) = Unit
-        override fun getPendingRequests():List<Request>? = emptyList()
-        override fun close() = Unit
-    }
-    data class Event(val data:Int)
-    data class Request(val data:Int)
 }
