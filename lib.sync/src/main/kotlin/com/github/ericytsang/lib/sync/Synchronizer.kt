@@ -12,6 +12,16 @@ class Synchronizer<Event,Request>(
         Closeable
 {
     private var state:State<Event,Request> = Opened(master,threadFactory)
+        set(value)
+        {
+            check(stateAccess.isHeldByCurrentThread)
+            field = value
+        }
+        get()
+        {
+            check(stateAccess.isHeldByCurrentThread)
+            return field
+        }
     private val stateAccess = ReentrantLock()
     fun add(slave:Slave<Event,Request>) = stateAccess.withLock {state.add(slave)}
     fun rm(slave:Slave<Event,Request>) = stateAccess.withLock {state.rm(slave)}
@@ -33,14 +43,14 @@ class Synchronizer<Event,Request>(
         private val master:Master<Event,Request> = SynchronizedMaster(_master)
 
         private val slavesAccess = ReentrantLock()
-        private val slaves = mutableMapOf<Slave<Event,Request>,Slave<Event,Request>>()
+        private val slaves = mutableMapOf<Slave<Event,Request>,SlaveWithWorker>()
             get()
             {
                 check(slavesAccess.isHeldByCurrentThread)
                 return field
             }
 
-        private val masterWorker = threadFactory.newThread()
+        private val masterWorker:Thread = threadFactory.newThread()
         {
             while (true)
             {
@@ -50,12 +60,12 @@ class Synchronizer<Event,Request>(
                 // broadcast events to slaves
                 slavesAccess
                         .withLock {slaves.map {it.value}}
-                        .forEach {it.apply(events)}
+                        .forEach {it.slave.apply(events)}
             }
-            slavesAccess.withLock()
-            {
-                slaves.values.toList().forEach {rm(it)}
-            }
+            stateAccess.withLock {state = this@Synchronizer.Closed()}
+            slavesAccess
+                    .withLock {slaves.map {it.value}}
+                    .forEach {it.close()}
         }
 
         init
@@ -66,36 +76,56 @@ class Synchronizer<Event,Request>(
 
         override fun add(slave:Slave<Event,Request>):Unit = slavesAccess.withLock()
         {
-            val initializationEvents = master.generateSnapshot()?:return@withLock close()
+            val initializationEvents = master.generateSnapshot()
+                    ?:return
 
             // throw exception if slave already added
             require(slave !in slaves)
 
             // register the new slave
-            slaves[slave] = slave
+            val newSlave = SlaveWithWorker(slave)
+            slaves[slave] = newSlave
 
             // send the new slave initialization ticks while we have the lock
-            slave.apply(initializationEvents)
+            newSlave.slave.apply(initializationEvents)
+
+            // start processing requests from this slave
+            newSlave.worker.start()
         }
 
-        override fun rm(slave:Slave<Event,Request>):Unit = slavesAccess.withLock()
+        override fun rm(slave:Slave<Event,Request>)
         {
-            // get slave from set
-            val existingEntry = slaves[slave]
-
-            // remove, and tell slave that it is over, and wait for thread to stop
-            if (existingEntry != null)
-            {
-                slaves.remove(slave)
-                existingEntry.close()
-            }
+            slavesAccess.withLock {slaves[slave]}?.close()
         }
 
         override fun close()
         {
-            state = this@Synchronizer.Closed()
             master.close()
             masterWorker.join()
+        }
+
+        private inner class SlaveWithWorker(
+                val slave:Slave<Event, Request>)
+            :Closeable
+        {
+            val worker:Thread = threadFactory.newThread()
+            {
+                while (true)
+                {
+                    // get pending events to broadcast to slaves
+                    val requests = slave.getPendingRequests()?:break
+
+                    // send requests to master
+                    master.process(requests)
+                }
+                slavesAccess.withLock {slaves.remove(slave)}
+            }
+
+            override fun close()
+            {
+                slave.close()
+                worker.join()
+            }
         }
     }
 

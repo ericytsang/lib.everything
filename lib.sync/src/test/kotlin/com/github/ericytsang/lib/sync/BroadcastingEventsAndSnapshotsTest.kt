@@ -1,5 +1,7 @@
 package com.github.ericytsang.lib.sync
 
+import com.github.ericytsang.lib.testutils.TestUtils
+import org.junit.After
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -9,7 +11,6 @@ import org.mockito.Mockito.verify
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ThreadFactory
 import kotlin.concurrent.thread
-import kotlin.test.assertEquals
 
 class BroadcastingEventsAndSnapshotsTest
 {
@@ -28,16 +29,10 @@ class BroadcastingEventsAndSnapshotsTest
         }
     })
 
-    @Test
-    fun can_use_multiple_thenAnswer_calls()
+    @After
+    fun teardown()
     {
-        val mock = mock(CharSequence::class.java)
-        `when`(mock.length)
-                .thenAnswer {5}
-                .thenAnswer {6}
-        assertEquals(mock.length,5)
-        assertEquals(mock.length,6)
-        assertEquals(mock.length,6)
+        TestUtils.assertAllWorkerThreadsDead()
     }
 
     @Test
@@ -53,6 +48,13 @@ class BroadcastingEventsAndSnapshotsTest
     {
         `when`(master.getPendingEvents()).thenReturn(null)
         `when`(master.generateSnapshot()).thenReturn(events)
+        for (slave in slaves)
+        {
+            `when`(slave.close()).thenAnswer()
+            {
+                `when`(slave.getPendingRequests()).thenReturn(null)
+            }
+        }
 
         // connect slaves to the fixture
         slaves.forEach {fixture.add(it)}
@@ -82,6 +84,13 @@ class BroadcastingEventsAndSnapshotsTest
         `when`(master.getPendingEvents())
                 .thenReturn(events)
                 .thenReturn(null)
+        for (slave in slaves)
+        {
+            `when`(slave.close()).thenAnswer()
+            {
+                `when`(slave.getPendingRequests()).thenReturn(null)
+            }
+        }
 
         // connect slaves to the fixture
         slaves.forEach {fixture.add(it)}
