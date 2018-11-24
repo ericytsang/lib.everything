@@ -18,13 +18,14 @@ interface Master<Event,Request>:Closeable
     fun generateSnapshot():List<Event>?
 
     /**
-     * process all the requests received from the [Slave]s.
+     * process [requests] which have been received from the [Slave]s.
      */
     fun process(requests:List<Request>)
 
     /**
-     * kindly asks [Master] to shut down, and return null from
-     * [getPendingEvents] in the near future.
+     * called when [Synchronizer.close] is called. when this is called, all
+     * blocked and future calls to [getPendingEvents] and [generateSnapshot]
+     * should immediately return null.
      */
     override fun close()
 }

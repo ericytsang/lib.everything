@@ -5,58 +5,17 @@ import java.util.concurrent.ThreadFactory
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class Synchronizer<Event,Message>(
-        master:Master<Event,Message>,
+class Synchronizer<Event,Request>(
+        master:Master<Event,Request>,
         threadFactory:ThreadFactory)
     :
         Closeable
 {
-    private var state:State<Event,Message> = Opened(master,threadFactory)
+    private var state:State<Event,Request> = Opened(master,threadFactory)
     private val stateAccess = ReentrantLock()
-    fun add(slave:Slave<Event,Message>) = stateAccess.withLock {state.add(slave)}
-    fun rm(slave:Slave<Event,Message>) = stateAccess.withLock {state.rm(slave)}
+    fun add(slave:Slave<Event,Request>) = stateAccess.withLock {state.add(slave)}
+    fun rm(slave:Slave<Event,Request>) = stateAccess.withLock {state.rm(slave)}
     override fun close() = stateAccess.withLock {state.close()}
-
-    data class SlaveEntry<Event,Message>(
-            private val slave:Slave<Event,Message>,
-            val threadFactory:ThreadFactory,
-            val master:Master<Event,Message>)
-        :
-            Closeable,
-            Slave<Event,Message> by slave
-    {
-        val worker = threadFactory.newThread()
-        {
-            do
-            {
-                val messages = slave.getPendingRequests()
-                if (!isClosed)
-                {
-                    master.process(messages ?: emptyList())
-                }
-            }
-            while (!isClosed && messages != null)
-            val hostIdentifier = if (isClosed) "local" else "remote"
-            Throwable("worker ending. closed by $hostIdentifier host").printStackTrace(System.out)
-        }
-
-        init
-        {
-            worker.name = ::worker.name
-        }
-
-        override fun hashCode() = slave.hashCode()
-        override fun equals(other:Any?) = slave == other
-
-        var isClosed = false
-        override fun close()
-        {
-            Throwable("close() called by local host").printStackTrace(System.out)
-            isClosed = true
-            slave.close()
-            worker.join()
-        }
-    }
 
     private interface State<Event,Message>
     {
@@ -65,25 +24,38 @@ class Synchronizer<Event,Message>(
         fun close()
     }
 
-    private inner class Opened<Event,Message>(
-            val master:Master<Event,Message>,
+    private inner class Opened(
+            _master:Master<Event,Request>,
             val threadFactory:ThreadFactory)
         :
-            State<Event,Message>
+            State<Event,Request>
     {
-        private val slaves = mutableMapOf<Slave<Event,Message>,SlaveEntry<Event,Message>>()
+        private val master:Master<Event,Request> = SynchronizedMaster(_master)
+
         private val slavesAccess = ReentrantLock()
+        private val slaves = mutableMapOf<Slave<Event,Request>,Slave<Event,Request>>()
+            get()
+            {
+                check(slavesAccess.isHeldByCurrentThread)
+                return field
+            }
 
         private val masterWorker = threadFactory.newThread()
         {
-            do
+            while (true)
             {
-                val events = master.getPendingEvents()
+                // get pending events to broadcast to slaves
+                val events = master.getPendingEvents() ?: break
+
+                // broadcast events to slaves
                 slavesAccess
                         .withLock {slaves.map {it.value}}
                         .forEach {it.apply(events)}
             }
-            while (events != null)
+            slavesAccess.withLock()
+            {
+                slaves.values.toList().forEach {rm(it)}
+            }
         }
 
         init
@@ -92,49 +64,72 @@ class Synchronizer<Event,Message>(
             masterWorker.start()
         }
 
-        override fun add(slave:Slave<Event,Message>):Unit = slavesAccess.withLock()
+        override fun add(slave:Slave<Event,Request>):Unit = slavesAccess.withLock()
         {
+            val initializationEvents = master.generateSnapshot()?:return@withLock close()
+
             // throw exception if slave already added
-            require(slave !in slaves.keys)
+            require(slave !in slaves)
 
             // register the new slave
-            val slaveEntry = SlaveEntry(slave,threadFactory,master)
-            slaves[slave] = slaveEntry
-            slaveEntry.worker.start()
+            slaves[slave] = slave
 
             // send the new slave initialization ticks while we have the lock
-            slaveEntry.apply(master.generateSnapshot())
+            slave.apply(initializationEvents)
         }
 
-        override fun rm(slave:Slave<Event,Message>):Unit = slavesAccess.withLock()
+        override fun rm(slave:Slave<Event,Request>):Unit = slavesAccess.withLock()
         {
-            // remove the slave
-            val existingEntry = slaves.remove(slave)
+            // get slave from set
+            val existingEntry = slaves[slave]
 
-            // tell slave that it is over, and wait for thread to stop
+            // remove, and tell slave that it is over, and wait for thread to stop
             if (existingEntry != null)
             {
-                existingEntry.apply(null)
+                slaves.remove(slave)
                 existingEntry.close()
             }
         }
 
         override fun close()
         {
-            slavesAccess.withLock()
-            {
-                slaves.keys.toList().forEach {rm(it)}
-                state = this@Synchronizer.Closed()
-                master.close()
-            }
+            state = this@Synchronizer.Closed()
+            master.close()
             masterWorker.join()
         }
     }
 
-    private inner class Closed<Event,Message>:State<Event,Message>
+    private inner class Closed:State<Event,Request>
     {
-        override fun add(slave:Slave<Event,Message>) = throw IllegalStateException("closed")
-        override fun rm(slave:Slave<Event,Message>) = throw IllegalStateException("closed")
-        override fun close() = throw IllegalStateException("closed")
+        override fun add(slave:Slave<Event,Request>) = throw IllegalStateException("closed")
+        override fun rm(slave:Slave<Event,Request>) = throw IllegalStateException("closed")
+        override fun close() = Throwable("already closed. redundant call to close").printStackTrace(System.out)
+    }
+
+    private inner class SynchronizedMaster(
+            private val delegate:Master<Event,Request>)
+        :Master<Event,Request>
+    {
+        private val lock = ReentrantLock()
+
+        override fun getPendingEvents():List<Event>? = lock.withLock()
+        {
+            delegate.getPendingEvents()
+        }
+
+        override fun generateSnapshot():List<Event>? = lock.withLock()
+        {
+            delegate.generateSnapshot()
+        }
+
+        override fun process(requests:List<Request>) = lock.withLock()
+        {
+            delegate.process(requests)
+        }
+
+        override fun close() = lock.withLock()
+        {
+            delegate.close()
+        }
     }
 }

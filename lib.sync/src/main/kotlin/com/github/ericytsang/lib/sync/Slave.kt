@@ -6,9 +6,8 @@ interface Slave<Event,Request>:Closeable
 {
     /**
      * updates the state of this [Slave] from the [events].
-     * null indicates that the [Master] has reached EOF.
      */
-    fun apply(events:List<Event>?)
+    fun apply(events:List<Event>)
 
     /**
      * returns all the pending [Request] objects received from this [Slave].
@@ -18,8 +17,8 @@ interface Slave<Event,Request>:Closeable
     fun getPendingRequests():List<Request>?
 
     /**
-     * kindly asks [Slave] to shut down, and return null from [getPendingRequests] in
-     * the near future.
+     * kindly asks [Slave] to shut down, and return null from
+     * [getPendingRequests] in the near future.
      */
     override fun close()
 }
