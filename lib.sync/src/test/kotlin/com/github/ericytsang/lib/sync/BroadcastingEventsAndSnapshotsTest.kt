@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadFactory
 import kotlin.concurrent.thread
 import kotlin.test.assertEquals
 
-class SynchronizerTest
+class BroadcastingEventsAndSnapshotsTest
 {
     private val events = (0..3).map {Event(it)}
 
