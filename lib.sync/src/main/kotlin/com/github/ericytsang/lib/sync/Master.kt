@@ -2,20 +2,13 @@ package com.github.ericytsang.lib.sync
 
 import java.io.Closeable
 
-interface Master<Event,Request>:Closeable
+interface Master<Request>:Closeable
 {
     /**
-     * returns the [Event] objects to broadcast to other [Slave] objects.
-     * returns null upon EOF (no more [Event] objects).
-     * should block until [Event]s become available.
+     * asks [Master] to call [Synchronizer.broadcastSnapshot] in the near
+     * future with events to bring new clients up to speed.
      */
-    fun getPendingEvents():List<Event>?
-
-    /**
-     * returns the [Event] objects to broadcast to newly added [Slave] objects
-     * to bring them up to speed.
-     */
-    fun generateSnapshot():List<Event>?
+    fun requestSnapshot()
 
     /**
      * process [requests] which have been received from the [Slave]s.

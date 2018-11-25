@@ -1,9 +1,8 @@
 package com.github.ericytsang.lib.sync
 
-open class MockMaster:Master<Event,Request>
+open class MockMaster:Master<Request>
 {
-    override fun getPendingEvents():List<Event>? = emptyList()
-    override fun generateSnapshot():List<Event>? = emptyList()
+    override fun requestSnapshot() = Unit
     override fun process(requests:List<Request>) = Unit
     override fun close() = Unit
 }
