@@ -8,9 +8,4 @@ dependencies {
 
     // test
     testCompile(project(":lib.testutils"))
-
-    // project dependencies
-    compile(project(":lib.liablethread"))
-    testCompile(project(":lib.concurrent"))
-    testCompile(project(":lib.simplepipestream"))
 }
