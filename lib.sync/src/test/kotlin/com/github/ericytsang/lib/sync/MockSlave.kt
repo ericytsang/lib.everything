@@ -4,5 +4,4 @@ open class MockSlave:Slave<Event,Request>
 {
     override fun apply(events:List<Event>) = Unit
     override fun getPendingRequests():List<Request>? = emptyList()
-    override fun close() = Unit
 }
