@@ -26,6 +26,7 @@ import android.text.Spanned
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -87,6 +88,11 @@ val Context.vibrator:Vibrator get()
 val Context.accessibilityManager:AccessibilityManager get()
 {
     return getSystemServiceCompat(Context.ACCESSIBILITY_SERVICE)
+}
+
+val Context.windowManager:WindowManager get()
+{
+    return getSystemServiceCompat(Context.WINDOW_SERVICE)
 }
 
 inline fun <reified SystemService> Context.getSystemServiceCompat(key:String):SystemService
