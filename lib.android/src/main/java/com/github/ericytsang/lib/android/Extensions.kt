@@ -24,6 +24,8 @@ import android.support.v4.content.ContextCompat
 import android.text.Html
 import android.text.Spanned
 import android.util.Log
+import android.view.Display
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -252,4 +254,24 @@ val PreferenceGroup.descendants:Sequence<Preference> get()
             else -> sequenceOf()
         }
     }
+}
+
+val Display.screenOrientation:Orientation get()
+{
+    return when (rotation)
+    {
+        Surface.ROTATION_0 -> Orientation.REGULAR_PORTRAIT
+        Surface.ROTATION_180  -> Orientation.REVERSE_PORTRAIT
+        Surface.ROTATION_90 -> Orientation.REGULAR_LANDSCAPE
+        Surface.ROTATION_270  -> Orientation.REVERSE_LANDSCAPE
+        else -> throw Exception()
+    }
+}
+
+enum class Orientation
+{
+    REGULAR_PORTRAIT,
+    REVERSE_PORTRAIT,
+    REGULAR_LANDSCAPE,
+    REVERSE_LANDSCAPE,
 }
