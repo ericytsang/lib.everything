@@ -9,6 +9,7 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.github.ericytsang.lib.android.alarmManager
 import com.github.ericytsang.lib.android.forceExhaustiveWhen
 import com.github.ericytsang.lib.android.setExactAndAllowWhileIdleCompat
@@ -102,7 +103,7 @@ class WorkScheduler(
         }
     }
 
-    private class CustomWorker:Worker()
+    private class CustomWorker(context:Context,workerParams:WorkerParameters):Worker(context,workerParams)
     {
         override fun doWork():Result
         {
@@ -113,7 +114,7 @@ class WorkScheduler(
                     .getString(FUNCTION_BASE64_ENCODED_DATA)!!
                     .decodeFromString<ScheduledWork<Serializable>>()
             function.doWork(applicationContext,input)
-            return Result.SUCCESS
+            return Result.success()
         }
     }
 

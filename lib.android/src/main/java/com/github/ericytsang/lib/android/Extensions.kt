@@ -19,8 +19,6 @@ import android.os.Vibrator
 import android.preference.Preference
 import android.preference.PreferenceGroup
 import android.preference.PreferenceManager
-import android.support.v4.app.AlarmManagerCompat
-import android.support.v4.content.ContextCompat
 import android.text.Html
 import android.text.Spanned
 import android.util.Log
@@ -30,6 +28,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import androidx.core.app.AlarmManagerCompat
+import androidx.core.content.ContextCompat
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future

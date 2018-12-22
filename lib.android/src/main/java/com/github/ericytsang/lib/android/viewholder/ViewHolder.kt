@@ -5,10 +5,10 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.LayoutTransition
 import android.animation.ValueAnimator
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.recyclerview.widget.RecyclerView
 import com.github.ericytsang.lib.android.descendants
 import com.github.ericytsang.lib.android.view.LayoutParamsGetter
 import com.github.ericytsang.lib.android.view.LayoutParamsSetter

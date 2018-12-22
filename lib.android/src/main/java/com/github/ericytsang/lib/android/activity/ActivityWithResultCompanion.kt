@@ -1,7 +1,7 @@
 package com.github.ericytsang.lib.android.activity
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import java.io.Serializable
 
 abstract class ActivityWithResultCompanion<Activity:AppCompatActivity,ActivityParams:Serializable,ActivityResult:Serializable>

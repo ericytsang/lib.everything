@@ -1,9 +1,11 @@
 package com.github.ericytsang.lib.android.worker
 
+import android.content.Context
 import android.util.Base64
 import androidx.work.Data
 import androidx.work.WorkRequest
 import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.github.ericytsang.lib.domainobjects.serialize
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
@@ -14,8 +16,10 @@ import kotlin.reflect.full.cast
 private val INPUT_DATA_BASE64_ENCODED_DATA = WorkerWithInputData::class.qualifiedName+"INPUT_DATA_BASE64_ENCODED_DATA"
 
 abstract class WorkerWithInputData<Input:Serializable>(
-        val inputType:KClass<Input>)
-    :Worker()
+        val inputType:KClass<Input>,
+        val context:Context,
+        val workParams:WorkerParameters)
+    :Worker(context,workParams)
 {
     final override fun doWork():Result
     {

@@ -1,6 +1,6 @@
 package com.github.ericytsang.lib.android.recyclerview
 
-import android.arch.paging.ItemKeyedDataSource
+import androidx.paging.ItemKeyedDataSource
 import com.github.ericytsang.lib.awaitable.Awaitable
 import com.github.ericytsang.lib.awaitable.SimpleAwaiter
 import com.github.ericytsang.lib.datastore.Index
