@@ -20,11 +20,14 @@ class Raii<Raii:Closeable>:Closeable,ReadOnlyRaii<Raii>
     private val lock = ReentrantLock()
     private val unblockWhenObjIsInitialized = lock.newCondition()
 
+    private val listeners = mutableSetOf<ReadOnlyRaii.Listener>()
+
     fun open(raiiInstanceFactory:()->Raii):Raii = lock.withLock()
     {
         close()
         val raiiObject = raiiInstanceFactory()
         obj = raiiObject
+        listeners.forEach {it.onAssigned()}
         unblockWhenObjIsInitialized.signalAll()
         return raiiObject
     }
@@ -36,9 +39,10 @@ class Raii<Raii:Closeable>:Closeable,ReadOnlyRaii<Raii>
 
     fun getAndClose():Raii? = lock.withLock()
     {
-        obj?.close()
         val raiiObject = obj
         obj = null
+        listeners.forEach {it.onAssigned()}
+        raiiObject?.close()
         return raiiObject
     }
 
@@ -65,6 +69,16 @@ class Raii<Raii:Closeable>:Closeable,ReadOnlyRaii<Raii>
     {
         block(obj?:return@withLock null)
     }
+
+    override fun listen(listener:ReadOnlyRaii.Listener):Closeable = lock.withLock()
+    {
+        listeners += listener
+        listener.onAssigned()
+        Closeable()
+        {
+            listeners -= listener
+        }
+    }
 }
 
 interface ReadOnlyRaii<Raii:Closeable>
@@ -72,4 +86,31 @@ interface ReadOnlyRaii<Raii:Closeable>
     val obj:Raii?
     fun blockingGetNonNullObj():Raii
     fun <Return:Any> doIfOpen(block:(Raii)->Return):Return?
+    fun listen(listener:Listener):Closeable
+
+    interface Listener
+    {
+        fun onAssigned()
+    }
+}
+
+fun <Raii:Closeable> ReadOnlyRaii<Raii>.listen(listener:()->Unit):Closeable
+{
+    val listenerObject = object:ReadOnlyRaii.Listener
+    {
+        override fun onAssigned()
+        {
+            listener()
+        }
+    }
+    return listen(listenerObject)
+}
+
+fun Iterable<ReadOnlyRaii<*>>.listen(listener:()->Unit):Closeable
+{
+    val closeables = map {it.listen(listener)}
+    return Closeable()
+    {
+        closeables.forEach {it.close()}
+    }
 }

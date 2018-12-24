@@ -8,6 +8,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import java.io.Closeable
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -81,5 +82,96 @@ class RaiiTest
         raii.open {closeable}
         t.join()
         assertSame(closeable,q.take())
+    }
+
+    @Test
+    fun listener_triggered_after_open()
+    {
+        val q = LinkedBlockingQueue<Int>()
+        val raii = Raii<Closeable>()
+        raii.listen {q += 2}
+        raii.open {
+            q += 1
+            Closeable {q += 3}
+        }
+        assertEquals(
+                listOf(2,2,1,2),
+                generateSequence {q.poll()}.toList())
+    }
+
+    @Test
+    fun listener_triggered_after_open_and_before_close()
+    {
+        val q = LinkedBlockingQueue<Int>()
+        val raii = Raii<Closeable>()
+        assertEquals(listOf(),generateSequence {q.poll()}.toList())
+
+        raii.listen {
+            q += if (raii.obj != null)
+            {
+                2
+            }
+            else
+            {
+                3
+            }
+        }
+        assertEquals(generateSequence {q.poll()}.toList(),listOf(3))
+
+        raii.open {
+            q += 1
+            Closeable {q += 4}
+        }
+        assertEquals(generateSequence {q.poll()}.toList(),listOf(3,1,2))
+
+        raii.close()
+        assertEquals(generateSequence {q.poll()}.toList(),listOf(3,4))
+    }
+
+    @Test
+    fun listener_on_multiple_raiis()
+    {
+        val q = LinkedBlockingQueue<Int>()
+        val raii1 = Raii<Closeable>()
+        val raii2 = Raii<Closeable>()
+        assertEquals(listOf(),generateSequence {q.poll()}.toList())
+
+        listOf(raii1,raii2).listen {
+            q += if (raii1.obj != null)
+            {
+                1
+            }
+            else
+            {
+                2
+            }
+            q += if (raii2.obj != null)
+            {
+                3
+            }
+            else
+            {
+                4
+            }
+        }
+        assertEquals(listOf(2,4,2,4),generateSequence {q.poll()}.toList())
+
+        raii1.open {
+            q += 5
+            Closeable {q += 6}
+        }
+        assertEquals(listOf(2,4,5,1,4),generateSequence {q.poll()}.toList())
+
+        raii2.open {
+            q += 7
+            Closeable {q += 8}
+        }
+        assertEquals(listOf(1,4,7,1,3),generateSequence {q.poll()}.toList())
+
+        raii1.close()
+        assertEquals(listOf(2,3,6),generateSequence {q.poll()}.toList())
+
+        raii2.close()
+        assertEquals(listOf(2,4,8),generateSequence {q.poll()}.toList())
     }
 }
