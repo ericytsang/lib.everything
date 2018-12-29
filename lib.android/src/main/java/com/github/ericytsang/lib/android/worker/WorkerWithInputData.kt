@@ -51,7 +51,7 @@ fun Serializable.encodeToString():String
 }
 
 // todo: move to library
-inline fun <reified R> String.decodeFromString():R
+inline fun <reified R:Serializable> String.decodeFromString():R
 {
     return Base64.decode(this,0)
             .let {ByteArrayInputStream(it)}
