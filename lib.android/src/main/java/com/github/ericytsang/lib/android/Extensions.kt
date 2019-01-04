@@ -268,10 +268,16 @@ val Display.screenOrientation:Orientation get()
     }
 }
 
-enum class Orientation
+enum class Orientation(val hvOrientation:HvOrientation)
 {
-    REGULAR_PORTRAIT,
-    REVERSE_PORTRAIT,
-    REGULAR_LANDSCAPE,
-    REVERSE_LANDSCAPE,
+    REGULAR_PORTRAIT(HvOrientation.VERTICAL),
+    REVERSE_PORTRAIT(HvOrientation.VERTICAL),
+    REGULAR_LANDSCAPE(HvOrientation.HORIZONTAL),
+    REVERSE_LANDSCAPE(HvOrientation.HORIZONTAL),
+}
+
+enum class HvOrientation
+{
+    VERTICAL,
+    HORIZONTAL,
 }
