@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.android.activity
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import java.io.Serializable
@@ -12,10 +13,15 @@ abstract class ActivityWithResultCompanion<Activity:AppCompatActivity,ActivityPa
     {
         context.startActivityForResult(toIntent(params).intent(context),requestCode)
     }
+    fun toIntent(context:Context,result:ActivityResult):Intent
+    {
+        val intent = Intent(context,contextClass)
+        intent.putExtra(activityResultExtraKey,result)
+        return intent
+    }
     protected fun setOnActivityResult(activity:Activity,result:ActivityResult)
     {
-        val intent = Intent(activity,contextClass)
-        intent.putExtra(activityResultExtraKey,result)
+        val intent = toIntent(activity,result)
         activity.setResult(android.app.Activity.RESULT_OK,intent)
     }
     fun parseOnActivityResult(intent:Intent):ActivityResult

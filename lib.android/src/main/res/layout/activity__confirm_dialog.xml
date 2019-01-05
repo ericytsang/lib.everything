@@ -7,18 +7,11 @@
 
     <TextView
         android:id="@+id/textview"
-        android:labelFor="@id/edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="4dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"/>
-
-    <EditText
-        android:id="@+id/edittext"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
     <LinearLayout
         style="?android:attr/buttonBarButtonStyle"
