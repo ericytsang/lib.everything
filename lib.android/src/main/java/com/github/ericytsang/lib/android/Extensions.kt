@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Point
 import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -280,4 +281,17 @@ enum class HvOrientation
 {
     VERTICAL,
     HORIZONTAL,
+}
+
+/**
+ * returns the screen dimensions of the phone as it would be when in portrait mode.
+ */
+val Display.orientationAgnosticScreenDimensions:Point get()
+{
+    val screenDimensInPixels = Point().also {getRealSize(it)}
+    return when (screenOrientation.hvOrientation)
+    {
+        com.github.ericytsang.lib.android.HvOrientation.VERTICAL -> Point(screenDimensInPixels.x,screenDimensInPixels.y)
+        com.github.ericytsang.lib.android.HvOrientation.HORIZONTAL -> Point(screenDimensInPixels.y,screenDimensInPixels.x)
+    }
 }
