@@ -13,18 +13,25 @@ class ConfirmDialogActivity
         ConfirmDialogActivity.Created,
         BaseActivity.NoOpState<ConfirmDialogActivity>>()
 {
-    companion object:ActivityWithResultCompanion<ConfirmDialogActivity,Params,Result>()
+    companion object:ActivityWithResultCompanion<ConfirmDialogActivity,Params<*>,Result<*>>()
     {
         override val contextClass get() = ConfirmDialogActivity::class.java
     }
 
+    enum class ButtonId:Serializable
+    {
+        YES_BUTTON,
+        NO_BUTTON;
+    }
+
     // Params
 
-    data class Params(
+    data class Params<ExtraUserData:Serializable>(
             val title:String?,
             val prompt:String,
             val yesButton:ButtonConfig,
-            val noButton:ButtonConfig)
+            val noButton:ButtonConfig,
+            val extraUserData:ExtraUserData)
         :Serializable
 
     data class ButtonConfig(
@@ -36,16 +43,19 @@ class ConfirmDialogActivity
 
     // Result
 
-    sealed class Result:Serializable
+    sealed class Result<ExtraUserData:Serializable>:Serializable
     {
-        data class ButtonPressed(
-                val pressedButton:ButtonConfig)
+        abstract val extraUserData:ExtraUserData
+        data class ButtonPressed<ExtraUserData:Serializable>(
+                val buttonId:ButtonId,
+                override val extraUserData:ExtraUserData)
             :
-                Result(),
+                Result<ExtraUserData>(),
                 Serializable
-        class Cancelled
+        data class Cancelled<ExtraUserData:Serializable>(
+                override val extraUserData:ExtraUserData)
             :
-                Result(),
+                Result<ExtraUserData>(),
                 Serializable
     }
 
@@ -55,7 +65,7 @@ class ConfirmDialogActivity
 
     class Created(
             val activity:ConfirmDialogActivity,
-            val params:Params)
+            val params:Params<*>)
         :Closeable
     {
         val layout = Layout(activity.findViewById(android.R.id.content))
@@ -67,7 +77,7 @@ class ConfirmDialogActivity
             {
                 activity.title = params.title
             }
-            setOnActivityResult(activity,Result.Cancelled())
+            setOnActivityResult(activity,Result.Cancelled(params.extraUserData))
             layout.textview.text = params.prompt
             layout.button__cancel.text = params.noButton.text
             layout.button__cancel.isEnabled = params.noButton.isEnabled
@@ -75,7 +85,7 @@ class ConfirmDialogActivity
             layout.button__cancel.visibility = params.noButton.visibility
             layout.button__cancel.setOnClickListener()
             {
-                setOnActivityResult(activity,Result.ButtonPressed(params.noButton))
+                setOnActivityResult(activity,Result.ButtonPressed(ButtonId.NO_BUTTON,params.extraUserData))
                 activity.finish()
             }
             layout.button__ok.text = params.yesButton.text
@@ -84,7 +94,7 @@ class ConfirmDialogActivity
             layout.button__ok.visibility = params.yesButton.visibility
             layout.button__ok.setOnClickListener()
             {
-                setOnActivityResult(activity,Result.ButtonPressed(params.yesButton))
+                setOnActivityResult(activity,Result.ButtonPressed(ButtonId.YES_BUTTON,params.extraUserData))
                 activity.finish()
             }
         }

@@ -21,7 +21,7 @@ class TextInputDialogActivity
 
     data class StartParams(val title:String?,val prompt:String?,val text:String):Serializable
 
-    data class ResultParams(val text:String):Serializable
+    data class ResultParams(val text:String,val cancelled:Boolean):Serializable
 
     override fun makeCreated(methodOverload:MethodOverload,contentView:ViewGroup) = Created(this,fromIntent(intent),contentView)
     class Created(
@@ -55,10 +55,10 @@ class TextInputDialogActivity
             layout.edittext.selectAll()
 
             // activity result
-            setOnActivityResult(activity,ResultParams(startParams.text))
+            setOnActivityResult(activity,ResultParams(startParams.text,true))
             layout.button__ok.setOnClickListener()
             {
-                setOnActivityResult(activity,ResultParams(layout.edittext.text?.toString()?:""))
+                setOnActivityResult(activity,ResultParams(layout.edittext.text?.toString()?:"",false))
                 activity.finish()
             }
 
