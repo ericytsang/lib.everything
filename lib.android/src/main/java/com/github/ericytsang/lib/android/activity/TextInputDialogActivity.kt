@@ -52,6 +52,7 @@ class TextInputDialogActivity
 
             // edittext
             layout.edittext.setText(startParams.text)
+            layout.edittext.requestFocus()
             layout.edittext.selectAll()
 
             // activity result
