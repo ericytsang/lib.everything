@@ -31,6 +31,8 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.content.ContextCompat
+import com.github.ericytsang.lib.android.HvOrientation.*
+import java.io.Serializable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -271,10 +273,10 @@ val Display.screenOrientation:Orientation get()
 
 enum class Orientation(val hvOrientation:HvOrientation)
 {
-    REGULAR_PORTRAIT(HvOrientation.VERTICAL),
-    REVERSE_PORTRAIT(HvOrientation.VERTICAL),
-    REGULAR_LANDSCAPE(HvOrientation.HORIZONTAL),
-    REVERSE_LANDSCAPE(HvOrientation.HORIZONTAL),
+    REGULAR_PORTRAIT(VERTICAL),
+    REVERSE_PORTRAIT(VERTICAL),
+    REGULAR_LANDSCAPE(HORIZONTAL),
+    REVERSE_LANDSCAPE(HORIZONTAL),
 }
 
 enum class HvOrientation
@@ -286,12 +288,25 @@ enum class HvOrientation
 /**
  * returns the screen dimensions of the phone as it would be when in portrait mode.
  */
-val Display.orientationAgnosticScreenDimensions:Point get()
+fun Display.realScreenDimensionsForOrientation(hvOrientation:HvOrientation):RealScreenSize
 {
     val screenDimensInPixels = Point().also {getRealSize(it)}
     return when (screenOrientation.hvOrientation)
     {
-        com.github.ericytsang.lib.android.HvOrientation.VERTICAL -> Point(screenDimensInPixels.x,screenDimensInPixels.y)
-        com.github.ericytsang.lib.android.HvOrientation.HORIZONTAL -> Point(screenDimensInPixels.y,screenDimensInPixels.x)
+        VERTICAL -> when(hvOrientation)
+        {
+            VERTICAL -> RealScreenSize(screenDimensInPixels.x,screenDimensInPixels.y)
+            HORIZONTAL -> RealScreenSize(screenDimensInPixels.y,screenDimensInPixels.x)
+        }
+        HORIZONTAL -> when(hvOrientation)
+        {
+            VERTICAL -> RealScreenSize(screenDimensInPixels.y,screenDimensInPixels.x)
+            HORIZONTAL -> RealScreenSize(screenDimensInPixels.x,screenDimensInPixels.y)
+        }
     }
 }
+
+data class RealScreenSize(
+        val w:Int,
+        val h:Int)
+    :Serializable
