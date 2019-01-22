@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.raii
 
+import com.github.ericytsang.lib.optional.Opt
 import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -116,5 +117,19 @@ fun Iterable<ReadOnlyRaii<*>>.listen(listener:(ReadOnlyRaii.Listener.Params)->Un
     return Closeable()
     {
         closeables.forEach {it.close()}
+    }
+}
+
+class OptCloser<Wrapped:Closeable>(
+        val opt:Opt<Wrapped>)
+    :Closeable
+{
+    override fun close()
+    {
+        when(opt)
+        {
+            is Opt.Some -> opt.opt.close()
+            is Opt.None -> Unit
+        }
     }
 }
