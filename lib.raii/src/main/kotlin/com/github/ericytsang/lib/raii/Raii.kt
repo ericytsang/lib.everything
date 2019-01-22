@@ -1,7 +1,6 @@
 package com.github.ericytsang.lib.raii
 
 import java.io.Closeable
-import java.io.Serializable
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -68,40 +67,6 @@ class Raii<Raii:Closeable>(initialValue:Raii):ReadOnlyRaii<Raii>
         Closeable()
         {
             listeners -= listener
-        }
-    }
-
-    class Noop<Wrapee:Any>(val wrapee:Wrapee):Closeable
-    {
-        override fun close() = Unit
-    }
-
-    sealed class Opt<Wrapped:Closeable>:Closeable,Serializable
-    {
-        companion object
-        {
-            fun <Wrapped:Closeable> none():Opt<Wrapped>
-            {
-                return None()
-            }
-            fun <Wrapped:Closeable> some(wrapped:Wrapped):Opt<Wrapped>
-            {
-                return Some(wrapped)
-            }
-        }
-        abstract val opt:Wrapped?
-        data class None<Wrapped:Closeable>(
-                val id:Int = 0)
-            :Opt<Wrapped>()
-        {
-            override val opt:Wrapped? get() = null
-            override fun close() = Unit
-        }
-        data class Some<Wrapped:Closeable>(
-                override val opt:Wrapped)
-            :Opt<Wrapped>()
-        {
-            override fun close() = opt.close()
         }
     }
 }
