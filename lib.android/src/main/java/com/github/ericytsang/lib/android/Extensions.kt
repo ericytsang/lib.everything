@@ -157,6 +157,7 @@ fun fromHtml(html:String):Spanned
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         Html.fromHtml(html,Html.FROM_HTML_MODE_LEGACY)
     } else {
+        @Suppress("DEPRECATION")
         Html.fromHtml(html)
     }
 }
@@ -219,6 +220,7 @@ inline fun <reified R:DoLog> R.info(shouldLog:Boolean,log:()->Any?)
     }
 }
 
+@Suppress("UNUSED_PARAMETER","unused")
 inline fun <reified R:NoLog> R.info(shouldLog:Boolean,log:()->Any?)
 {
     // no-op

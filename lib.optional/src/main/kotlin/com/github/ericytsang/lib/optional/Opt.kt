@@ -9,7 +9,6 @@ sealed class Opt<Wrapped:Any>:Serializable
         fun <Wrapped:Any> some(wrapped:Wrapped) = Some(wrapped)
         fun <Wrapped:Any> none() = None<Wrapped>()
         fun <Wrapped:Any> of(wrapped:Wrapped?) = wrapped?.let {some(it)}?:none<Wrapped>()
-        fun <Wrapped:Any> of(wrapped:Wrapped) = some(wrapped)
         fun <Wrapped:Any> of() = none<Wrapped>()
     }
     abstract val opt:Wrapped?
