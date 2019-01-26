@@ -39,7 +39,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     protected abstract fun doGet(context:Context):Value
 
-    fun set(context:Context,value:Value)
+    override fun set(context:Context,value:Value)
     {
         readWriteLock.write()
         {
