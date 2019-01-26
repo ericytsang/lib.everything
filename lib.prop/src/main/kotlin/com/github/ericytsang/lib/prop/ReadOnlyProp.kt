@@ -10,6 +10,11 @@ interface ReadOnlyProp<Context:Any,Value:Any>
     fun get(context:Context):Value
 
     /**
+     * returns the value for this [ReadOnlyProp]; null if it is being unset.
+     */
+    fun getNullable(context:Context):Value?
+
+    /**
      * will call [onChanged] before returning.
      * will call [onChanged] when [ReadOnlyProp]'s value has changed.
      * returns a [Closeable] that will unsubscribe [onChanged] from change
@@ -26,14 +31,14 @@ interface ReadOnlyProp<Context:Any,Value:Any>
 
     sealed class Change<Context:Any,Value:Any>
     {
-        abstract val changedProperty:ReadOnlyProp<Context,Value>
+        abstract val source:ReadOnlyProp<Context,Value>
         abstract val context:Context
         abstract val oldValue:Value
         abstract val newValue:Value
         abstract val nowValue:Value
 
         data class Before<Context:Any,Value:Any>(
-                override val changedProperty:ReadOnlyProp<Context,Value>,
+                override val source:ReadOnlyProp<Context,Value>,
                 override val context:Context,
                 override val oldValue:Value,
                 override val newValue:Value)
@@ -43,7 +48,7 @@ interface ReadOnlyProp<Context:Any,Value:Any>
         }
 
         data class After<Context:Any,Value:Any>(
-                override val changedProperty:ReadOnlyProp<Context,Value>,
+                override val source:ReadOnlyProp<Context,Value>,
                 override val context:Context,
                 override val oldValue:Value,
                 override val newValue:Value)

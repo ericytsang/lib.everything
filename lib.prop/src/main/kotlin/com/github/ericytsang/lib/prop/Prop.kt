@@ -12,12 +12,28 @@ abstract class Prop<Context:Any,Value:Any>:ReadOnlyProp<Context,Value>
 {
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
+    private val valueIsBeingUnset = ReentrantLock()
 
-    override fun get(context:Context):Value
+    final override fun get(context:Context):Value
     {
         return readWriteLock.read()
         {
             doGet(context)
+        }
+    }
+
+    final override fun getNullable(context:Context):Value?
+    {
+        return readWriteLock.write()
+        {
+            if (valueIsBeingUnset.isHeldByCurrentThread)
+            {
+                null
+            }
+            else
+            {
+                doGet(context)
+            }
         }
     }
 
@@ -27,12 +43,15 @@ abstract class Prop<Context:Any,Value:Any>:ReadOnlyProp<Context,Value>
     {
         readWriteLock.write()
         {
-            check(notifyingListenersLock.isLocked.not()) {throw RecursiveSettingIsNotAllowedException()}
+            check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
             notifyingListenersLock.withLock()
             {
                 val oldValue = doGet(context)
                 val before = ReadOnlyProp.Change.Before(this,context,oldValue,value)
-                listeners.forEach {it(before)}
+                valueIsBeingUnset.withLock()
+                {
+                    listeners.forEach {it(before)}
+                }
 
                 doSet(context,value)
 

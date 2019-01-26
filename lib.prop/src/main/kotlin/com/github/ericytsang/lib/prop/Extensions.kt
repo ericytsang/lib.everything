@@ -5,6 +5,9 @@ import java.io.Closeable
 val <Value:Any> ReadOnlyProp<Unit,Value>.value:Value
     get() = get(Unit)
 
+val <Value:Any> ReadOnlyProp<Unit,Value>.nullableValue:Value?
+    get() = getNullable(Unit)
+
 var <Value:Any> Prop<Unit,Value>.value:Value
     get() = get(Unit)
     set(value) { set(Unit,value) }

@@ -1,7 +1,7 @@
 package com.github.ericytsang.lib.prop
 
+import com.github.ericytsang.lib.optional.Opt
 import org.junit.Test
-import java.lang.IllegalStateException
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -155,6 +155,20 @@ class DataPropTest
 
         dataProp.value
         assert(getCallsSoFar().isEmpty())
+    }
+
+    @Test
+    fun nullableValue_is_null_when_being_unset_and_non_null_when_being_set()
+    {
+        val dataProp = DataProp(1)
+        val nullableValues = LinkedBlockingQueue<Opt<Int>>()
+        fun getCallsSoFar() = generateSequence {nullableValues.poll()}.map {it.opt}.toList()
+
+        dataProp.listen {nullableValues += Opt.of(dataProp.nullableValue)}
+        assert(getCallsSoFar().isEmpty())
+
+        dataProp.value = 2
+        assertEquals(getCallsSoFar(),listOf(null,2))
     }
 
     @Test
