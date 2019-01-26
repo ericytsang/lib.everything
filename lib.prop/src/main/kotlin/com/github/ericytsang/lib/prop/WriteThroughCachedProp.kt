@@ -1,6 +1,8 @@
 package com.github.ericytsang.lib.prop
 
-class WriteThroughCachedProp<Context:Any,Value:Any>(val underlyingProp:Prop<Context,Value>):Prop<Context,Value>()
+class WriteThroughCachedProp<Context:Any,Value:Any>(
+        val underlyingProp:MutableProp<Context,Value>)
+    :Prop<Context,Value>()
 {
     private var isInitialized = false
     private var field:Value? = null

@@ -8,7 +8,7 @@ import kotlin.concurrent.read
 import kotlin.concurrent.withLock
 import kotlin.concurrent.write
 
-abstract class Prop<Context:Any,Value:Any>:ReadOnlyProp<Context,Value>
+abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 {
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
