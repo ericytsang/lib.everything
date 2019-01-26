@@ -46,18 +46,18 @@ abstract class Prop<Context:Any,Value:Any>:ReadOnlyProp<Context,Value>
             check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
             notifyingListenersLock.withLock()
             {
-                val oldValue = doGet(context)
-                val before = ReadOnlyProp.Change.Before(this,context,oldValue,value)
+                val oldValue = lazy {doGet(context)}
+                val before = lazy {ReadOnlyProp.Change.Before(this,context,oldValue.value,value)}
                 valueIsBeingUnset.withLock()
                 {
-                    listeners.forEach {it(before)}
+                    listeners.forEach {it(before.value)}
                 }
 
                 doSet(context,value)
 
-                val newValue = doGet(context)
-                val after = ReadOnlyProp.Change.After(this,context,oldValue,newValue)
-                listeners.forEach {it(after)}
+                val newValue = lazy {doGet(context)}
+                val after = lazy {ReadOnlyProp.Change.After(this,context,oldValue.value,newValue.value)}
+                listeners.forEach {it(after.value)}
             }
         }
     }
