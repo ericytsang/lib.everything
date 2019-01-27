@@ -12,9 +12,10 @@ var <Value:Any> MutableProp<Unit,Value>.value:Value
     get() = get(Unit)
     set(value) { set(Unit,value) }
 
-fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp.Change<*,*>)->Unit):Closeable
+fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
-    val closeables = map {it.listen(onChanged)}
+    onChanged(null)
+    val closeables = map {it.listen {change -> onChanged(change.source)}}
     return Closeable {closeables.forEach {it.close()}}
 }
 
