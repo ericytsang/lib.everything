@@ -8,8 +8,8 @@ abstract class ContextCompanionWithStart<Contextt:Context,Params:Serializable>(
         startableIntentFactory:((Context)->Intent)->StartableIntent)
     :ContextCompanion<Contextt,Params>(startableIntentFactory)
 {
-    fun start(context:Context,params:Params)
+    fun start(context:Context,params:Params,extraFlags:Int = 0)
     {
-        toIntent(params).start(context)
+        toIntent(params,extraFlags).start(context)
     }
 }

@@ -10,14 +10,16 @@ abstract class ContextCompanion<Contextt:Context,ContextParams:Serializable>(
 {
     private val activityParamsExtraKey = "${ContextCompanion::class.qualifiedName}.activityParamsExtraKey"
     protected abstract val contextClass:Class<Contextt>
-    fun toIntent(params:ContextParams):StartableIntent
+    fun toIntent(params:ContextParams,extraFlags:Int = 0):StartableIntent
     {
         return startableIntentFactory()
         {
             context:Context->
             val intent = Intent(context,contextClass)
             intent.putExtra(activityParamsExtraKey,params)
-            intent.addFlags(getFlagsForIntent(params).fold(0) {acc, i -> acc or i })
+            intent.addFlags(getFlagsForIntent(params)
+                    .plus(extraFlags)
+                    .fold(0) {acc, i -> acc or i })
         }
     }
     protected open fun getFlagsForIntent(params:ContextParams):Set<Int> = setOf(0)
