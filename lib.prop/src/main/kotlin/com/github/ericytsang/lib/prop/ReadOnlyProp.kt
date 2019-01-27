@@ -1,8 +1,9 @@
 package com.github.ericytsang.lib.prop
 
 import java.io.Closeable
+import java.io.Serializable
 
-interface ReadOnlyProp<Context:Any,Value:Any>
+interface ReadOnlyProp<Context:Any,Value:Any>:Serializable
 {
     /**
      * returns the value for this [ReadOnlyProp].
