@@ -8,9 +8,9 @@ val <Value:Any> ReadOnlyProp<Unit,Value>.value:Value
 val <Value:Any> ReadOnlyProp<Unit,Value>.nullableValue:Value?
     get() = getNullable(Unit)
 
-var <Value:Any> MutableProp<Unit,Value>.value:Value
+var <Value:Any> MutableProp<Unit,Unit,Value>.value:Value
     get() = get(Unit)
-    set(value) { set(Unit,value) }
+    set(value) { set(Unit,Unit,value) }
 
 fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
@@ -19,7 +19,7 @@ fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Clo
     return Closeable {closeables.forEach {it.close()}}
 }
 
-fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withContext(contextFactory:()->Context):ReadOnlyProp<Unit,Value>
+fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withReadContext(contextFactory:()->Context):ReadOnlyProp<Unit,Value>
 {
     val oldProp = this
     return object:ReadOnlyProp<Unit,Value>
@@ -46,17 +46,36 @@ fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withContext(contextFacto
     }
 }
 
-fun <Context:Any,Value:Any> MutableProp<Context,Value>.withContext(contextFactory:()->Context):MutableProp<Unit,Value>
+fun <ReadContext:Any,WriteContext:Any,Value:Any> MutableProp<ReadContext,WriteContext,Value>.withReadContext(contextFactory:()->ReadContext):MutableProp<Unit,WriteContext,Value>
 {
     val oldProp = this
-    val readOnlyProp = this.let {it as ReadOnlyProp<Context,Value>}.withContext(contextFactory)
-    return object:MutableProp<Unit,Value>,ReadOnlyProp<Unit,Value> by readOnlyProp
+    val readOnlyProp = this.let {it as ReadOnlyProp<ReadContext,Value>}.withReadContext(contextFactory)
+    return object:MutableProp<Unit,WriteContext,Value>,ReadOnlyProp<Unit,Value> by readOnlyProp
     {
-        override fun set(context:Unit,value:Value)
+        override fun set(readContext:Unit,writeContext:WriteContext,value:Value)
         {
-            oldProp.set(contextFactory(),value)
+            oldProp.set(contextFactory(),writeContext,value)
         }
     }
+}
+
+fun <ReadContext:Any,WriteContext:Any,Value:Any> MutableProp<ReadContext,WriteContext,Value>.withWriteContext(writeContextFactory:()->WriteContext):MutableProp<ReadContext,Unit,Value>
+{
+    val oldProp = this
+    return object:MutableProp<ReadContext,Unit,Value>,ReadOnlyProp<ReadContext,Value> by oldProp
+    {
+        override fun set(readContext:ReadContext,writeContext:Unit,value:Value)
+        {
+            oldProp.set(readContext,writeContextFactory(),value)
+        }
+    }
+}
+
+fun <Context:Any,Value:Any> MutableProp<Context,Context,Value>.withReadWriteContext(contextFactory:()->Context):MutableProp<Unit,Unit,Value>
+{
+    return this
+            .withWriteContext(contextFactory)
+            .withReadContext(contextFactory)
 }
 
 fun <OldContext:Any,NewContext:Any,Value:Any> ReadOnlyProp.Change<OldContext,Value>.map(newProp:ReadOnlyProp<NewContext,Value>,newContext:NewContext):ReadOnlyProp.Change<NewContext,Value>

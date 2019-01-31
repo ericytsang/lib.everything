@@ -9,16 +9,16 @@ class ExtensionsKtTest
     private val events = LinkedBlockingQueue<String>()
     private fun eventsSoFar() = generateSequence {events.poll()}.toList()
 
-    private val prop = object:Prop<String,Int>()
+    private val prop = object:Prop<String,String,Int>()
     {
         private val dataProp = DataProp(1)
         override fun doGet(context:String):Int = dataProp.value
-        override fun doSet(context:String,value:Int)
+        override fun doSet(readContext:String,writeContext:String,value:Int)
         {
             dataProp.value = value
         }
     }
-    private val withContextProp = prop.withContext {""}
+    private val withContextProp = prop.withReadWriteContext {""}
     private val mappedProp = prop.map {it+1}
 
     @Test
@@ -30,7 +30,7 @@ class ExtensionsKtTest
             events += "${it.oldValue} -> ${it.newValue}"
         }
         assert(eventsSoFar().isEmpty())
-        prop.set("",2)
+        prop.set("","",2)
         assertEquals(
                 listOf(
                         "null",
@@ -49,7 +49,7 @@ class ExtensionsKtTest
             events += "${it.oldValue} -> ${it.newValue}"
         }
         assert(eventsSoFar().isEmpty())
-        prop.set("",2)
+        prop.set("","",2)
         assertEquals(
                 listOf(
                         "null",

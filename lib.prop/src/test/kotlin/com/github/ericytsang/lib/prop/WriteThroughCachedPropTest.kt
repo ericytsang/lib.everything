@@ -8,7 +8,7 @@ class WriteThroughCachedPropTest
 {
     private val actions = LinkedBlockingQueue<String>()
     private fun getActions() = generateSequence {actions.poll()}.toList()
-    private val underlyingProp = object:Prop<Unit,Int>()
+    private val underlyingProp = object:Prop<Unit,Unit,Int>()
     {
         private var field = 1
         override fun doGet(context:Unit):Int
@@ -17,7 +17,7 @@ class WriteThroughCachedPropTest
             return field
         }
 
-        override fun doSet(context:Unit,value:Int)
+        override fun doSet(readContext:Unit,writeContext:Unit,value:Int)
         {
             actions += "set($value)"
             field = value

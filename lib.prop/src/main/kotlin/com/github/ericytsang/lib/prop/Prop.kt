@@ -8,13 +8,13 @@ import kotlin.concurrent.read
 import kotlin.concurrent.withLock
 import kotlin.concurrent.write
 
-abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
+abstract class Prop<ReadContext:Any,WriteContext:Any,Value:Any>:MutableProp<ReadContext,WriteContext,Value>
 {
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
     private val valueIsBeingUnset = ReentrantLock()
 
-    final override fun get(context:Context):Value
+    final override fun get(context:ReadContext):Value
     {
         return readWriteLock.read()
         {
@@ -22,7 +22,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
         }
     }
 
-    final override fun getNullable(context:Context):Value?
+    final override fun getNullable(context:ReadContext):Value?
     {
         return readWriteLock.write()
         {
@@ -37,43 +37,43 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
         }
     }
 
-    protected abstract fun doGet(context:Context):Value
+    protected abstract fun doGet(context:ReadContext):Value
 
-    override fun set(context:Context,value:Value)
+    override fun set(readContext:ReadContext,writeContext:WriteContext,value:Value)
     {
         readWriteLock.write()
         {
             check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
             notifyingListenersLock.withLock()
             {
-                val oldValue = lazy {doGet(context)}
-                val before = lazy {ReadOnlyProp.Change.Before(this,context,oldValue.value,value)}
+                val oldValue = lazy {doGet(readContext)}
+                val before = lazy {ReadOnlyProp.Change.Before(this,readContext,oldValue.value,value)}
                 valueIsBeingUnset.withLock()
                 {
                     listeners.forEach {it(before.value)}
                 }
 
-                doSet(context,value)
+                doSet(readContext,writeContext,value)
 
-                val newValue = lazy {doGet(context)}
-                val after = lazy {ReadOnlyProp.Change.After(this,context,oldValue.value,newValue.value)}
+                val newValue = lazy {doGet(readContext)}
+                val after = lazy {ReadOnlyProp.Change.After(this,readContext,oldValue.value,newValue.value)}
                 listeners.forEach {it(after.value)}
             }
         }
     }
 
-    protected abstract fun doSet(context:Context,value:Value)
+    protected abstract fun doSet(readContext:ReadContext,writeContext:WriteContext,value:Value)
 
-    private val listeners = mutableSetOf<(ReadOnlyProp.Change<Context,Value>)->Unit>()
+    private val listeners = mutableSetOf<(ReadOnlyProp.Change<ReadContext,Value>)->Unit>()
 
-    final override fun listen(context:Context,onChanged:(ReadOnlyProp.Change<Context,Value>)->Unit):Closeable
+    final override fun listen(context:ReadContext,onChanged:(ReadOnlyProp.Change<ReadContext,Value>)->Unit):Closeable
     {
         val value = get(context)
         onChanged(ReadOnlyProp.Change.After(this,context,value,value))
         return listen(onChanged)
     }
 
-    final override fun listen(onChanged:(ReadOnlyProp.Change<Context,Value>)->Unit):Closeable
+    final override fun listen(onChanged:(ReadOnlyProp.Change<ReadContext,Value>)->Unit):Closeable
     {
         listeners += onChanged
         return Closeable {listeners -= onChanged}

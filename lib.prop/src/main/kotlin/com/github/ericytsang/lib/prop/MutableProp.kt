@@ -1,6 +1,6 @@
 package com.github.ericytsang.lib.prop
 
-interface MutableProp<Context:Any,Value:Any>:ReadOnlyProp<Context,Value>
+interface MutableProp<ReadContext:Any,WriteContext:Any,Value:Any>:ReadOnlyProp<ReadContext,Value>
 {
-    fun set(context:Context,value:Value)
+    fun set(readContext:ReadContext,writeContext:WriteContext,value:Value)
 }
