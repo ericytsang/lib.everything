@@ -12,6 +12,11 @@ var <Value:Any> MutableProp<Unit,Unit,Value>.value:Value
     get() = get(Unit)
     set(value) { set(Unit,Unit,value) }
 
+fun <Context:Any,Value:Any> MutableProp<Context,Unit,Value>.set(context:Context,value:Value)
+{
+    set(context,Unit,value)
+}
+
 fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
     onChanged(null)
