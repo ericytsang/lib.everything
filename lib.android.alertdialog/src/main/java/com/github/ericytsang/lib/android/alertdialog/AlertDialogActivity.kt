@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.android.alertdialog.activity
+package com.github.ericytsang.lib.android.alertdialog
 
 import android.os.Bundle
 import android.view.View

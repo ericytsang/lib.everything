@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="SeekBarWithFeedback">
+        <attr name="maximum" format="integer"/>
+        <attr name="minimum" format="integer"/>
+        <attr name="valueCoefficient" format="integer"/>
+        <attr name="labelTemplate" format="string"/>
+    </declare-styleable>
+
+</resources>

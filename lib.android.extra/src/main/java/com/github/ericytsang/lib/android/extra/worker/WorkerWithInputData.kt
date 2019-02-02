@@ -1,16 +1,12 @@
-package com.github.ericytsang.lib.android.worker
+package com.github.ericytsang.lib.android.extra.worker
 
 import android.content.Context
-import android.util.Base64
 import androidx.work.Data
 import androidx.work.WorkRequest
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.github.ericytsang.lib.android.decodeFromString
 import com.github.ericytsang.lib.android.encodeToString
-import com.github.ericytsang.lib.domainobjects.serialize
-import java.io.ByteArrayInputStream
-import java.io.ObjectInputStream
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast

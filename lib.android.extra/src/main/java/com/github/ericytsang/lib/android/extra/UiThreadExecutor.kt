@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.android
+package com.github.ericytsang.lib.android.extra
 
 import android.os.Handler
 import android.os.Looper

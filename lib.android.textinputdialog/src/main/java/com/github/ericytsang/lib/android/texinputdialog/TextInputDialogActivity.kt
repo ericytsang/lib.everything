@@ -1,8 +1,7 @@
-package com.github.ericytsang.lib.android.texinputdialog.activity
+package com.github.ericytsang.lib.android.texinputdialog
 
 import android.view.View
 import android.view.ViewGroup
-import com.github.ericytsang.lib.android.R
 import com.github.ericytsang.lib.android.activity.ActivityWithResultCompanion
 import com.github.ericytsang.lib.android.activity.BaseActivity
 import com.github.ericytsang.lib.android.layoutInflater

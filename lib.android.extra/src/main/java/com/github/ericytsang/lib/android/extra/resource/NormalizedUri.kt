@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.android.resource
+package com.github.ericytsang.lib.android.extra.resource
 
 import android.net.Uri
 import com.github.ericytsang.lib.domainobjects.DataObject

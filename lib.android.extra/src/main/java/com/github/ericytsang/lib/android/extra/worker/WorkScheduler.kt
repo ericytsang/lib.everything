@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.android.worker
+package com.github.ericytsang.lib.android.extra.worker
 
 import android.app.AlarmManager
 import android.app.PendingIntent

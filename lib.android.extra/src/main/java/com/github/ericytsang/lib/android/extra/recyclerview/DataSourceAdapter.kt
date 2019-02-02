@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.android.recyclerview
+package com.github.ericytsang.lib.android.extra.recyclerview
 
 import androidx.paging.ItemKeyedDataSource
 import com.github.ericytsang.lib.awaitable.Awaitable

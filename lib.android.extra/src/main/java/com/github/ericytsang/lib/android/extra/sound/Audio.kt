@@ -1,9 +1,9 @@
-package com.github.ericytsang.lib.android.sound
+package com.github.ericytsang.lib.android.extra.sound
 
 import android.content.Context
 import android.media.MediaPlayer
-import com.github.ericytsang.lib.android.resource.NormalizedUri
-import com.github.ericytsang.lib.android.resource.RawResId
+import com.github.ericytsang.lib.android.extra.resource.NormalizedUri
+import com.github.ericytsang.lib.android.extra.resource.RawResId
 import com.github.ericytsang.lib.domainobjects.DataObject
 import java.io.Closeable
 
@@ -22,12 +22,14 @@ object Audio
             {
                 return when(data)
                 {
-                    is Audio.Data.Uri -> Player(
+                    is Data.Uri -> Player(
                             data,
-                            MediaPlayer.create(context,data.uri.uri) ?: return null)
-                    is Audio.Data.ResId -> Player(
+                            MediaPlayer.create(context,data.uri.uri)
+                                    ?: return null)
+                    is Data.ResId -> Player(
                             data,
-                            MediaPlayer.create(context,data.rawResId.id) ?: return null)
+                            MediaPlayer.create(context,data.rawResId.id)
+                                    ?: return null)
                 }
             }
         }
