@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.texinputdialog.android.activity
+package com.github.ericytsang.lib.android.alertdialog.activity
 
 import android.os.Bundle
 import android.view.View

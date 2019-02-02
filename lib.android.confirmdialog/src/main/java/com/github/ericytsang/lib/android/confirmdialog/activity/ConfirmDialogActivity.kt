@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.texinputdialog.android.activity;
+package com.github.ericytsang.lib.android.confirmdialog.activity;
 
 import android.view.ViewGroup
 import com.github.ericytsang.lib.android.R

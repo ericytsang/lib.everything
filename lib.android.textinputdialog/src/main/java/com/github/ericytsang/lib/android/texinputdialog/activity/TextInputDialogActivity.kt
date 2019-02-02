@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.texinputdialog.android.activity
+package com.github.ericytsang.lib.android.texinputdialog.activity
 
 import android.view.View
 import android.view.ViewGroup
