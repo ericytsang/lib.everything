@@ -1,9 +1,12 @@
-package com.github.ericytsang.lib.android.activity
+package com.github.ericytsang.lib.texinputdialog.android.activity
 
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.github.ericytsang.lib.android.R
+import com.github.ericytsang.lib.android.activity.ActivityIntent
+import com.github.ericytsang.lib.android.activity.BaseActivity
+import com.github.ericytsang.lib.android.activity.ContextCompanionWithStart
 import com.github.ericytsang.lib.android.fromHtml
 import com.github.ericytsang.lib.android.layoutInflater
 import kotlinx.android.extensions.LayoutContainer
@@ -75,7 +78,7 @@ class AlertDialogActivity
         override fun close() = Unit
     }
 
-    override fun makeResumed(methodOverload:MethodOverload,created:Created) = NoOpState(this)
+    override fun makeResumed(methodOverload:MethodOverload,created:AlertDialogActivity.Created) = NoOpState(this)
 
     class Layout(root:ViewGroup):LayoutContainer
     {

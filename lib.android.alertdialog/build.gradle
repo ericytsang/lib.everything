@@ -25,17 +25,7 @@ androidExtensions {
 
 dependencies {
 
-    api project(":lib.datastore")
-    api project(":lib.setofatleastone")
-    api project(":lib.domainobjects")
-
-    implementation "joda-time:joda-time:2.9.9"
-
-    // app compat
-    api "androidx.legacy:legacy-support-v4:1.0.0"
-    api "androidx.appcompat:appcompat:1.0.2"
-    api "androidx.recyclerview:recyclerview:1.0.0"
-    api "androidx.multidex:multidex:2.0.1"
+    api project(":lib.android")
 
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

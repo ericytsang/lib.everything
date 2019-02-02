@@ -6,6 +6,8 @@ import androidx.work.Data
 import androidx.work.WorkRequest
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.github.ericytsang.lib.android.decodeFromString
+import com.github.ericytsang.lib.android.encodeToString
 import com.github.ericytsang.lib.domainobjects.serialize
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
@@ -42,20 +44,4 @@ fun <B:WorkRequest.Builder<B,W>,W:WorkRequest,Worker:WorkerWithInputData<Input>,
     return setInputData(Data.Builder()
             .putString(INPUT_DATA_BASE64_ENCODED_DATA,inputData.encodeToString())
             .build())
-}
-
-// todo: move to library
-fun Serializable.encodeToString():String
-{
-    return Base64.encodeToString(serialize(),0)
-}
-
-// todo: move to library
-inline fun <reified R:Serializable> String.decodeFromString():R
-{
-    return Base64.decode(this,0)
-            .let {ByteArrayInputStream(it)}
-            .let {ObjectInputStream(it)}
-            .readObject()
-            .let {it as R}
 }

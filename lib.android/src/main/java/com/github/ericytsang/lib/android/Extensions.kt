@@ -22,6 +22,7 @@ import android.preference.PreferenceGroup
 import android.preference.PreferenceManager
 import android.text.Html
 import android.text.Spanned
+import android.util.Base64
 import android.util.Log
 import android.view.Display
 import android.view.Surface
@@ -32,6 +33,9 @@ import android.view.accessibility.AccessibilityManager
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.content.ContextCompat
 import com.github.ericytsang.lib.android.HvOrientation.*
+import com.github.ericytsang.lib.domainobjects.serialize
+import java.io.ByteArrayInputStream
+import java.io.ObjectInputStream
 import java.io.Serializable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -312,3 +316,19 @@ data class RealScreenSize(
         val w:Int,
         val h:Int)
     :Serializable
+
+// todo: move to library
+fun Serializable.encodeToString():String
+{
+    return Base64.encodeToString(serialize(),0)
+}
+
+// todo: move to library
+inline fun <reified R:Serializable> String.decodeFromString():R
+{
+    return Base64.decode(this,0)
+            .let {ByteArrayInputStream(it)}
+            .let {ObjectInputStream(it)}
+            .readObject()
+            .let {it as R}
+}

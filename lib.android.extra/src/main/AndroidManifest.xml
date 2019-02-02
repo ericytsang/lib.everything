@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.ericytsang.lib.android">
+
+    <application>
+
+        <receiver
+            android:name=".worker.WorkScheduler$CustomBroadcastReceiver" />
+
+    </application>
+
+</manifest>

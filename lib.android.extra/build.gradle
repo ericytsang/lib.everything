@@ -25,11 +25,19 @@ androidExtensions {
 
 dependencies {
 
+    api project(":lib.android")
     api project(":lib.datastore")
     api project(":lib.setofatleastone")
     api project(":lib.domainobjects")
 
     implementation "joda-time:joda-time:2.9.9"
+
+    // paging
+    api "android.arch.paging:runtime:$paging_version"
+
+    // work manager
+    api "android.arch.work:work-runtime-ktx:1.0.0-beta01"
+    api "android.arch.work:work-firebase:1.0.0-alpha11"
 
     // app compat
     api "androidx.legacy:legacy-support-v4:1.0.0"
