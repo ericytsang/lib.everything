@@ -1,8 +1,8 @@
 package com.github.ericytsang.lib.prop
 
-class WriteThroughCachedProp<ReadContext:Any,WriteContext:Any,Value:Any>(
-        val underlyingProp:MutableProp<ReadContext,WriteContext,Value>)
-    :Prop<ReadContext,WriteContext,Value>()
+class WriteThroughCachedProp<Context:Any,Value:Any>(
+        val underlyingProp:MutableProp<Context,Value>)
+    :Prop<Context,Value>()
 {
     private var isInitialized = false
     private var field:Value? = null
@@ -11,7 +11,7 @@ class WriteThroughCachedProp<ReadContext:Any,WriteContext:Any,Value:Any>(
             isInitialized = true
             field = value
         }
-    override fun doGet(context:ReadContext):Value
+    override fun doGet(context:Context):Value
     {
         if (!isInitialized)
         {
@@ -19,9 +19,9 @@ class WriteThroughCachedProp<ReadContext:Any,WriteContext:Any,Value:Any>(
         }
         return field as Value
     }
-    override fun doSet(readContext:ReadContext,writeContext:WriteContext,value:Value)
+    override fun doSet(context:Context,value:Value)
     {
-        underlyingProp.set(readContext,writeContext,value)
-        field = underlyingProp.get(readContext)
+        underlyingProp.set(context,value)
+        field = underlyingProp.get(context)
     }
 }

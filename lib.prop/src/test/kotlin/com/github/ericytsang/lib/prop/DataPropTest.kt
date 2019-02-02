@@ -21,7 +21,7 @@ class DataPropTest
     fun get_gets_value_from_set()
     {
         val dataProp = DataProp(1)
-        dataProp.set(Unit,Unit,2)
+        dataProp.set(Unit,2)
         assertEquals(2,dataProp.get(Unit))
     }
 
