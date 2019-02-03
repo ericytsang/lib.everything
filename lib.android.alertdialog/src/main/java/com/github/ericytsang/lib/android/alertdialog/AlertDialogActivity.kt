@@ -3,7 +3,6 @@ package com.github.ericytsang.lib.android.alertdialog
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.github.ericytsang.lib.android.R
 import com.github.ericytsang.lib.android.activity.ActivityIntent
 import com.github.ericytsang.lib.android.activity.BaseActivity
 import com.github.ericytsang.lib.android.activity.ContextCompanionWithStart
