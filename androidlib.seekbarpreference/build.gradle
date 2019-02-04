@@ -25,7 +25,7 @@ androidExtensions {
 
 dependencies {
 
-    api project(":androidlib")
+    api project(":androidlib.core")
     api project(":androidlib.seekbar")
 
     api("androidx.preference:preference:1.0.0")

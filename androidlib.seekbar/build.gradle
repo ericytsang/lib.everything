@@ -25,7 +25,7 @@ androidExtensions {
 
 dependencies {
 
-    api project(":androidlib")
+    api project(":androidlib.core")
     api project(":lib.prop")
 
     // kotlin

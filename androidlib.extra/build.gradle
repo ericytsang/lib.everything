@@ -25,7 +25,7 @@ androidExtensions {
 
 dependencies {
 
-    api project(":androidlib")
+    api project(":androidlib.core")
     api project(":lib.datastore")
     api project(":lib.setofatleastone")
     api project(":lib.domainobjects")
