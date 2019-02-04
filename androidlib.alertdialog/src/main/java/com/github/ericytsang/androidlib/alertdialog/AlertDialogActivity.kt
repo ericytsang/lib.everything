@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.github.ericytsang.androidlib.core.activity.ActivityIntent
-import com.github.ericytsang.androidlib.activity.BaseActivity
+import com.github.ericytsang.androidlib.core.activity.BaseActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.fromHtml
 import com.github.ericytsang.androidlib.core.layoutInflater
