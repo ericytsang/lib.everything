@@ -1,6 +1,5 @@
 package com.github.ericytsang.lib.prop
 
-import com.github.ericytsang.lib.optional.Opt
 import org.junit.Test
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.test.assertEquals
@@ -45,22 +44,19 @@ class DataPropTest
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,1,3),
-                        ReadOnlyProp.Change.After(dataProp,Unit,1,3)),
+                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
                 getCallsSoFar())
 
         dataProp.value = 4
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,3,4),
-                        ReadOnlyProp.Change.After(dataProp,Unit,3,4)),
+                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
                 getCallsSoFar())
 
         dataProp.value = 5
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,4,5),
-                        ReadOnlyProp.Change.After(dataProp,Unit,4,5)),
+                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
                 getCallsSoFar())
     }
 
@@ -93,8 +89,7 @@ class DataPropTest
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,1,3),
-                        ReadOnlyProp.Change.After(dataProp,Unit,1,3)),
+                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
                 getCallsSoFar())
 
         listener.close()
@@ -113,27 +108,24 @@ class DataPropTest
         fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
 
         dataProp.listen(Unit) {onChangedInvocations += it}
-        assertEquals(listOf(ReadOnlyProp.Change.After(dataProp,Unit,1,1)),getCallsSoFar())
+        assertEquals(listOf(ReadOnlyProp.Change(dataProp,Unit,1,1)),getCallsSoFar())
 
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,1,3),
-                        ReadOnlyProp.Change.After(dataProp,Unit,1,3)),
+                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
                 getCallsSoFar())
 
         dataProp.value = 4
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,3,4),
-                        ReadOnlyProp.Change.After(dataProp,Unit,3,4)),
+                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
                 getCallsSoFar())
 
         dataProp.value = 5
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,4,5),
-                        ReadOnlyProp.Change.After(dataProp,Unit,4,5)),
+                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
                 getCallsSoFar())
     }
 
@@ -158,20 +150,6 @@ class DataPropTest
     }
 
     @Test
-    fun nullableValue_is_null_when_being_unset_and_non_null_when_being_set()
-    {
-        val dataProp = DataProp(1)
-        val nullableValues = LinkedBlockingQueue<Opt<Int>>()
-        fun getCallsSoFar() = generateSequence {nullableValues.poll()}.map {it.opt}.toList()
-
-        dataProp.listen {nullableValues += Opt.of(dataProp.nullableValue)}
-        assert(getCallsSoFar().isEmpty())
-
-        dataProp.value = 2
-        assertEquals(getCallsSoFar(),listOf(null,2))
-    }
-
-    @Test
     fun smoke_test()
     {
         val dataProp = DataProp(1)
@@ -188,13 +166,11 @@ class DataPropTest
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,1,3),
-                        ReadOnlyProp.Change.After(dataProp,Unit,1,3)),
+                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
                 getCallsSoFar1())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,1,3),
-                        ReadOnlyProp.Change.After(dataProp,Unit,1,3)),
+                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
                 getCallsSoFar2())
 
         listener.close()
@@ -202,16 +178,14 @@ class DataPropTest
         assert(getCallsSoFar1().isEmpty())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,3,4),
-                        ReadOnlyProp.Change.After(dataProp,Unit,3,4)),
+                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
                 getCallsSoFar2())
 
         dataProp.value = 5
         assert(getCallsSoFar1().isEmpty())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change.Before(dataProp,Unit,4,5),
-                        ReadOnlyProp.Change.After(dataProp,Unit,4,5)),
+                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
                 getCallsSoFar2())
     }
 }

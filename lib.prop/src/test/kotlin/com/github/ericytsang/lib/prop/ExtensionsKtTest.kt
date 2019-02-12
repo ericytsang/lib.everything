@@ -26,16 +26,14 @@ class ExtensionsKtTest
     {
         withContextProp.listen()
         {
-            events += withContextProp.nullableValue.toString()
+            events += withContextProp.getChange().run {"$oldValue => $newValue"}
             events += "${it.oldValue} -> ${it.newValue}"
         }
         assert(eventsSoFar().isEmpty())
         prop.set("",2)
         assertEquals(
                 listOf(
-                        "null",
-                        "1 -> 2",
-                        "2",
+                        "1 => 2",
                         "1 -> 2"),
                 eventsSoFar())
     }
@@ -45,16 +43,14 @@ class ExtensionsKtTest
     {
         mappedProp.listen()
         {
-            events += mappedProp.getNullable("").toString()
+            events += mappedProp.getChange().run {"$oldValue => $newValue"}
             events += "${it.oldValue} -> ${it.newValue}"
         }
         assert(eventsSoFar().isEmpty())
         prop.set("",2)
         assertEquals(
                 listOf(
-                        "null",
-                        "2 -> 3",
-                        "3",
+                        "2 => 3",
                         "2 -> 3"),
                 eventsSoFar())
     }

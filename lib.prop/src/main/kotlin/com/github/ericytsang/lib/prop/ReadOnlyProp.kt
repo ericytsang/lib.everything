@@ -11,9 +11,10 @@ interface ReadOnlyProp<Context:Any,Value:Any>:Serializable
     fun get(context:Context):Value
 
     /**
-     * returns the value for this [ReadOnlyProp]; null if it is being unset.
+     * returns the [Change] object that is being dispatched to all of its listeners for this property.
+     * will throw an exception if called outside of the thread of a listener
      */
-    fun getNullable(context:Context):Value?
+    fun getChange():ReadOnlyProp.Change<Context,Value>
 
     /**
      * will call [onChanged] before returning.
@@ -30,32 +31,9 @@ interface ReadOnlyProp<Context:Any,Value:Any>:Serializable
      */
     fun listen(onChanged:(Change<Context,Value>)->Unit):Closeable
 
-    sealed class Change<Context:Any,Value:Any>
-    {
-        abstract val source:ReadOnlyProp<Context,Value>
-        abstract val context:Context
-        abstract val oldValue:Value
-        abstract val newValue:Value
-        abstract val nowValue:Value
-
-        data class Before<Context:Any,Value:Any>(
-                override val source:ReadOnlyProp<Context,Value>,
-                override val context:Context,
-                override val oldValue:Value,
-                override val newValue:Value)
-            :Change<Context,Value>()
-        {
-            override val nowValue:Value get() = oldValue
-        }
-
-        data class After<Context:Any,Value:Any>(
-                override val source:ReadOnlyProp<Context,Value>,
-                override val context:Context,
-                override val oldValue:Value,
-                override val newValue:Value)
-            :Change<Context,Value>()
-        {
-            override val nowValue:Value get() = newValue
-        }
-    }
+    data class Change<Context:Any,Value:Any>(
+            val source:ReadOnlyProp<Context,Value>,
+            val context:Context,
+            val oldValue:Value,
+            val newValue:Value)
 }

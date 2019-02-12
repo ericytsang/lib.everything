@@ -1,5 +1,7 @@
 package com.github.ericytsang.lib.prop
 
+import com.github.ericytsang.lib.optional.Opt
+import com.github.ericytsang.lib.optional.OptCloser
 import org.junit.Test
 import java.io.Closeable
 import java.util.concurrent.LinkedBlockingQueue
@@ -14,12 +16,12 @@ class RaiiPropTest
         val events = LinkedBlockingQueue<Int>()
         fun eventsSoFar() = generateSequence {events.poll()}.toList()
 
-        val raiiProp = RaiiProp(Closeable {events += 1})
+        val raiiProp = RaiiProp(Opt.of(Closeable {events += 1}))
         assert(eventsSoFar().isEmpty())
 
         raiiProp.value = {
             events += 2
-            Closeable {events += 3}
+            Opt.of(Closeable{events += 3})
         }
         assertEquals(listOf(1,2),eventsSoFar())
     }
@@ -30,7 +32,7 @@ class RaiiPropTest
         val events = LinkedBlockingQueue<Int>()
         fun eventsSoFar() = generateSequence {events.poll()}.toList()
 
-        val raiiProp = RaiiProp(Closeable {events += 1})
+        val raiiProp = RaiiProp(Opt.of(Closeable {events += 1}))
         assert(eventsSoFar().isEmpty())
 
         raiiProp.close()
@@ -43,18 +45,18 @@ class RaiiPropTest
         val events = LinkedBlockingQueue<Int>()
         fun eventsSoFar() = generateSequence {events.poll()}.toList()
 
-        val raiiProp = RaiiProp(Closeable {events += 1})
+        val raiiProp = RaiiProp(Opt.of(Closeable {events += 1}))
         assert(eventsSoFar().isEmpty())
 
         raiiProp.value = {
             events += 2
-            Closeable {events += 3}
+            Opt.of(Closeable{events += 3})
         }
         assertEquals(listOf(1,2),eventsSoFar())
 
         raiiProp.value = {
             events += 4
-            Closeable {events += 5}
+            Opt.of(Closeable{events += 5})
         }
         assertEquals(listOf(3,4),eventsSoFar())
 

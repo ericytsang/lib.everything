@@ -10,7 +10,6 @@ import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.optional.OptCloser
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.listen
-import com.github.ericytsang.lib.prop.nullableValue
 import com.github.ericytsang.lib.prop.value
 import java.io.Closeable
 
@@ -19,21 +18,21 @@ class SeekBarWithFeedbackPreference(
         attrs:AttributeSet)
     :Preference(context,attrs)
 {
-    private val attached = RaiiProp(OptCloser(Opt.none<Attached>()))
-    private val persistenceStrategy = RaiiProp(OptCloser(Opt.none<NoopClose<PersistenceStrategy>>()))
-    private val running = RaiiProp(OptCloser(Opt.none<Running>()))
+    private val attached = RaiiProp(Opt.none<Attached>())
+    private val persistenceStrategy = RaiiProp(Opt.none<NoopClose<PersistenceStrategy>>())
+    private val running = RaiiProp(Opt.none<Running>())
 
     private val runningAssigner = listOf(persistenceStrategy,attached).listen()
     {
-        val attached = attached.nullableValue?.invoke()?.opt?.opt
-        val persistenceStrategy = persistenceStrategy.nullableValue?.invoke()?.opt?.opt?.wrapee
+        val attached = attached.value.invoke().opt
+        val persistenceStrategy = persistenceStrategy.value.invoke().opt?.wrapee
         if (attached != null && persistenceStrategy != null)
         {
-            running.value = {OptCloser(Opt.some(Running(attached,persistenceStrategy)))}
+            running.value = {Opt.some(Running(attached,persistenceStrategy))}
         }
         else
         {
-            running.value = {OptCloser(Opt.none())}
+            running.value = {Opt.none()}
         }
     }
 
@@ -55,14 +54,14 @@ class SeekBarWithFeedbackPreference(
     override fun onBindViewHolder(holder:PreferenceViewHolder)
     {
         super.onBindViewHolder(holder)
-        attached.value = {OptCloser(Opt.some(Attached(this)))}
+        attached.value = {Opt.some(Attached(this))}
     }
 
     override fun onDetached()
     {
-        attached.value = {OptCloser(Opt.none())}
-        persistenceStrategy.value = {OptCloser(Opt.none())}
-        running.value = {OptCloser(Opt.none())}
+        attached.value = {Opt.none()}
+        persistenceStrategy.value = {Opt.none()}
+        running.value = {Opt.none()}
         runningAssigner.close()
         super.onDetached()
     }
@@ -70,14 +69,14 @@ class SeekBarWithFeedbackPreference(
     override fun onClick()
     {
         super.onClick()
-        running.value.invoke().opt.opt?.onClick()
+        running.value.invoke().opt?.onClick()
     }
 
     // PersistenceStrategy
 
     fun setPersistenceStrategy(newPersistenceStrategy:PersistenceStrategy)
     {
-        persistenceStrategy.value = {OptCloser(Opt.some(NoopClose(newPersistenceStrategy)))}
+        persistenceStrategy.value = {Opt.some(NoopClose(newPersistenceStrategy))}
     }
 
     interface PersistenceStrategy

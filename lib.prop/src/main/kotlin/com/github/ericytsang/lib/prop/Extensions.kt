@@ -5,9 +5,6 @@ import java.io.Closeable
 val <Value:Any> ReadOnlyProp<Unit,Value>.value:Value
     get() = get(Unit)
 
-val <Value:Any> ReadOnlyProp<Unit,Value>.nullableValue:Value?
-    get() = getNullable(Unit)
-
 var <Value:Any> MutableProp<Unit,Value>.value:Value
     get() = get(Unit)
     set(value) { set(Unit,value) }
@@ -29,9 +26,8 @@ fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withContext(contextFacto
             return oldProp.get(contextFactory())
         }
 
-        override fun getNullable(context:Unit):Value?
-        {
-            return oldProp.getNullable(contextFactory())
+        override fun getChange():ReadOnlyProp.Change<Unit,Value> {
+            return ReadOnlyProp.Change(this,Unit,oldProp.getChange().oldValue,oldProp.getChange().newValue)
         }
 
         override fun listen(context:Unit,onChanged:(ReadOnlyProp.Change<Unit,Value>)->Unit):Closeable
@@ -61,11 +57,7 @@ fun <Context:Any,Value:Any> MutableProp<Context,Value>.withContext(contextFactor
 
 fun <OldContext:Any,NewContext:Any,Value:Any> ReadOnlyProp.Change<OldContext,Value>.map(newProp:ReadOnlyProp<NewContext,Value>,newContext:NewContext):ReadOnlyProp.Change<NewContext,Value>
 {
-    return when(this)
-    {
-        is ReadOnlyProp.Change.Before -> ReadOnlyProp.Change.Before(newProp,newContext,oldValue,newValue)
-        is ReadOnlyProp.Change.After -> ReadOnlyProp.Change.After(newProp,newContext,oldValue,newValue)
-    }
+    return ReadOnlyProp.Change(newProp,newContext,oldValue,newValue)
 }
 
 fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp<Context,OldValue>.map(transform:(OldValue)->NewValue):ReadOnlyProp<Context,NewValue>
@@ -78,9 +70,8 @@ fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp<Context,OldValue>.map(t
             return oldProp.get(context).let(transform)
         }
 
-        override fun getNullable(context:Context):NewValue?
-        {
-            return oldProp.getNullable(context)?.let(transform)
+        override fun getChange():ReadOnlyProp.Change<Context,NewValue> {
+            return ReadOnlyProp.Change(this,oldProp.getChange().context,transform(oldProp.getChange().oldValue),transform(oldProp.getChange().newValue))
         }
 
         override fun listen(context:Context,onChanged:(ReadOnlyProp.Change<Context,NewValue>)->Unit):Closeable
@@ -97,9 +88,5 @@ fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp<Context,OldValue>.map(t
 
 fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp.Change<Context,OldValue>.map(newProp:ReadOnlyProp<Context,NewValue>,transform:(OldValue)->NewValue):ReadOnlyProp.Change<Context,NewValue>
 {
-    return when(this)
-    {
-        is ReadOnlyProp.Change.Before -> ReadOnlyProp.Change.Before(newProp,context,transform(oldValue),transform(newValue))
-        is ReadOnlyProp.Change.After -> ReadOnlyProp.Change.After(newProp,context,transform(oldValue),transform(newValue))
-    }
+    return ReadOnlyProp.Change(newProp,context,transform(oldValue),transform(newValue))
 }

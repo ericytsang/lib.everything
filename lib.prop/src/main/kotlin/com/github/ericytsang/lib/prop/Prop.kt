@@ -12,7 +12,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 {
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
-    private val valueIsBeingUnset = ReentrantLock()
+    private var change:ReadOnlyProp.Change<Context,Value>? = null
 
     final override fun get(context:Context):Value
     {
@@ -22,17 +22,17 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
         }
     }
 
-    final override fun getNullable(context:Context):Value?
+    final override fun getChange():ReadOnlyProp.Change<Context,Value>
     {
         return readWriteLock.write()
         {
-            if (valueIsBeingUnset.isHeldByCurrentThread)
+            if (notifyingListenersLock.isHeldByCurrentThread)
             {
-                null
+                change!!
             }
             else
             {
-                doGet(context)
+                throw IllegalAccessException("only allowed to access change from notified listener")
             }
         }
     }
@@ -47,17 +47,14 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
             notifyingListenersLock.withLock()
             {
                 val oldValue = lazy {doGet(context)}
-                val before = lazy {ReadOnlyProp.Change.Before(this,context,oldValue.value,value)}
-                valueIsBeingUnset.withLock()
-                {
-                    listeners.forEach {it(before.value)}
-                }
+                listeners.firstOrNull()?.let {oldValue.value}
 
                 doSet(context,value)
 
                 val newValue = lazy {doGet(context)}
-                val after = lazy {ReadOnlyProp.Change.After(this,context,oldValue.value,newValue.value)}
-                listeners.forEach {it(after.value)}
+                val change = lazy {ReadOnlyProp.Change(this,context,oldValue.value,newValue.value)}
+                listeners.firstOrNull()?.let {this.change = change.value}
+                listeners.forEach {it(change.value)}
             }
         }
     }
@@ -69,7 +66,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
     final override fun listen(context:Context,onChanged:(ReadOnlyProp.Change<Context,Value>)->Unit):Closeable
     {
         val value = get(context)
-        onChanged(ReadOnlyProp.Change.After(this,context,value,value))
+        onChanged(ReadOnlyProp.Change(this,context,value,value))
         return listen(onChanged)
     }
 

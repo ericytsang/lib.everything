@@ -37,17 +37,17 @@ class SeekBarWithFeedbackDialog:AppCompatActivity()
 
     // created
 
-    private val created = RaiiProp(OptCloser(Opt.none<Created>()))
+    private val created = RaiiProp(Opt.none<Created>())
 
     override fun onCreate(savedInstanceState:Bundle?)
     {
         super.onCreate(savedInstanceState)
-        created.value = {OptCloser(Opt.Some(Created(this,fromIntent(intent))))}
+        created.value = {Opt.Some(Created(this,fromIntent(intent)))}
     }
 
     override fun onDestroy()
     {
-        created.value = {OptCloser(Opt.None())}
+        created.value = {Opt.None()}
         super.onDestroy()
     }
 
