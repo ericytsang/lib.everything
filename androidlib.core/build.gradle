@@ -29,8 +29,6 @@ dependencies {
     api project(":lib.setofatleastone")
     api project(":lib.domainobjects")
 
-    implementation "joda-time:joda-time:2.9.9"
-
     // app compat
     api "androidx.legacy:legacy-support-v4:1.0.0"
     api "androidx.appcompat:appcompat:1.0.2"
