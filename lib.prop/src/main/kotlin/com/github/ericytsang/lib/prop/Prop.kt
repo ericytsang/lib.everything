@@ -54,7 +54,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
                 val newValue = lazy {doGet(context)}
                 val change = lazy {ReadOnlyProp.Change(this,context,oldValue.value,newValue.value)}
                 listeners.firstOrNull()?.let {this.change = change.value}
-                listeners.forEach {it(change.value)}
+                listeners.toList().forEach {it(change.value)}
             }
         }
     }
