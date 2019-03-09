@@ -5,9 +5,6 @@ import android.util.AttributeSet
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback
-import com.github.ericytsang.lib.optional.Opt
-import com.github.ericytsang.lib.prop.DataProp
-import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
 import java.util.concurrent.LinkedBlockingQueue
 
