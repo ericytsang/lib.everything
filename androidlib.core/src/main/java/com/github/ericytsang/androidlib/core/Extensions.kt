@@ -162,13 +162,13 @@ fun <T> List<T>.subList(indices:IntRange):List<T>
     return subList(indices.first,indices.last)
 }
 
-fun fromHtml(html:String):Spanned
+fun fromHtml(html:String,imageGetter:Html.ImageGetter? = null):Spanned
 {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Html.fromHtml(html,Html.FROM_HTML_MODE_LEGACY)
+        Html.fromHtml(html,Html.FROM_HTML_MODE_LEGACY,imageGetter,null)
     } else {
         @Suppress("DEPRECATION")
-        Html.fromHtml(html)
+        Html.fromHtml(html,imageGetter,null)
     }
 }
 
