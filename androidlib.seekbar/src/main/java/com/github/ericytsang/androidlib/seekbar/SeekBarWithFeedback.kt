@@ -25,9 +25,9 @@ class SeekBarWithFeedback(
     val progress = object:Prop<Unit,Int>()
     {
         override fun doGet(context:Unit):Int
-        { return layout.SeekBarWithFeedback__seekbar.progress*valueCoefficient.value }
+        { return layout.SeekBarWithFeedback__seekbar.progress*valueCoefficient.value+min.value }
         override fun doSet(context:Unit,value:Int)
-        { layout.SeekBarWithFeedback__seekbar.progress = value/valueCoefficient.value }
+        { layout.SeekBarWithFeedback__seekbar.progress = value/valueCoefficient.value-min.value }
     }
 
     val valueCoefficient = object:Prop<Unit,Int>()
@@ -46,14 +46,16 @@ class SeekBarWithFeedback(
 
     val min = object:Prop<Unit,Int>()
     {
-        override fun doGet(context:Unit):Int = layout.SeekBarWithFeedback__seekbar.min
-        override fun doSet(context:Unit,value:Int) {layout.SeekBarWithFeedback__seekbar.min = value}
+        private var internalValue:Int = 0
+        override fun doGet(context:Unit):Int = internalValue
+        override fun doSet(context:Unit,value:Int) {internalValue = value}
     }
 
     val max = object:Prop<Unit,Int>()
     {
-        override fun doGet(context:Unit):Int = layout.SeekBarWithFeedback__seekbar.max
-        override fun doSet(context:Unit,value:Int) {layout.SeekBarWithFeedback__seekbar.max = value}
+        private var internalValue:Int = 0
+        override fun doGet(context:Unit):Int = internalValue
+        override fun doSet(context:Unit,value:Int) {internalValue = value}
     }
 
     init
@@ -69,6 +71,12 @@ class SeekBarWithFeedback(
 
     init
     {
+        // updating min and max on the progress bar
+        listOf(min,max).listen()
+        {
+            layout.SeekBarWithFeedback__seekbar.max = max.value-min.value
+        }
+
         // updating text labels when needed
         listOf(progress,valueCoefficient,labelTemplate,min,max).listen()
         {
