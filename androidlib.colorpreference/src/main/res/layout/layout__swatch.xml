@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/checkered_background"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/min_touchable_separation">
+
+    <View
+        android:id="@+id/color_sample"
+        android:background="@drawable/circle"
+        android:layout_width="@dimen/min_touchable_length"
+        android:layout_height="@dimen/min_touchable_length"/>
+
+</LinearLayout>
