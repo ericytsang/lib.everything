@@ -1,4 +1,4 @@
-package com.github.ericytsang.androidlib.extra.sound
+package com.github.ericytsang.androidlib.preferences
 
 import android.content.SharedPreferences
 import com.github.ericytsang.androidlib.core.editAndCommit
