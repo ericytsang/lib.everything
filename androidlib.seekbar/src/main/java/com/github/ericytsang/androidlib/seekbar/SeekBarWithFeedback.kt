@@ -25,9 +25,9 @@ class SeekBarWithFeedback(
     val progress = object:Prop<Unit,Int>()
     {
         override fun doGet(context:Unit):Int
-        { return layout.SeekBarWithFeedback__seekbar.progress*valueCoefficient.value+min.value }
+        { return (layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value }
         override fun doSet(context:Unit,value:Int)
-        { layout.SeekBarWithFeedback__seekbar.progress = value/valueCoefficient.value-min.value }
+        { layout.SeekBarWithFeedback__seekbar.progress = (value-min.value)/valueCoefficient.value }
     }
 
     val valueCoefficient = object:Prop<Unit,Int>()
