@@ -4,24 +4,27 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import com.github.ericytsang.androidlib.core.activity.ActivityIntent
-import com.github.ericytsang.androidlib.core.activity.BaseActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.clipboardManager
 import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.core.layoutInflater
+import com.github.ericytsang.lib.optional.Opt
+import com.github.ericytsang.lib.prop.RaiiProp
+import com.github.ericytsang.lib.prop.value
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.activity__confirm_dialog.*
+import kotlinx.android.synthetic.main.notification_media_action.action0
 import java.io.Closeable
 import java.io.Serializable
 
-class CannotOpenLinkActivity
-    :BaseActivity<
-        CannotOpenLinkActivity.Created,
-        BaseActivity.NoOpState<CannotOpenLinkActivity>>()
+class CannotOpenLinkActivity:AppCompatActivity()
 {
     companion object:ContextCompanionWithStart<CannotOpenLinkActivity,Params>(ActivityIntent.FACTORY)
     {
@@ -65,7 +68,19 @@ class CannotOpenLinkActivity
 
     // Created
 
-    override fun makeCreated(methodOverload:MethodOverload,contentView:ViewGroup) = Created(this,fromIntent(intent))
+    private val created = RaiiProp(Opt.of<Created>())
+
+    override fun onCreate(savedInstanceState:Bundle?)
+    {
+        super.onCreate(savedInstanceState)
+        created.value = {Opt.of(Created(this,fromIntent(intent)))}
+    }
+
+    override fun onDestroy()
+    {
+        created.close()
+        super.onDestroy()
+    }
 
     class Created(
             val activity:CannotOpenLinkActivity,
@@ -73,6 +88,7 @@ class CannotOpenLinkActivity
         :Closeable
     {
         val layout = Layout(activity.findViewById(android.R.id.content))
+                .apply {activity.setContentView(containerView)}
 
         init
         {
@@ -119,7 +135,11 @@ class CannotOpenLinkActivity
 
     // Resumed
 
-    override fun makeResumed(methodOverload:MethodOverload,created:Created) = NoOpState(this)
+    override fun onPause()
+    {
+        super.onPause()
+        finish()
+    }
 
     // Layout
 

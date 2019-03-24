@@ -26,6 +26,7 @@ androidExtensions {
 dependencies {
 
     api project(":androidlib.core")
+    api project(":lib.prop")
 
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
