@@ -1,4 +1,5 @@
 include(":androidlib.alertdialog")
+include(":androidlib.cannotopenlinkdialog")
 include(":androidlib.confirmdialog")
 include(":androidlib.core")
 include(":androidlib.colorpreference")

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="activity__cannot_open_link__title">Couldn\'t open link</string>
+    <string name="activity__cannot_open_link__clipboard_label">Link</string>
+    <string name="activity__cannot_open_link__clipboard_copied">Copied \"%1$s\" to clipboard</string>
+    <string name="activity__cannot_open_link__retry">Retry</string>
+    <string name="activity__cannot_open_link__copy">Copy</string>
+    <string name="activity__cannot_open_link__share">Share</string>
+
+</resources>
