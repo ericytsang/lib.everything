@@ -25,9 +25,15 @@ class SeekBarWithFeedback(
     val progress = object:Prop<Unit,Int>()
     {
         override fun doGet(context:Unit):Int
-        { return layout.SeekBarWithFeedback__seekbar.progress*valueCoefficient.value+min.value }
+        {
+            println("layout.SeekBarWithFeedback__seekbar.progress: ${layout.SeekBarWithFeedback__seekbar.progress}")
+            println("min.value: ${min.value}")
+            println("valueCoefficient.value: ${valueCoefficient.value}")
+            println("final: ${(layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value}")
+            return (layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value
+        }
         override fun doSet(context:Unit,value:Int)
-        { layout.SeekBarWithFeedback__seekbar.progress = value/valueCoefficient.value-min.value }
+        { layout.SeekBarWithFeedback__seekbar.progress = (value/valueCoefficient.value)-min.value }
     }
 
     val valueCoefficient = object:Prop<Unit,Int>()
@@ -90,7 +96,7 @@ class SeekBarWithFeedback(
         {
             override fun onProgressChanged(seekBar:SeekBar?,progress:Int,fromUser:Boolean)
             {
-                layout.SeekBarWithFeedback__label__value.text = createLabelText(labelTemplate.value,progress*valueCoefficient.value)
+                layout.SeekBarWithFeedback__label__value.text = createLabelText(labelTemplate.value,this@SeekBarWithFeedback.progress.value)
                 listener?.onProgressChanged(this@SeekBarWithFeedback,this@SeekBarWithFeedback.progress.value,fromUser)
             }
             override fun onStartTrackingTouch(seekBar:SeekBar?) = Unit

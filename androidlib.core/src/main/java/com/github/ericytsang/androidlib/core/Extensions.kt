@@ -1,5 +1,6 @@
 package com.github.ericytsang.androidlib.core
 
+import android.annotation.TargetApi
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -9,6 +10,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ShortcutManager
 import android.graphics.Point
 import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
@@ -63,6 +65,11 @@ fun Context.getDrawableCompat(resId:Int):Drawable
 fun Context.startForegroundServiceCompat(intent:Intent)
 {
     return ContextCompat.startForegroundService(this,intent)
+}
+
+val Context.shortcutManager:ShortcutManager @TargetApi(Build.VERSION_CODES.N_MR1) get()
+{
+    return getSystemServiceCompat(Context.SHORTCUT_SERVICE)
 }
 
 val Context.activityManager:ActivityManager get()
@@ -273,16 +280,16 @@ val PreferenceGroup.descendants:Sequence<Preference> get()
 
 val Display.screenOrientation:Orientation
     get()
-{
-    return when (rotation)
     {
-        Surface.ROTATION_0 -> Orientation.REGULAR_PORTRAIT
-        Surface.ROTATION_180  -> Orientation.REVERSE_PORTRAIT
-        Surface.ROTATION_90 -> Orientation.REGULAR_LANDSCAPE
-        Surface.ROTATION_270  -> Orientation.REVERSE_LANDSCAPE
-        else -> throw Exception()
+        return when (rotation)
+        {
+            Surface.ROTATION_0 -> Orientation.REGULAR_PORTRAIT
+            Surface.ROTATION_180  -> Orientation.REVERSE_PORTRAIT
+            Surface.ROTATION_90 -> Orientation.REGULAR_LANDSCAPE
+            Surface.ROTATION_270  -> Orientation.REVERSE_LANDSCAPE
+            else -> throw Exception()
+        }
     }
-}
 
 enum class Orientation(val hvOrientation:HvOrientation)
 {
