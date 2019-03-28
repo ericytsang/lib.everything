@@ -26,10 +26,6 @@ class SeekBarWithFeedback(
     {
         override fun doGet(context:Unit):Int
         {
-            println("layout.SeekBarWithFeedback__seekbar.progress: ${layout.SeekBarWithFeedback__seekbar.progress}")
-            println("min.value: ${min.value}")
-            println("valueCoefficient.value: ${valueCoefficient.value}")
-            println("final: ${(layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value}")
             return (layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value
         }
         override fun doSet(context:Unit,value:Int)
