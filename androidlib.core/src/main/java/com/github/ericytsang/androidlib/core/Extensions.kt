@@ -14,6 +14,7 @@ import android.content.pm.ShortcutManager
 import android.graphics.Point
 import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -75,6 +76,11 @@ val Context.shortcutManager:ShortcutManager @TargetApi(Build.VERSION_CODES.N_MR1
 val Context.activityManager:ActivityManager get()
 {
     return getSystemServiceCompat(Context.ACTIVITY_SERVICE)
+}
+
+val Context.sensorManager:SensorManager get()
+{
+    return getSystemServiceCompat(Context.SENSOR_SERVICE)
 }
 
 val Context.notificationManager:NotificationManager get()
