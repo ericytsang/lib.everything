@@ -132,6 +132,7 @@ class ColorPreference(
                     .setPositiveButton(android.R.string.ok) {_,newColor,_ -> selectedColor = newColor}
                     .setNegativeButton(android.R.string.cancel) {_,_->Unit}
                     .showAlphaSlider(attached.colorPreference.showAlphaSlider)
+                    .showColorEdit(true)
                     .build()
                     .apply {setOnDismissListener {setColor(selectedColor)}}
                     .show()
