@@ -25,7 +25,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-// todo refine, and abstract to separate library!
 class BillingClientFacade
 private constructor(
         context:Context,
@@ -55,6 +54,7 @@ private constructor(
 
     interface IapListings
     {
+        fun buy(activity:Activity,sku:String):SkuDetails?
         fun details(sku:String):SkuDetails?
         fun isPurchased(sku:String):Boolean
     }
@@ -72,15 +72,6 @@ private constructor(
 
     // client functions
 
-    fun buy(activity:Activity,sku:String)
-    {
-        opened.value.invoke().opt
-                ?.connected?.value?.invoke()?.opt
-                ?.offers?.value?.invoke()?.opt
-                ?.readyToSellStuff?.value?.invoke()?.opt
-                ?.buy(activity,sku)
-    }
-
     fun consume(sku:String)
     {
         opened.value.invoke().opt
@@ -95,9 +86,17 @@ private constructor(
         opened.value.invoke().opt?.refreshPurchases()
     }
 
-    fun doWhenListingsLoaded(block:(IapListings)->Unit)
+    fun doWhenListingsLoaded(block:(IapListings)->Unit):Closeable
     {
-        doWhenReadyToSellStuff += block
+        val doLaterUnlessClosed = DoLaterUnlessClosed()
+        {
+            iapListings:IapListings ->
+            block(iapListings)
+        }
+        doWhenReadyToSellStuff += fun(iapListing:IapListings)
+        {
+            doLaterUnlessClosed(iapListing)
+        }
         val listings = opened.value.invoke().opt
                 ?.connected?.value?.invoke()?.opt
                 ?.offers?.value?.invoke()?.opt
@@ -106,6 +105,28 @@ private constructor(
         {
             generateSequence {doWhenReadyToSellStuff.poll()}
                     .forEach {it(listings)}
+        }
+        return doLaterUnlessClosed
+    }
+
+    // DoLaterUnlessClosed
+
+    private class DoLaterUnlessClosed<I>(val block:(I)->Unit):Closeable
+    {
+        private val lock = ReentrantLock()
+        private var isClosed = false
+
+        operator fun invoke(i:I):Unit = lock.withLock()
+        {
+            if (!isClosed)
+            {
+                block(i)
+            }
+        }
+
+        override fun close() = lock.withLock()
+        {
+            isClosed = true
         }
     }
 
@@ -312,7 +333,7 @@ private constructor(
             offers.connected.opened.billingClientFacade._onPurchaseStateChanged.value += 1
         }
 
-        fun buy(activity:Activity,sku:String):SkuDetails?
+        override fun buy(activity:Activity,sku:String):SkuDetails?
         {
             if (offers.readyToSellStuff.value.invoke().opt != this) return null
 
