@@ -19,6 +19,7 @@ import com.github.ericytsang.lib.prop.DataProp
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.ReadOnlyProp
 import com.github.ericytsang.lib.prop.value
+import com.github.ericytsang.lib.simpletask.SimpleTask
 import java.io.Closeable
 import java.lang.IllegalArgumentException
 import java.util.concurrent.LinkedBlockingQueue
@@ -88,7 +89,7 @@ private constructor(
 
     fun doWhenListingsLoaded(block:(IapListings)->Unit):Closeable
     {
-        val doLaterUnlessClosed = DoLaterUnlessClosed()
+        val doLaterUnlessClosed = SimpleTask()
         {
             iapListings:IapListings ->
             block(iapListings)
@@ -107,27 +108,6 @@ private constructor(
                     .forEach {it(listings)}
         }
         return doLaterUnlessClosed
-    }
-
-    // DoLaterUnlessClosed
-
-    private class DoLaterUnlessClosed<I>(val block:(I)->Unit):Closeable
-    {
-        private val lock = ReentrantLock()
-        private var isClosed = false
-
-        operator fun invoke(i:I):Unit = lock.withLock()
-        {
-            if (!isClosed)
-            {
-                block(i)
-            }
-        }
-
-        override fun close() = lock.withLock()
-        {
-            isClosed = true
-        }
     }
 
     // try to establish a connection to the billing service

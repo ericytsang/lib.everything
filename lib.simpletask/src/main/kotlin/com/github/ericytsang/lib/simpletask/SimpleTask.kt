@@ -4,20 +4,20 @@ import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private class SimpleTask<I,O:Any>(val block:(I)->O):Closeable
+class SimpleTask<I,O:Any>(val block:(I)->O):Closeable
 {
     private val lock = ReentrantLock()
     private var isClosed = false
 
     operator fun invoke(i:I):O? = lock.withLock()
     {
-        if (!isClosed)
+        if (isClosed)
         {
-            block(i)
+            null
         }
         else
         {
-            null
+            block(i)
         }
     }
 
