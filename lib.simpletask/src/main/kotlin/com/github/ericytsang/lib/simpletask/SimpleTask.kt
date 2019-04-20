@@ -9,6 +9,8 @@ class SimpleTask<I,O:Any>(val block:(I)->O):Closeable
     private val lock = ReentrantLock()
     private var isClosed = false
 
+    val wasInvokedOrClosed:Boolean get() = isClosed
+
     operator fun invoke(i:I):O? = lock.withLock()
     {
         if (isClosed)
@@ -17,6 +19,7 @@ class SimpleTask<I,O:Any>(val block:(I)->O):Closeable
         }
         else
         {
+            isClosed = true
             block(i)
         }
     }
