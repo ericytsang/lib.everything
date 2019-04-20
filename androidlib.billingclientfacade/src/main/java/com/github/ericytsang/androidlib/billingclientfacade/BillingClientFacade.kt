@@ -62,9 +62,11 @@ private constructor(
 
     // Opened
 
+    private val appContext = context.applicationContext
+
     private val doWhenReadyToSellStuff = LinkedBlockingQueue<(IapListings)->Unit>()
 
-    private val opened = RaiiProp(Opt.some(Opened(this,context)))
+    private val opened = RaiiProp(Opt.some(Opened(this,appContext)))
 
     override fun close()
     {
@@ -84,7 +86,7 @@ private constructor(
 
     fun refreshPurchases()
     {
-        opened.value.invoke().opt?.refreshPurchases()
+        opened.value = {Opt.of(Opened(this,appContext))}
     }
 
     fun doWhenListingsLoaded(block:(IapListings)->Unit):Closeable
@@ -175,10 +177,7 @@ private constructor(
                 BillingClient.BillingResponse.DEVELOPER_ERROR,
                 BillingClient.BillingResponse.ERROR,
                 BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                BillingClient.BillingResponse.ITEM_NOT_OWNED ->
-                {
-                    billingClientFacade.opened.value = {Opt.of(Opened(billingClientFacade,androidContext))}
-                }
+                BillingClient.BillingResponse.ITEM_NOT_OWNED -> Unit
 
                 // billing client connected
                 BillingClient.BillingResponse.OK ->
@@ -228,13 +227,7 @@ private constructor(
                 BillingClient.BillingResponse.DEVELOPER_ERROR,
                 BillingClient.BillingResponse.ERROR,
                 BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                BillingClient.BillingResponse.ITEM_NOT_OWNED ->
-                {
-                    with(opened)
-                    {
-                        billingClientFacade.opened.value = {Opt.of(Opened(billingClientFacade,androidContext))}
-                    }
-                }
+                BillingClient.BillingResponse.ITEM_NOT_OWNED -> Unit
 
                 // offers received
                 BillingClient.BillingResponse.OK ->
