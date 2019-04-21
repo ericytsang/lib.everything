@@ -1,27 +1,20 @@
 package com.github.ericytsang.androidlib.navbuttonlisteners
 
-import android.content.Context
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.github.ericytsang.multiwindow.app.android.logExceptionSilently
 
-sealed class SoftwareSystemButtonShortcut(
-        val context:Context,
-        val viewIdResourceName:String,
-        val source:AppService.Params.ToggleSplitScreenMode.Source)
-    :AppService.LifecycleStrategy
+class SoftwareSystemButtonShortcut(
+        val viewIdResourceName:Set<String>,
+        val action:(AccessibilityEvent)->Unit)
 {
     companion object
     {
-        private val SYSTEM_UI_PACKAGE = "com.android.systemui"
-        private val RECENT_APPS = ":id/recent_apps"
-        private val HOME_BUTTON = ":id/home_button"
-        private val BACK = ":id/back"
+        val RECENT_APPS = "com.android.systemui:id/recent_apps"
+        val HOME = "com.android.systemui:id/home_button"
+        val BACK = "com.android.systemui:id/back"
     }
 
-    override fun close() = Unit
-
-    override fun onAccessibilityEvent(event:AccessibilityEvent)
+    fun onAccessibilityEvent(event:AccessibilityEvent)
     {
         // ignore non-long-click event types
         if (event.eventType != AccessibilityEvent.TYPE_VIEW_LONG_CLICKED)
@@ -38,32 +31,11 @@ sealed class SoftwareSystemButtonShortcut(
         }
         catch(e:Throwable)
         {
-            logExceptionSilently(e)
-            null
+            throw BenignException(e)
         }
-        if ({true}()
-                && viewIdResourceName == eventViewIdResourceName)
+        if (eventViewIdResourceName in viewIdResourceName)
         {
-            AppService.start(context,AppService.Params.ToggleSplitScreenMode(source))
+            action(event)
         }
     }
-
-    class OverviewButtonShortcut(context:Context)
-        :SoftwareSystemButtonShortcut(context,SYSTEM_UI_PACKAGE+RECENT_APPS,AppService.Params.ToggleSplitScreenMode.Source.Navigation.Overview(AppService.Params.ToggleSplitScreenMode.Source.Navigation.Ware.Soft()))
-
-    class HomeButtonShortcut(context:Context)
-        :SoftwareSystemButtonShortcut(context,SYSTEM_UI_PACKAGE+HOME_BUTTON,AppService.Params.ToggleSplitScreenMode.Source.Navigation.Home(AppService.Params.ToggleSplitScreenMode.Source.Navigation.Ware.Soft()))
-
-    class BackButtonShortcut(context:Context)
-        :SoftwareSystemButtonShortcut(context,SYSTEM_UI_PACKAGE+BACK,AppService.Params.ToggleSplitScreenMode.Source.Navigation.Back(AppService.Params.ToggleSplitScreenMode.Source.Navigation.Ware.Soft()))
-
-    class CustomButtonShortcut(
-            context:Context,
-            viewIdResourceName:String)
-        :SoftwareSystemButtonShortcut(
-            context,
-            viewIdResourceName,
-            AppService.Params.ToggleSplitScreenMode.Source.Navigation.Custom(
-                    viewIdResourceName,
-                    AppService.Params.ToggleSplitScreenMode.Source.Navigation.Ware.Soft()))
 }
