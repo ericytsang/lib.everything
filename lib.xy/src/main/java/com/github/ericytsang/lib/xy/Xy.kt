@@ -7,6 +7,11 @@ data class Xy(
         val y:Float)
     :Serializable
 {
+    companion object
+    {
+        val ZERO = Xy(0f,0f)
+    }
+
     init
     {
         require(x.isNaN().not())
@@ -26,6 +31,11 @@ data class Xy(
     operator fun times(other:Float):Xy
     {
         return Xy(x*other,y*other)
+    }
+
+    operator fun div(other:Float):Xy
+    {
+        return Xy(x/other,y/other)
     }
 
     val squaredDistance by lazy {x*x+y*y}
