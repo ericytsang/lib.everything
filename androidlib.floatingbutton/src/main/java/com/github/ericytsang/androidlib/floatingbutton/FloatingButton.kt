@@ -22,8 +22,6 @@ import com.github.ericytsang.lib.prop.value
 import com.github.ericytsang.lib.xy.BoundedXy
 import com.github.ericytsang.lib.xy.Xy
 import com.github.ericytsang.lib.xy.XyBounds
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.layout__floating_button.*
 import java.io.Closeable
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -33,9 +31,8 @@ import kotlin.math.sqrt
  * * optional have tap/long press actions
  * * optional drag to move
  */
-class FloatingButton
-private constructor(
-        context:Context,
+class FloatingButton(
+        val rootView:View,
         val strategy:Strategy,
 
         /**
@@ -44,15 +41,9 @@ private constructor(
          * 1.0 for x/y -> button is on the very right/bottom of the screen.
          * position is calculated as if device is in portrait orientation.
          */
-        initialPositionScalar:Xy)
+        initialPositionScalar:Xy = Xy(0.5f,0.5f))
     :Closeable
 {
-    companion object
-    {
-        fun make(context:Context,strategy:Strategy,initialPositionScalar:Xy)
-            = FloatingButton(context.applicationContext,strategy,initialPositionScalar)
-    }
-
     // validate input
     init
     {
@@ -61,47 +52,15 @@ private constructor(
         require(initialPositionScalar.y in 0.0..1.0)
     }
 
-    private val layout = Layout(context)
-
     private val thingsToClose = CloseableGroup()
 
     override fun close() = thingsToClose.close()
-
-    // update the background tint to match the property
-    init
-    {
-        thingsToClose += listOf(strategy.backgroundTintColor).listen()
-        {
-            val newColor = strategy.backgroundTintColor.value
-            layout.layout__floating_button.backgroundTintList = ColorStateList.valueOf(newColor)
-        }
-    }
-
-    // update the foreground drawable to match the property
-    init
-    {
-        thingsToClose += listOf(strategy.foregroundDrawable).listen()
-        {
-            layout.layout__floating_button.setImageDrawable(strategy.foregroundDrawable.value)
-        }
-    }
-
-    // size of floating button matches property
-    init
-    {
-        listOf(strategy.diameter).listen()
-        {
-            layout.layout__floating_button.layoutParams = RelativeLayout.LayoutParams(
-                    strategy.diameter.value,
-                    strategy.diameter.value)
-        }
-    }
 
     // convert position when orientation changes
     init
     {
         val oldDimensions = OldValueHolder(strategy.screenDimensions.value)
-        listOf(strategy.screenDimensions).listen()
+        thingsToClose += listOf(strategy.screenDimensions).listen()
         {
             val newDimensions = strategy.screenDimensions.value
 
@@ -122,22 +81,20 @@ private constructor(
     // floating point x and y position of the floating button
     private val position = run()
     {
-        val measurements = layout.containerView.context.windowManager.defaultDisplay.realScreenDimensionsForOrientation(HvOrientation.VERTICAL)
+        val measurements = rootView.context.windowManager.defaultDisplay.realScreenDimensionsForOrientation(HvOrientation.VERTICAL)
         val screenBounds = strategy.screenDimensions.value.dimensions.screenBoundsIncludingNavBar
         BoundedXy(
                 Xy(
                         measurements.w*initialPositionScalar.x,
                         measurements.h*initialPositionScalar.y),
                 XyBounds(
-                        screenBounds.xBounds.run {start..endInclusive-strategy.diameter.value.toFloat()},
-                        screenBounds.yBounds.run {start..endInclusive-strategy.diameter.value.toFloat()}))
+                        screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
+                        screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y}))
     }
 
     // layout parameters used to attach the button to the window manager
     private val layoutParams = WindowManager.LayoutParams().apply()
     {
-        width = strategy.diameter.value
-        height = strategy.diameter.value
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         flags = 0
                 .or(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
@@ -147,32 +104,38 @@ private constructor(
     }
         get()
         {
+            field.width = strategy.dimensions.value.x.roundToInt()
+            field.height = strategy.dimensions.value.y.roundToInt()
             field.x = position.position.x.roundToInt()
             field.y = position.position.y.roundToInt()
             return field
         }
 
+    // size of floating button matches property
+    // position of floating button matches property
+    init
+    {
+        thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
+        {
+            rootView.layoutParams = layoutParams
+        }
+    }
+
     // add this to the window
     init
     {
-        layout.containerView.context.windowManager.addView(
-                layout.containerView,
-                layoutParams)
+        rootView.context.windowManager.addView(rootView,layoutParams)
         thingsToClose += Closeable()
         {
-            layout.containerView.context.windowManager.removeView(layout.containerView)
+            rootView.context.windowManager.removeView(rootView)
         }
     }
 
     interface Strategy
     {
-        val backgroundTintColor:ReadOnlyProp<Unit,Int>
-        val foregroundDrawable:ReadOnlyProp<Unit,Drawable>
-        val diameter:ReadOnlyProp<Unit,Int>
+        val dimensions:ReadOnlyProp<Unit,Xy>
         val screenDimensions:ReadOnlyProp<Unit,OrientationChange>
     }
-
-    val rootView get() = layout.containerView
 
     // manages the velocity of the floating button as it is decelerating to a stop after being flung...
     private val flingAnimator = object
@@ -221,30 +184,8 @@ private constructor(
         }
     }
 
-    // update the window during the animation pulse
-    init
-    {
-        val valueAnimator = ValueAnimator.ofInt(0,100)
-        valueAnimator.repeatMode = ValueAnimator.RESTART
-        valueAnimator.repeatCount = ValueAnimator.INFINITE
-        val oldPosition = OldValueHolder(position)
-        valueAnimator.addUpdateListener()
-        {
-            // update the window layout parameters if needed
-            oldPosition.doAndSetIfNotEq(position)
-            {
-                layout.containerView.context.windowManager.updateViewLayout(layout.containerView,layoutParams)
-            }
-        }
-
-        thingsToClose += Closeable()
-        {
-            valueAnimator.cancel()
-        }
-    }
-
     // drag action that can be injected into touch listeners
-    val dragToMoveButton = object:TouchHandler.DragAction
+    private val dragToMoveButton = object:TouchHandler.DragAction
     {
         override fun dragStart(firstPosition:Xy,eventTime:Long):TouchHandler.DragAction.DragContinuation
         {
@@ -265,12 +206,6 @@ private constructor(
         {
             flingAnimator.setFling(flingVelocity)
         }
-    }
-
-    // Layout
-    private class Layout(context:Context):LayoutContainer
-    {
-        override val containerView:View = context.layoutInflater.inflate(R.layout.layout__floating_button,null)
     }
 
     private class OldValueHolder<T>(_oldValue:T)

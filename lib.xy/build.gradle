@@ -8,4 +8,7 @@ dependencies {
 
     // test
     testCompile(project(":lib.testutils"))
+
+    // project dependencies
+    compile(project(":lib.prop"))
 }
