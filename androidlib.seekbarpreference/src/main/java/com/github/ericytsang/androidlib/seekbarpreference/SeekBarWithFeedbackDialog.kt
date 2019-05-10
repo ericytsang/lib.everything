@@ -9,7 +9,6 @@ import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback
 import com.github.ericytsang.lib.optional.Opt
-import com.github.ericytsang.lib.optional.OptCloser
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
 import kotlinx.android.extensions.LayoutContainer

@@ -12,7 +12,6 @@ import com.github.ericytsang.lib.prop.value
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.view__seek_bar_with_feedback.*
 
-// todo: separate android library
 class SeekBarWithFeedback(
         context:Context,
         attrs:AttributeSet)

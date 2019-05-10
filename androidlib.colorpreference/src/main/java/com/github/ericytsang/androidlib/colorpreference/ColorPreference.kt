@@ -44,6 +44,7 @@ class ColorPreference(
 
     init
     {
+        typedArray.recycle()
         widgetLayoutResource = R.layout.layout__swatch
     }
 
