@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/listPreferredItemHeight"
+    android:paddingStart="?android:attr/dialogPreferredPadding"
+    android:paddingEnd="?android:attr/dialogPreferredPadding"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <CheckedTextView
+        android:id="@+id/radiobutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?android:attr/textColorAlertDialogListItem"
+        android:paddingStart="0dip"
+        android:paddingEnd="8dip"
+        android:layout_marginStart="-5dip"
+        android:checkMark="?android:attr/listChoiceIndicatorSingle"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:id="@+id/text1"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="?android:attr/textColorAlertDialogListItem"
+        android:gravity="center_vertical"
+        android:ellipsize="marquee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/radiobutton"/>
+
+    <TextView
+        android:id="@+id/text2"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorSecondary"
+        android:gravity="center_vertical"
+        android:ellipsize="marquee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/text1"
+        android:layout_alignStart="@id/text1"/>
+
+</RelativeLayout>

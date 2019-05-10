@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TwoLineListPreference">
+        <attr name="entries" format="reference"/>
+        <attr name="entryDescriptions" format="reference"/>
+        <attr name="entryValues" format="reference"/>
+    </declare-styleable>
+
+</resources>
