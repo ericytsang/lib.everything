@@ -26,6 +26,7 @@ class InlineSeekBarWithFeedbackPreference(
     private val labelTemplate = typedArray.getString(R.styleable.InlineSeekBarWithFeedbackPreference_labelTemplate)?:"{}"
     init
     {
+        typedArray.recycle()
         require(minSliderValue < maxSliderValue)
         require(minSliderValue != Integer.MAX_VALUE)
         require(maxSliderValue != Integer.MIN_VALUE)

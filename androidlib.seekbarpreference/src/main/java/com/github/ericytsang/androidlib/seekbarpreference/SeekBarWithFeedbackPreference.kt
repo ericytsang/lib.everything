@@ -7,7 +7,6 @@ import androidx.preference.PreferenceViewHolder
 import com.github.ericytsang.androidlib.core.postOnUiThread
 import com.github.ericytsang.lib.noopclose.NoopClose
 import com.github.ericytsang.lib.optional.Opt
-import com.github.ericytsang.lib.optional.OptCloser
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.listen
 import com.github.ericytsang.lib.prop.value
@@ -44,6 +43,7 @@ class SeekBarWithFeedbackPreference(
     private val labelTemplate = typedArray.getString(R.styleable.SeekBarWithFeedbackPreference_labelTemplate)?:"{}"
     init
     {
+        typedArray.recycle()
         require(minSliderValue < maxSliderValue)
         require(minSliderValue != Integer.MAX_VALUE)
         require(maxSliderValue != Integer.MIN_VALUE)
