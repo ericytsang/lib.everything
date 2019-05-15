@@ -56,6 +56,20 @@ class FloatingButton(
 
     override fun close() = thingsToClose.close()
 
+    // floating point x and y position of the floating button
+    private val position = run()
+    {
+        val measurements = rootView.context.windowManager.defaultDisplay.realScreenDimensionsForOrientation(HvOrientation.VERTICAL)
+        val screenBounds = strategy.screenDimensions.value.dimensions.screenBoundsIncludingNavBar
+        BoundedXy(
+                Xy(
+                        measurements.w*initialPositionScalar.x,
+                        measurements.h*initialPositionScalar.y),
+                XyBounds(
+                        screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
+                        screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y}))
+    }
+
     // convert position when orientation changes
     init
     {
@@ -76,20 +90,6 @@ class FloatingButton(
                 position.position = newPosition
             }
         }
-    }
-
-    // floating point x and y position of the floating button
-    private val position = run()
-    {
-        val measurements = rootView.context.windowManager.defaultDisplay.realScreenDimensionsForOrientation(HvOrientation.VERTICAL)
-        val screenBounds = strategy.screenDimensions.value.dimensions.screenBoundsIncludingNavBar
-        BoundedXy(
-                Xy(
-                        measurements.w*initialPositionScalar.x,
-                        measurements.h*initialPositionScalar.y),
-                XyBounds(
-                        screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
-                        screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y}))
     }
 
     // layout parameters used to attach the button to the window manager
