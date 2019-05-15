@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.prop
 
+import com.github.ericytsang.lib.optional.Opt
 import java.io.Closeable
 
 val <Value:Any> ReadOnlyProp<Unit,Value>.value:Value
@@ -8,6 +9,13 @@ val <Value:Any> ReadOnlyProp<Unit,Value>.value:Value
 var <Value:Any> MutableProp<Unit,Value>.value:Value
     get() = get(Unit)
     set(value) { set(Unit,value) }
+
+val <Value:Any> ReadOnlyProp<Unit,Opt<Value>>.nullableValue:Value?
+    get() = get(Unit).opt
+
+var <Value:Any> MutableProp<Unit,Opt<Value>>.nullableValue:Value?
+    get() = get(Unit).opt
+    set(value) { set(Unit,Opt.of(value)) }
 
 fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
