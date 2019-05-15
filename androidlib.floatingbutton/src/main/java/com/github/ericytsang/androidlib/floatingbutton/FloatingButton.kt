@@ -162,7 +162,7 @@ class FloatingButton(
             val initialVelocity = sqrt(flingVelocity.squaredDistance)
             val stoppingDuration = initialVelocity.div(0.05f).toLong()
             val initialPosition = position.position
-            close()
+            endAllOngoingAnimations()
             ongoingValueAnimators += ValueAnimator
                     .ofFloat(1f,0f)
                     .setDuration(stoppingDuration)
