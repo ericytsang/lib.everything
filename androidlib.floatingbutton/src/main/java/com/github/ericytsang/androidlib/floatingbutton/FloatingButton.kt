@@ -114,16 +114,6 @@ class FloatingButton(
             return field
         }
 
-    // size of floating button matches property
-    // position of floating button matches property
-    init
-    {
-        thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
-        {
-            rootView.layoutParams = layoutParams
-        }
-    }
-
     // add this to the window
     init
     {
@@ -131,6 +121,16 @@ class FloatingButton(
         thingsToClose += Closeable()
         {
             rootView.context.windowManager.removeView(rootView)
+        }
+    }
+
+    // size of floating button matches property
+    // position of floating button matches property
+    init
+    {
+        thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
+        {
+            rootView.context.windowManager.updateViewLayout(rootView,layoutParams)
         }
     }
 
