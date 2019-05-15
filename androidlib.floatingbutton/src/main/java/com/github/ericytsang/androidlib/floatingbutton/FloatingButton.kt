@@ -8,10 +8,8 @@ import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.widget.RelativeLayout
 import com.github.ericytsang.androidlib.core.HvOrientation
 import com.github.ericytsang.androidlib.core.Orientation
-import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.core.realScreenDimensionsForOrientation
 import com.github.ericytsang.androidlib.core.windowManager
 import com.github.ericytsang.androidlib.screenmeasurer.OrientationChange
@@ -157,9 +155,10 @@ class FloatingButton(
          * stops any ongoing flings, and immediately makes the floating button
          * fling using the given [flingVelocity].
          */
-        fun setFling(flingVelocity:Xy)
+        fun setFling(flingVelocity:TouchHandler.DragAction.Velocity)
         {
-            val initialVelocity = sqrt(flingVelocity.squaredDistance)
+            val initialVelocityXy = flingVelocity.deltaPosition/flingVelocity.deltaTimeMillis.toFloat().coerceAtLeast(0.0001f)
+            val initialVelocity = sqrt(initialVelocityXy.squaredDistance)
             val stoppingDuration = initialVelocity.div(0.05f).toLong()
             val initialPosition = position.position
             endAllOngoingAnimations()
@@ -170,8 +169,8 @@ class FloatingButton(
                     {
                         val animatedValue = (it.animatedValue as Float)
                         val elapsedTime = (1f-animatedValue)*stoppingDuration
-                        val currentVelocity = flingVelocity*animatedValue
-                        val distanceFromInitialPosition = (flingVelocity+currentVelocity)*elapsedTime/2f
+                        val currentVelocity = initialVelocityXy*animatedValue
+                        val distanceFromInitialPosition = (initialVelocityXy+currentVelocity)*elapsedTime/2f
                         position.position = initialPosition+distanceFromInitialPosition
                     }}
                     .apply {start()}
@@ -188,11 +187,11 @@ class FloatingButton(
     }
 
     // drag action that can be injected into touch listeners
-    private val dragToMoveButton = object:TouchHandler.DragAction
+    val dragToMoveButton = object:TouchHandler.DragAction
     {
         override fun dragStart(firstPosition:Xy,eventTime:Long):TouchHandler.DragAction.DragContinuation
         {
-            flingAnimator.setFling(Xy.ZERO)
+            flingAnimator.setFling(TouchHandler.DragAction.Velocity(Xy.ZERO,0))
             return DragToMoveButtonDragContinuation()
         }
     }
@@ -205,7 +204,7 @@ class FloatingButton(
             position.position += deltaPosition
         }
 
-        override fun dragEnd(flingVelocity:Xy,eventTime:Long)
+        override fun dragEnd(flingVelocity:TouchHandler.DragAction.Velocity,eventTime:Long)
         {
             flingAnimator.setFling(flingVelocity)
         }
