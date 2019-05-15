@@ -4,6 +4,7 @@ import android.view.MotionEvent
 import android.view.View
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.xy.Xy
+import kotlin.math.roundToLong
 
 class TouchHandler(
         val touchSessionFactory:PrimaryPointerFilterTouchListener.Listener)
@@ -51,7 +52,25 @@ class TouchHandler(
         interface DragContinuation
         {
             fun dragContinue(currentPosition:Xy,deltaPosition:Xy,eventTime:Long)
-            fun dragEnd(flingVelocity:Xy,eventTime:Long)
+            fun dragEnd(flingVelocity:Velocity,eventTime:Long)
+        }
+        data class Velocity(
+                val deltaPosition:Xy,
+                val deltaTimeMillis:Long)
+        {
+            operator fun plus(other:Velocity):Velocity
+            {
+                return Velocity(
+                        deltaPosition+other.deltaPosition,
+                        deltaTimeMillis+other.deltaTimeMillis)
+            }
+
+            operator fun div(other:Float):Velocity
+            {
+                return Velocity(
+                        deltaPosition/other,
+                        deltaTimeMillis.div(other).roundToLong())
+            }
         }
     }
 }

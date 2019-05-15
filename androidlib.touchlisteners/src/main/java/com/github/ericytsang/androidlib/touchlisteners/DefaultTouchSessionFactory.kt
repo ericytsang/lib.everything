@@ -375,7 +375,8 @@ class DefaultTouchSessionFactory(
             :TouchSession()
         {
             private var lastPosition = firstPosition
-            private val deltaMoveSamples = MovingWindowBuffer<Xy>(5)
+            private var lastEventTime = dragStartEventTime
+            private val deltaMoveSamples = MovingWindowBuffer<TouchHandler.DragAction.Velocity>(5)
             private val dragContinuation = dragAction.dragStart(firstPosition,dragStartEventTime)
 
             override fun touchContinue(v:View,event:MotionEvent):TouchSession
@@ -383,19 +384,28 @@ class DefaultTouchSessionFactory(
                 val currentPosition = Xy(event.rawX,event.rawY)
                 val deltaPosition = currentPosition-lastPosition
                 lastPosition = currentPosition
+
+                val currentTimeMillis = event.eventTime
+                val deltaTimeMillis = currentTimeMillis-lastEventTime
+                lastEventTime = currentTimeMillis
+
                 dragContinuation.dragContinue(currentPosition,deltaPosition,event.eventTime)
-                deltaMoveSamples.add(deltaPosition)
+                deltaMoveSamples.add(TouchHandler.DragAction.Velocity(deltaPosition,deltaTimeMillis))
                 return this
             }
 
             override fun touchEnd(v:View,event:MotionEvent)
             {
+                // add the last event to the list of velocity samples...
+                touchContinue(v,event)
+
+                // compute the fling velocity
                 val flingVelocity = deltaMoveSamples.consume().let()
                 {samples ->
-                    val denominator = samples.size.coerceAtLeast(1)
+                    val denominator = samples.size.also{require(it > 0)}
                     samples
-                            .fold(Xy(0f,0f)) {acc,next -> acc+next}
-                            .let {Xy(it.x/denominator,it.y/denominator)}
+                            .fold(TouchHandler.DragAction.Velocity(Xy(0f,0f),0)) {acc,next -> acc+next}
+                            .let {it/denominator.toFloat()}
                 }
                 dragContinuation.dragEnd(flingVelocity,event.eventTime)
             }
@@ -445,7 +455,7 @@ private fun TouchHandler.DragAction.alsoDo(block:()->Unit):TouchHandler.DragActi
             val continuation = original.dragStart(firstPosition,eventTime)
             return object:TouchHandler.DragAction.DragContinuation by continuation
             {
-                override fun dragEnd(flingVelocity:Xy,eventTime:Long)
+                override fun dragEnd(flingVelocity:TouchHandler.DragAction.Velocity,eventTime:Long)
                 {
                     block()
                     continuation.dragEnd(flingVelocity,eventTime)
