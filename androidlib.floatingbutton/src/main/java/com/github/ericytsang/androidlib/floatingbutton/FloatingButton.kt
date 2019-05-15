@@ -3,6 +3,7 @@ package com.github.ericytsang.androidlib.floatingbutton
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
@@ -96,10 +97,12 @@ class FloatingButton(
     private val layoutParams = WindowManager.LayoutParams().apply()
     {
         type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        flags = 0
+        format = PixelFormat.TRANSLUCENT
+        flags = flags
                 .or(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
                 .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)
                 .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+                .or(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         gravity = Gravity.TOP or Gravity.LEFT
     }
         get()
