@@ -31,12 +31,12 @@ class ScreenMeasurer(
         BroadcastReceiver(),
         Closeable
 {
+    private val bottomRightView = View(context)
+    private val topLeftView = View(context)
+
     val orientation = DataProp(OrientationChange(
             context.windowManager.defaultDisplay.screenOrientation,
             computeScreenDimensions()))
-
-    private val bottomRightView = View(context)
-    private val topLeftView = View(context)
 
     private val layoutChangeListener = object:ViewTreeObserver.OnGlobalLayoutListener,DoLog
     {
