@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
+import android.view.WindowManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.flask.colorpicker.ColorPickerView
@@ -135,7 +136,13 @@ class ColorPreference(
                     .showAlphaSlider(attached.colorPreference.showAlphaSlider)
                     .showColorEdit(true)
                     .build()
-                    .apply {setOnDismissListener {setColor(selectedColor)}}
+                    .apply {
+                        // set the color back to original color when touch outside dialog
+                        setOnDismissListener {setColor(selectedColor)}
+
+                        // don't popup keyboard immediately
+                        window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+                    }
                     .show()
         }
     }
