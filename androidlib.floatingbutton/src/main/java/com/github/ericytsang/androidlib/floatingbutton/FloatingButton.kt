@@ -1,10 +1,7 @@
 package com.github.ericytsang.androidlib.floatingbutton
 
 import android.animation.ValueAnimator
-import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.PixelFormat
-import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -15,6 +12,7 @@ import com.github.ericytsang.androidlib.core.windowManager
 import com.github.ericytsang.androidlib.screenmeasurer.OrientationChange
 import com.github.ericytsang.androidlib.touchlisteners.TouchHandler
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
+import com.github.ericytsang.lib.prop.DataProp
 import com.github.ericytsang.lib.prop.ReadOnlyProp
 import com.github.ericytsang.lib.prop.listen
 import com.github.ericytsang.lib.prop.value
@@ -25,11 +23,6 @@ import java.io.Closeable
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-/**
- * this is a floating button that has multiple strategies:
- * * optional have tap/long press actions
- * * optional drag to move
- */
 class FloatingButton(
         val rootView:View,
         val strategy:Strategy,
@@ -51,84 +44,147 @@ class FloatingButton(
         require(initialPositionScalar.y in 0.0..1.0)
     }
 
+    /**
+     * [thingsToClose]: resources allocated during initialization that are to be
+     * released upon [FloatingButton.close].
+     */
     private val thingsToClose = CloseableGroup()
-
     override fun close() = thingsToClose.close()
 
-    // floating point x and y position of the floating button
+    /**
+     * [position]: floating point x and y position of the floating button
+     */
     private val position = run()
     {
         val measurements = rootView.context.windowManager.defaultDisplay.realScreenDimensionsForOrientation(HvOrientation.VERTICAL)
         val screenBounds = strategy.screenDimensions.value.dimensions.screenBoundsIncludingNavBar
         BoundedXy(
                 Xy(
-                        measurements.w*initialPositionScalar.x,
-                        measurements.h*initialPositionScalar.y),
+                        measurements.w*initialPositionScalar.x-strategy.dimensions.value.x/2,
+                        measurements.h*initialPositionScalar.y-strategy.dimensions.value.y/2),
                 XyBounds(
                         screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
                         screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y}))
     }
 
-    // convert position when orientation changes
+    /**
+     * allow access to the scalar position of this [FloatingButton].
+     */
+    val portraitModePositionAsScalar:ReadOnlyProp<Unit,Xy> get() = _portraitModePositionAsScalar
+    private val _portraitModePositionAsScalar = DataProp(initialPositionScalar)
+
     init
     {
-        val oldDimensions = OldValueHolder(strategy.screenDimensions.value)
-        thingsToClose += listOf(strategy.screenDimensions).listen()
+        object
         {
-            val newDimensions = strategy.screenDimensions.value
+            /**
+             * [positionAsScalar]: allows access to [position].[BoundedXy.position] in a way where
+             * - (0,0) is the top left of the screen,
+             * - and (1,1) is the bottom right.
+             */
+            var positionAsScalar:Xy
+                get() = Xy(
+                        position.bounds.xBounds.run {(position.position.x-start)/(endInclusive-start)},
+                        position.bounds.yBounds.run {(position.position.y-start)/(endInclusive-start)})
+                set(value)
+                {
+                    position.position = Xy(
+                            position.bounds.xBounds.run {value.x*(endInclusive-start)+start},
+                            position.bounds.yBounds.run {value.y*(endInclusive-start)+start})
+                }
 
-            // convert position to scalar coordinates
-            oldDimensions.doThenSet(newDimensions)
+            /**
+             * [oldDimensions]: dimension that the position is calibrated for.
+             * e.g. position was set while the phone's is in landscape mode;
+             * [oldDimensions].[OrientationChange.dimensions] == [Orientation.REGULAR_LANDSCAPE].
+             * but the phone is now in [Orientation.REGULAR_PORTRAIT].
+             */
+            val oldDimensions = OldValueHolder(strategy.screenDimensions.value
+                    .copy(orientation = Orientation.REGULAR_PORTRAIT))
+
+            // convert position when orientation or dimension changes.
+            init
             {
-                val newPosition = transformCoordinate(
-                        oldDimensions.oldValue.orientation,
-                        newDimensions.orientation,
-                        position.position,
-                        newDimensions.dimensions.screenBoundsIncludingNavBar)
-                position.bounds = newDimensions.dimensions.screenBoundsIncludingNavBar
-                position.position = newPosition
+                thingsToClose += listOf(strategy.screenDimensions,strategy.dimensions).listen()
+                {
+                    val newDimensions = strategy.screenDimensions.value
+
+                    // convert position to scalar coordinates
+                    oldDimensions.doThenSet(newDimensions)
+                    {
+                        val newPosition = transformCoordinate(
+                                oldDimensions.oldValue.orientation,
+                                newDimensions.orientation,
+                                positionAsScalar,
+                                XyBounds(0f..1f,0f..1f))
+                        val screenBounds = newDimensions.dimensions.screenBoundsIncludingNavBar
+                        position.bounds = XyBounds(
+                                screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
+                                screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y})
+                        positionAsScalar = newPosition
+                    }
+                }
+            }
+
+            // save position when it is updated
+            init
+            {
+                thingsToClose += listOf(position.onChanged).listen()
+                {
+                    _portraitModePositionAsScalar.value = transformCoordinate(
+                            oldDimensions.oldValue.orientation,
+                            Orientation.REGULAR_PORTRAIT,
+                            positionAsScalar,
+                            XyBounds(0f..1f,0f..1f))
+                }
             }
         }
     }
 
-    // layout parameters used to attach the button to the window manager
-    private val layoutParams = WindowManager.LayoutParams().apply()
-    {
-        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-        format = PixelFormat.TRANSLUCENT
-        flags = flags
-                .or(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-                .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)
-                .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-                .or(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        gravity = Gravity.TOP or Gravity.LEFT
-    }
-        get()
-        {
-            field.width = strategy.dimensions.value.x.roundToInt()
-            field.height = strategy.dimensions.value.y.roundToInt()
-            field.x = position.position.x.roundToInt()
-            field.y = position.position.y.roundToInt()
-            return field
-        }
-
-    // add this to the window
     init
     {
-        rootView.context.windowManager.addView(rootView,layoutParams)
-        thingsToClose += Closeable()
+        object
         {
-            rootView.context.windowManager.removeView(rootView)
-        }
-    }
+            private val layoutParams = WindowManager.LayoutParams().apply()
+            {
+                type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                format = PixelFormat.TRANSLUCENT
+                flags = flags
+                        .or(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                        .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)
+                        .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+                        .or(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                gravity = Gravity.TOP or Gravity.LEFT
+            }
 
-    // size of floating button matches property
-    // position of floating button matches property
-    init
-    {
-        thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
-        {
-            rootView.context.windowManager.updateViewLayout(rootView,layoutParams)
+            private fun layoutParams(position:Xy,dimensions:Xy):WindowManager.LayoutParams
+            {
+                layoutParams.width = dimensions.x.roundToInt()
+                layoutParams.height = dimensions.y.roundToInt()
+                layoutParams.x = position.x.roundToInt()
+                layoutParams.y = position.y.roundToInt()
+                return layoutParams
+            }
+
+            // add floating button to the window & remove it upon [FloatingButton.close].
+            init
+            {
+                rootView.context.windowManager.addView(rootView,layoutParams(position.position,strategy.dimensions.value))
+                thingsToClose += Closeable()
+                {
+                    rootView.context.windowManager.removeView(rootView)
+                }
+            }
+
+            // size of floating button matches property
+            // position of floating button matches property
+            init
+            {
+                thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
+                {
+                    rootView.context.windowManager.updateViewLayout(rootView,layoutParams(position.position,strategy.dimensions.value))
+                }
+            }
         }
     }
 
@@ -194,19 +250,19 @@ class FloatingButton(
             flingAnimator.setFling(TouchHandler.DragAction.Velocity(Xy.ZERO,0))
             return DragToMoveButtonDragContinuation()
         }
-    }
 
-    private inner class DragToMoveButtonDragContinuation
-        :TouchHandler.DragAction.DragContinuation
-    {
-        override fun dragContinue(currentPosition:Xy,deltaPosition:Xy,eventTime:Long)
+        private inner class DragToMoveButtonDragContinuation
+            :TouchHandler.DragAction.DragContinuation
         {
-            position.position += deltaPosition
-        }
+            override fun dragContinue(currentPosition:Xy,deltaPosition:Xy,eventTime:Long)
+            {
+                position.position += deltaPosition
+            }
 
-        override fun dragEnd(flingVelocity:TouchHandler.DragAction.Velocity,eventTime:Long)
-        {
-            flingAnimator.setFling(flingVelocity)
+            override fun dragEnd(flingVelocity:TouchHandler.DragAction.Velocity,eventTime:Long)
+            {
+                flingAnimator.setFling(flingVelocity)
+            }
         }
     }
 
@@ -214,15 +270,6 @@ class FloatingButton(
     {
         var oldValue = _oldValue
             private set
-
-        fun doAndSetIfNotEq(newValue:T,block:()->Unit)
-        {
-            if (oldValue != newValue)
-            {
-                block()
-                oldValue = newValue
-            }
-        }
 
         fun doThenSet(newValue:T,block:()->Unit)
         {
