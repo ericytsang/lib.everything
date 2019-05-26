@@ -1,12 +1,14 @@
 package com.github.ericytsang.lib.closeablegroup
 
 import java.io.Closeable
+import java.util.Stack
 
 class CloseableGroup(
         vararg _closeables:Closeable)
     :Closeable
 {
-    private val closeables = mutableListOf(*_closeables)
+    private val closeables = Stack<Closeable>()
+            .apply {addAll(_closeables)}
 
     operator fun plusAssign(other:Closeable)
     {
@@ -15,6 +17,7 @@ class CloseableGroup(
 
     override fun close()
     {
-        closeables.toList().asReversed().forEach {it.close()}
+        generateSequence {closeables.runCatching {pop()}.getOrNull()}
+                .forEach {it.close()}
     }
 }
