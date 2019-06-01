@@ -15,6 +15,11 @@ class CloseableGroup(
         closeables += other
     }
 
+    operator fun <R> plusAssign(other:()->R)
+    {
+        closeables += Closeable {other()}
+    }
+
     override fun close()
     {
         generateSequence {closeables.runCatching {pop()}.getOrNull()}
