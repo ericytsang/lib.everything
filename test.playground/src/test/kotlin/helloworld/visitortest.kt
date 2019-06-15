@@ -1,5 +1,7 @@
 package helloworld
 
+import com.github.ericytsang.generated.helloworld.UnionType_Greeting
+import com.github.ericytsang.generated.helloworld.asUnionType
 import org.junit.Test
 
 class Test
