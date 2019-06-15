@@ -1,6 +1,5 @@
 package com.github.ericytsang.lib.concurrent
 
-import com.sun.jmx.remote.internal.ArrayQueue
 import java.io.Closeable
 import java.util.Queue
 import java.util.concurrent.BlockingQueue
