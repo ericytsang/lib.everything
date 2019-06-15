@@ -1,7 +1,30 @@
 apply plugin: "kotlin"
 apply plugin: "kotlin-kapt"
 
+kapt {
+    generateStubs = true
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir.absolutePath}/generated/source/kapt/main"
+            srcDir "${buildDir.absolutePath}/generated/source/kaptKotlin/main"
+        }
+    }
+    test {
+        java {
+            srcDir "${buildDir.absolutePath}/generated/source/kapt/test"
+            srcDir "${buildDir.absolutePath}/generated/source/kaptKotlin/test"
+        }
+    }
+}
+
 dependencies {
+
+    // lib.visitor
+    kapt project(":lib.visitor")
+    compileOnly project(":lib.visitor")
 
     // kotlin
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
