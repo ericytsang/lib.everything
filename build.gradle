@@ -2,11 +2,21 @@
 buildscript {
 
     repositories {
+
+        // kotlin
         mavenCentral()
+        
+        // android
+        google()
     }
 
     dependencies {
+
+        // kotlin
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+
+        // android
+        classpath("com.android.tools.build:gradle:$android_gradle_version")
     }
 }
 
