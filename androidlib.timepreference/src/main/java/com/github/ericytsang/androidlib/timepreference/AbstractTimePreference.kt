@@ -200,8 +200,10 @@ abstract class AbstractTimePreference<T:Any>(
             }
 
             // determine whether we should show the custom button
-            customButton.visibility =  if (preference.strategy.customAction != null)
+            val customAction = preference.strategy.customAction
+            customButton.visibility =  if (customAction != null)
             {
+                customButton.text = customAction.buttonText
                 View.VISIBLE
             }
             else

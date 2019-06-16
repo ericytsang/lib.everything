@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ShortcutManager
+import android.content.res.TypedArray
 import android.graphics.Point
 import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
@@ -26,6 +27,7 @@ import android.preference.PreferenceGroup
 import android.preference.PreferenceManager
 import android.text.Html
 import android.text.Spanned
+import android.util.AttributeSet
 import android.util.Base64
 import android.util.Log
 import android.view.Display
@@ -41,6 +43,7 @@ import com.github.ericytsang.lib.domainobjects.serialize
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
 import java.io.Serializable
+import java.lang.RuntimeException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -136,6 +139,19 @@ fun Context.getStringCompat(resId:Int,vararg formatArgs:Any):String
 val Context.defaultSharedPreferences:SharedPreferences get()
 {
     return PreferenceManager.getDefaultSharedPreferences(this)
+}
+
+fun <R> Context.usingAttrs(attrs:AttributeSet,resId:IntArray,block:(TypedArray)->R):R
+{
+    val typedArray = theme.obtainStyledAttributes(attrs,resId,0,0)
+    try
+    {
+        return block(typedArray)
+    }
+    finally
+    {
+        typedArray.recycle()
+    }
 }
 
 // SharedPreferences
