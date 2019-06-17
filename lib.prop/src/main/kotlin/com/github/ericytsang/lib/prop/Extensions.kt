@@ -17,9 +17,12 @@ var <Value:Any> MutableProp<Unit,()->Opt<Value>>.mutableNullableValue:()->Value?
     get() = get(Unit)().opt.let {{it}}
     set(value) { set(Unit) {Opt.of(value())} }
 
-fun Iterable<ReadOnlyProp<*,*>>.listen(onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
+fun Iterable<ReadOnlyProp<*,*>>.listen(callOnChangedNow:Boolean = true,onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
-    onChanged(null)
+    if (callOnChangedNow)
+    {
+        onChanged(null)
+    }
     val closeables = map {it.listen {change -> onChanged(change.source)}}
     return Closeable {closeables.forEach {it.close()}}
 }
