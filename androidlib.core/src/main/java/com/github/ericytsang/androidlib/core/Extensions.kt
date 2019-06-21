@@ -10,12 +10,14 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.content.res.TypedArray
 import android.graphics.Point
 import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
+import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -126,6 +128,11 @@ val Context.clipboardManager:ClipboardManager get()
     return getSystemServiceCompat(Context.CLIPBOARD_SERVICE)
 }
 
+val Context.locationManager:LocationManager get()
+{
+    return getSystemServiceCompat(Context.LOCATION_SERVICE)
+}
+
 inline fun <reified SystemService> Context.getSystemServiceCompat(key:String):SystemService
 {
     return getSystemService(key) as SystemService
@@ -139,6 +146,11 @@ fun Context.getStringCompat(resId:Int,vararg formatArgs:Any):String
 val Context.defaultSharedPreferences:SharedPreferences get()
 {
     return PreferenceManager.getDefaultSharedPreferences(this)
+}
+
+fun Context.checkSelfPermissionCompat(permission:String):Boolean
+{
+    return ContextCompat.checkSelfPermission(this,permission) == PackageManager.PERMISSION_GRANTED
 }
 
 fun <R> Context.usingAttrs(attrs:AttributeSet,resId:IntArray,block:(TypedArray)->R):R
