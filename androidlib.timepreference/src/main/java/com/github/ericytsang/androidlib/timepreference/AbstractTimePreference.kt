@@ -52,7 +52,7 @@ abstract class AbstractTimePreference<T:Any>(
         }
     }
 
-    // update summery when times are set
+    // update summary when times are set
     init
     {
         closeables += listOf(_selectedTime).listen()
@@ -63,6 +63,21 @@ abstract class AbstractTimePreference<T:Any>(
                 is Selection.Custom -> selectedValue.customAction.buttonText
                 is Selection.Clear -> context.getStringCompat(R.string.not_set)
             }
+        }
+    }
+
+    // update persisted value when times are set
+    init
+    {
+        closeables += listOf(_selectedTime).listen(false)
+        {
+            val persistedInt = when(val selectedValue = _selectedTime.value)
+            {
+                is Selection.Time -> selectedValue.localTime.millisOfDay
+                is Selection.Custom -> CUSTOM_TIME_AS_INT
+                is Selection.Clear -> CLEAR_TIME_AS_INT
+            }
+            persistInt(persistedInt)
         }
     }
 
@@ -85,17 +100,16 @@ abstract class AbstractTimePreference<T:Any>(
         if (callChangeListener(value))
         {
             _selectedTime.value = localTime?.let {Selection.Time<T>(it)}?:Selection.Clear()
-            persistInt(localTime?.millisOfDay?:CLEAR_TIME_AS_INT)
         }
     }
 
     private fun setCustom()
     {
-        val value = strategy.customAction!!.customValue()
+        val customAction = strategy.customAction!!
+        val value = customAction.customValue()
         if (callChangeListener(value))
         {
-            _selectedTime.value = Selection.Clear()
-            persistInt(CUSTOM_TIME_AS_INT)
+            _selectedTime.value = Selection.Custom(customAction)
         }
     }
 
