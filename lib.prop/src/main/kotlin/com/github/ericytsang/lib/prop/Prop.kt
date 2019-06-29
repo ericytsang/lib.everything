@@ -39,9 +39,9 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     protected abstract fun doGet(context:Context):Value
 
-    override fun set(context:Context,value:Value)
+    override fun set(context:Context,value:Value):Value
     {
-        readWriteLock.write()
+        return readWriteLock.write()
         {
             check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
             notifyingListenersLock.withLock()
@@ -56,6 +56,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
                 listeners.firstOrNull()?.let {this.change = change.value}
                 listeners.toList().forEach {it(change.value)}
                 this.change = null
+                value
             }
         }
     }

@@ -10,6 +10,7 @@ dependencies {
     testCompile(project(":lib.testutils"))
 
     // project dependencies
+    compile(project(":lib.closeablegroup"))
     compile(project(":lib.noopclose"))
     compile(project(":lib.optional"))
 }

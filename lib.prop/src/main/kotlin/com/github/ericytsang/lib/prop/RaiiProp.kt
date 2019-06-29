@@ -7,7 +7,7 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
 {
     private val prop = DataProp(initialValue)
 
-    override fun set(context:Unit,value:()->Opt<Value>)
+    override fun set(context:Unit,value:()->Opt<Value>):()->Opt<Value>
     {
         // get reference to soon-to-be-previous value
         val previousValue = get(context)
@@ -19,7 +19,10 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
         previousValue.invoke().opt?.close()
 
         // fetch and set the value to the new given value
-        prop.set(context,value.invoke())
+        val fethedValue = value.invoke()
+        prop.set(context,fethedValue)
+
+        return {fethedValue}
     }
 
     override fun get(context:Unit):()->Opt<Value>

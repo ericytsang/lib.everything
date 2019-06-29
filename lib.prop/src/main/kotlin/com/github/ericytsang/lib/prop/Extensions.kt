@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.prop
 
+import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
 import java.io.Closeable
 
@@ -17,6 +18,10 @@ var <Value:Any> MutableProp<Unit,()->Opt<Value>>.mutableNullableValue:()->Value?
     get() = get(Unit)().opt.let {{it}}
     set(value) { set(Unit) {Opt.of(value())} }
 
+fun <Value:Any> MutableProp<Unit,Value>.set(value:Value):Value = set(Unit,value)
+
+fun <Value:Any> MutableProp<Unit,()->Opt<Value>>.set(value:()->Opt<Value>):Value? = set(Unit,value).invoke().opt
+
 fun Iterable<ReadOnlyProp<*,*>>.listen(callOnChangedNow:Boolean = true,onChanged:(ReadOnlyProp<*,*>?)->Unit):Closeable
 {
     if (callOnChangedNow)
@@ -25,6 +30,28 @@ fun Iterable<ReadOnlyProp<*,*>>.listen(callOnChangedNow:Boolean = true,onChanged
     }
     val closeables = map {it.listen {change -> onChanged(change.source)}}
     return Closeable {closeables.forEach {it.close()}}
+}
+
+fun <State:Any> Iterable<ReadOnlyProp<*,*>>.aggregate(closeables:CloseableGroup = CloseableGroup(),stateFactory:()->State):ReadOnlyProp<Unit,State>
+{
+    val dataProp = DataProp(stateFactory()).debounced()
+    closeables += listen(false)
+    {
+        dataProp.value = stateFactory()
+    }
+    return dataProp
+}
+
+fun <State:Any> ReadOnlyProp<Unit,State>.component(closeableFactory:(State)->Closeable?):Closeable
+{
+    val closeables = CloseableGroup()
+    val raiiProp = RaiiProp(Opt.of(closeableFactory(value)?:Closeable{}))
+    closeables += raiiProp
+    closeables += listen()
+    {
+        raiiProp.mutableNullableValue = {closeableFactory(value)?:Closeable{}}
+    }
+    return closeables
 }
 
 fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withContext(contextFactory:()->Context):ReadOnlyProp<Unit,Value>
@@ -59,9 +86,9 @@ fun <Context:Any,Value:Any> MutableProp<Context,Value>.withContext(contextFactor
     val readOnlyProp = this.let {it as ReadOnlyProp<Context,Value>}.withContext(contextFactory)
     return object:MutableProp<Unit,Value>,ReadOnlyProp<Unit,Value> by readOnlyProp
     {
-        override fun set(context:Unit,value:Value)
+        override fun set(context:Unit,value:Value):Value
         {
-            oldProp.set(contextFactory(),value)
+            return oldProp.set(contextFactory(),value)
         }
     }
 }
@@ -101,3 +128,5 @@ fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp.Change<Context,OldValue
 {
     return ReadOnlyProp.Change(newProp,context,transform(oldValue),transform(newValue))
 }
+
+fun <Context:Any,Value:Any> MutableProp<Context,Value>.debounced() = Debouncer(this)
