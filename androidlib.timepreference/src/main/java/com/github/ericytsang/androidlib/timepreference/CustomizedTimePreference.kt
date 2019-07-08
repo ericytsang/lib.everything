@@ -19,6 +19,13 @@ class CustomizedTimePreference(
             attrs:AttributeSet)
         :AbstractTimePreference.Strategy<Strategy.Selection>
     {
+        override fun toPreferenceValue(customValue:Selection):AbstractTimePreference.Selection<Selection> = when(customValue)
+        {
+            is Selection.Time -> AbstractTimePreference.Selection.Time(customValue.time)
+            is Selection.Clear -> AbstractTimePreference.Selection.Clear()
+            is Selection.Custom -> AbstractTimePreference.Selection.Custom(customAction)
+        }
+
         override fun fromTime(time:LocalTime?) = when (time)
         {
             null -> Selection.Clear()

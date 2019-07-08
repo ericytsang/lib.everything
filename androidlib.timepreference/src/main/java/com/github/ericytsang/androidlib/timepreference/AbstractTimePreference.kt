@@ -18,6 +18,8 @@ import com.github.ericytsang.lib.prop.listen
 import com.github.ericytsang.lib.prop.value
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 abstract class AbstractTimePreference<T:Any>(
         context:Context,
@@ -43,12 +45,32 @@ abstract class AbstractTimePreference<T:Any>(
     private val _selectedTime = DataProp<Selection<T>>(Selection.Clear())
     val selectedTime = DataProp(_selectedTime.value.value)
 
-    // selectedTime is value of _selectedTime
     init
     {
+        val isBeingSetViaListener = ReentrantLock()
+
+        // selectedTime is value of _selectedTime
         closeables += listOf(_selectedTime).listen()
         {
-            selectedTime.value = _selectedTime.value.value
+            if (isBeingSetViaListener.isHeldByCurrentThread.not())
+            {
+                isBeingSetViaListener.withLock()
+                {
+                    selectedTime.value = _selectedTime.value.value
+                }
+            }
+        }
+
+        // allow callers to set selectedTime, which will cascade and set _selectedTime
+        closeables += listOf(selectedTime).listen()
+        {
+            if (isBeingSetViaListener.isHeldByCurrentThread.not())
+            {
+                isBeingSetViaListener.withLock()
+                {
+                    _selectedTime.value = strategy.toPreferenceValue(selectedTime.value)
+                }
+            }
         }
     }
 
@@ -153,15 +175,16 @@ abstract class AbstractTimePreference<T:Any>(
         is Selection.Clear -> strategy.fromTime(null)
     }
 
-    private sealed class Selection<T:Any>
+    sealed class Selection<T:Any>
     {
         data class Time<T:Any>(val localTime:LocalTime):Selection<T>()
         data class Custom<T:Any>(val customAction:CustomAction<T>):Selection<T>()
         class Clear<T:Any>:Selection<T>()
     }
 
-    interface Strategy<out T:Any>
+    interface Strategy<T:Any>
     {
+        fun toPreferenceValue(customValue:T):Selection<T>
         fun fromTime(time:LocalTime?):T
         val customAction:CustomAction<T>?
     }
@@ -243,8 +266,8 @@ abstract class AbstractTimePreference<T:Any>(
             okButton.setOnClickListener()
             {
                 val selectedTime = LocalTime.MIDNIGHT
-                        .withHourOfDay(picker.currentHour)
-                        .withMinuteOfHour(picker.currentMinute)
+                        .withHourOfDay(picker.hourCompat)
+                        .withMinuteOfHour(picker.minuteCompat)
                 preference.setTime(selectedTime)
                 dialog!!.dismiss()
             }
@@ -253,17 +276,25 @@ abstract class AbstractTimePreference<T:Any>(
         override fun onDialogClosed(positiveResult:Boolean) = Unit
 
         private var TimePicker.hourCompat
-            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) hour else currentHour
+            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) hour else @Suppress("DEPRECATION") currentHour
             set(value)
             {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) hour = value else currentHour = value
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    hour = value
+                else
+                    @Suppress("DEPRECATION")
+                    currentHour = value
             }
 
         private var TimePicker.minuteCompat
-            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) minute else currentMinute
+            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) minute else @Suppress("DEPRECATION") currentMinute
             set(value)
             {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) minute = value else currentMinute = value
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    minute = value
+                else
+                    @Suppress("DEPRECATION")
+                    currentMinute = value
             }
     }
 }
