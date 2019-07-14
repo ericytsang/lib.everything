@@ -14,7 +14,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
     private val notifyingListenersLock = ReentrantLock()
     private var change:ReadOnlyProp.Change<Context,Value>? = null
 
-    final override fun get(context:Context):Value
+    final override operator fun get(context:Context):Value
     {
         return readWriteLock.read()
         {
@@ -39,7 +39,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     protected abstract fun doGet(context:Context):Value
 
-    override fun set(context:Context,value:Value):Value
+    override operator fun set(context:Context,value:Value):Value
     {
         return readWriteLock.write()
         {
