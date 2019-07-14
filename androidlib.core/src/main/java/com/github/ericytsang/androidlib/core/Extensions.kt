@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -164,6 +165,11 @@ fun <R> Context.usingAttrs(attrs:AttributeSet,resId:IntArray,block:(TypedArray)-
     {
         typedArray.recycle()
     }
+}
+
+val Context.manifestMetaData:Bundle get()
+{
+    return packageManager.getApplicationInfo(packageName,PackageManager.GET_META_DATA).metaData
 }
 
 // SharedPreferences
