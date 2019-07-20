@@ -1,17 +1,22 @@
 package com.github.ericytsang.androidlib.core.activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import java.io.Serializable
 
-abstract class ActivityWithResultCompanion<Activity:AppCompatActivity,ActivityParams:Serializable,ActivityResult:Serializable>
-    :ContextCompanion<Activity,ActivityParams>(ActivityIntent.FACTORY)
+abstract class ActivityWithResultCompanion<TActivity:Activity,ActivityParams:Serializable,ActivityResult:Serializable>
+    :ContextCompanion<TActivity,ActivityParams>(ActivityIntent.FACTORY)
 {
     private val activityResultExtraKey = "${ActivityWithResultCompanion::class.qualifiedName}.activityResultExtraKey"
-    fun startActivityForResult(context:AppCompatActivity,requestCode:Int,params:ActivityParams)
+    fun startActivityForResult(context:Activity,requestCode:Int,params:ActivityParams)
     {
         context.startActivityForResult(toIntent(params).intent(context),requestCode)
+    }
+    fun startActivityForResult(context:Fragment,requestCode:Int,params:ActivityParams)
+    {
+        context.startActivityForResult(toIntent(params).intent(context.activity!!),requestCode)
     }
     fun toIntent(context:Context,result:ActivityResult):Intent
     {
@@ -19,10 +24,10 @@ abstract class ActivityWithResultCompanion<Activity:AppCompatActivity,ActivityPa
         intent.putExtra(activityResultExtraKey,result)
         return intent
     }
-    protected fun setOnActivityResult(activity:Activity,result:ActivityResult)
+    fun setOnActivityResult(activity:TActivity,result:ActivityResult)
     {
         val intent = toIntent(activity,result)
-        activity.setResult(android.app.Activity.RESULT_OK,intent)
+        activity.setResult(Activity.RESULT_OK,intent)
     }
     fun parseOnActivityResult(intent:Intent):ActivityResult
     {

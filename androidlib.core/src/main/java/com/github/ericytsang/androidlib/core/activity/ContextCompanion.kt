@@ -22,8 +22,8 @@ abstract class ContextCompanion<Contextt:Context,ContextParams:Serializable>(
                     .fold(0) {acc, i -> acc or i })
         }
     }
-    protected open fun getFlagsForIntent(params:ContextParams):Set<Int> = setOf(0)
-    protected fun fromIntent(startingIntent:Intent):ContextParams
+    open fun getFlagsForIntent(params:ContextParams):Set<Int> = setOf(0)
+    fun fromIntent(startingIntent:Intent):ContextParams
     {
         return startingIntent.getSerializableExtra(
                 activityParamsExtraKey) as ContextParams

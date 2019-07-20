@@ -5,9 +5,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import java.io.Serializable
 
+
+// todo: i just changed this to use the more mature API: ActivityWithResultCompanion...need to make sure this
+//  class is implemented OK, and call sites are also OK...
 class IntentLauncherForResultActivity:AppCompatActivity()
 {
-    companion object:ContextCompanionWithStartForResult<IntentLauncherForResultActivity,Params>(ActivityIntent.FACTORY)
+    companion object:ActivityWithResultCompanion<IntentLauncherForResultActivity,Params,Serializable>()
     {
         private const val THE_REQUEST_CODE = 2782
         override val contextClass:Class<IntentLauncherForResultActivity> get() = IntentLauncherForResultActivity::class.java
