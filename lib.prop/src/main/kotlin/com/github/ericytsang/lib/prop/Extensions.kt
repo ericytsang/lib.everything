@@ -42,12 +42,11 @@ fun <State:Any> Iterable<ReadOnlyProp<*,*>>.aggregate(closeables:CloseableGroup 
     return dataProp
 }
 
-fun <State:Any> ReadOnlyProp<Unit,State>.component(closeableFactory:(State)->Closeable?):Closeable
+fun <State:Any> ReadOnlyProp<Unit,State>.component(closeables:CloseableGroup = CloseableGroup(),closeableFactory:(State)->Closeable?):Closeable
 {
-    val closeables = CloseableGroup()
     val raiiProp = RaiiProp(Opt.of(closeableFactory(value)?:Closeable{}))
     closeables += raiiProp
-    closeables += listen()
+    closeables += listOf(this).listen(false)
     {
         raiiProp.mutableNullableValue = {closeableFactory(value)?:Closeable{}}
     }
