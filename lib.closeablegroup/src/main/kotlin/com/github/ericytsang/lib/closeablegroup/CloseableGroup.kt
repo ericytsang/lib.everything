@@ -10,6 +10,12 @@ class CloseableGroup(
     private val closeables = Stack<Closeable>()
             .apply {addAll(_closeables)}
 
+    fun <TCloseable:Closeable> add(other:TCloseable):TCloseable
+    {
+        closeables += other
+        return other
+    }
+
     operator fun plusAssign(other:Closeable)
     {
         closeables += other

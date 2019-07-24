@@ -19,10 +19,10 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
         previousValue.invoke().opt?.close()
 
         // fetch and set the value to the new given value
-        val fethedValue = value.invoke()
-        prop.set(context,fethedValue)
+        val fetchedValue = value.invoke()
+        prop.set(context,fetchedValue)
 
-        return {fethedValue}
+        return {fetchedValue}
     }
 
     override fun get(context:Unit):()->Opt<Value>
@@ -30,26 +30,19 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
         return prop.get(context).let {{it}}
     }
 
-    override fun getChange():ReadOnlyProp.Change<Unit,()->Opt<Value>>
-    {
-        return prop.getChange().map(this) {{it}}
-    }
-
-    override fun listen(context:Unit,onChanged:(ReadOnlyProp.Change<Unit,()->Opt<Value>>)->Unit):Closeable
+    override fun listen(context:Unit,onChanged:(ReadOnlyProp<Unit,()->Opt<Value>>)->Unit):Closeable
     {
         return prop.listen(context)
         {
-            change->
-            onChanged(ReadOnlyProp.Change(this,Unit,change.oldValue.let {{it}},change.newValue.let {{it}}))
+            onChanged(this)
         }
     }
 
-    override fun listen(onChanged:(ReadOnlyProp.Change<Unit,()->Opt<Value>>)->Unit):Closeable
+    override fun listen(onChanged:(ReadOnlyProp<Unit,()->Opt<Value>>)->Unit):Closeable
     {
         return prop.listen()
         {
-            change->
-            onChanged(ReadOnlyProp.Change(this,Unit,change.oldValue.let {{it}},change.newValue.let {{it}}))
+            onChanged(this)
         }
     }
 

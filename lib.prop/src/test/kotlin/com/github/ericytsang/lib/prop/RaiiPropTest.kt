@@ -1,7 +1,6 @@
 package com.github.ericytsang.lib.prop
 
 import com.github.ericytsang.lib.optional.Opt
-import com.github.ericytsang.lib.optional.OptCloser
 import org.junit.Test
 import java.io.Closeable
 import java.util.concurrent.LinkedBlockingQueue

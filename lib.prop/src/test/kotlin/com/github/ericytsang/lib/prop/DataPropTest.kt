@@ -35,28 +35,28 @@ class DataPropTest
     fun set_calls_listeners()
     {
         val dataProp = DataProp(1)
-        val onChangedInvocations = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
+        val onChangedInvocations = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
         fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
 
-        dataProp.listen {onChangedInvocations += it}
+        dataProp.listen {onChangedInvocations += it to it.value}
         assert(getCallsSoFar().isEmpty())
 
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
+                        dataProp to 3),
                 getCallsSoFar())
 
         dataProp.value = 4
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
+                        dataProp to 4),
                 getCallsSoFar())
 
         dataProp.value = 5
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
+                        dataProp to 5),
                 getCallsSoFar())
     }
 
@@ -80,16 +80,16 @@ class DataPropTest
     fun listeners_do_not_get_notified_after_unsubscribing()
     {
         val dataProp = DataProp(1)
-        val onChangedInvocations = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
+        val onChangedInvocations = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
         fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
 
-        val listener = dataProp.listen {onChangedInvocations += it}
+        val listener = dataProp.listen {onChangedInvocations += it to it.value}
         assert(getCallsSoFar().isEmpty())
 
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
+                        dataProp to 3),
                 getCallsSoFar())
 
         listener.close()
@@ -104,28 +104,28 @@ class DataPropTest
     fun listener_is_notified_upon_subscribing()
     {
         val dataProp = DataProp(1)
-        val onChangedInvocations = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
+        val onChangedInvocations = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
         fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
 
-        dataProp.listen(Unit) {onChangedInvocations += it}
-        assertEquals(listOf(ReadOnlyProp.Change(dataProp,Unit,1,1)),getCallsSoFar())
+        dataProp.listen(Unit) {onChangedInvocations += it to it.value}
+        assertEquals(listOf(dataProp to 1),getCallsSoFar())
 
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
+                        dataProp to 3),
                 getCallsSoFar())
 
         dataProp.value = 4
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
+                        dataProp to 4),
                 getCallsSoFar())
 
         dataProp.value = 5
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
+                        dataProp to 5),
                 getCallsSoFar())
     }
 
@@ -133,10 +133,10 @@ class DataPropTest
     fun get_does_not_notify_listeners()
     {
         val dataProp = DataProp(1)
-        val onChangedInvocations = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
+        val onChangedInvocations = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
         fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
 
-        dataProp.listen {onChangedInvocations += it}
+        dataProp.listen {onChangedInvocations += it to it.value}
         assert(getCallsSoFar().isEmpty())
 
         dataProp.value
@@ -153,24 +153,24 @@ class DataPropTest
     fun smoke_test()
     {
         val dataProp = DataProp(1)
-        val onChangedInvocations1 = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
-        val onChangedInvocations2 = LinkedBlockingQueue<ReadOnlyProp.Change<Unit,Int>>()
+        val onChangedInvocations1 = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
+        val onChangedInvocations2 = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
         fun getCallsSoFar1() = generateSequence {onChangedInvocations1.poll()}.toList()
         fun getCallsSoFar2() = generateSequence {onChangedInvocations2.poll()}.toList()
 
-        val listener = dataProp.listen {onChangedInvocations1 += it}
-        dataProp.listen {onChangedInvocations2 += it}
+        val listener = dataProp.listen {onChangedInvocations1 += it to it.value}
+        dataProp.listen {onChangedInvocations2 += it to it.value}
         assert(getCallsSoFar1().isEmpty())
         assert(getCallsSoFar2().isEmpty())
 
         dataProp.value = 3
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
+                        dataProp to 3),
                 getCallsSoFar1())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,1,3)),
+                        dataProp to 3),
                 getCallsSoFar2())
 
         listener.close()
@@ -178,14 +178,14 @@ class DataPropTest
         assert(getCallsSoFar1().isEmpty())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,3,4)),
+                        dataProp to 4),
                 getCallsSoFar2())
 
         dataProp.value = 5
         assert(getCallsSoFar1().isEmpty())
         assertEquals(
                 listOf(
-                        ReadOnlyProp.Change(dataProp,Unit,4,5)),
+                        dataProp to 5),
                 getCallsSoFar2())
     }
 }

@@ -28,104 +28,46 @@ fun Iterable<ReadOnlyProp<*,*>>.listen(callOnChangedNow:Boolean = true,onChanged
     {
         onChanged(null)
     }
-    val closeables = map {it.listen {change -> onChanged(change.source)}}
+    val closeables = map {it.listen {source -> onChanged(source)}}
     return Closeable {closeables.forEach {it.close()}}
 }
 
-fun <State:Any> Iterable<ReadOnlyProp<*,*>>.aggregate(closeables:CloseableGroup = CloseableGroup(),stateFactory:()->State):ReadOnlyProp<Unit,State>
+interface AggregatedProp<State:Any>:ReadOnlyProp<Unit,State>,Closeable
+
+fun <State:Any> Iterable<ReadOnlyProp<*,*>>.aggregate(stateFactory:(ReadOnlyProp<*,*>?)->State):AggregatedProp<State>
 {
-    val dataProp = DataProp(stateFactory()).debounced()
+    val dataProp = DataProp(stateFactory(null)).debounced()
+    val closeables = CloseableGroup()
     closeables += listen(false)
     {
-        dataProp.value = stateFactory()
+        dataProp.value = stateFactory(it)
     }
-    return dataProp
+    return object:AggregatedProp<State>,ReadOnlyProp<Unit,State> by dataProp
+    {
+        override fun close() = closeables.close()
+    }
 }
 
-fun <State:Any> ReadOnlyProp<Unit,State>.component(closeables:CloseableGroup = CloseableGroup(),closeableFactory:(State)->Closeable?):Closeable
+data class SessionFactoryParams<State>(
+        val state:State,
+        val closeables:CloseableGroup = CloseableGroup())
+
+fun <State:Any> ReadOnlyProp<Unit,State>.component(sessionFactory:(SessionFactoryParams<State>)->Unit):Closeable
 {
-    val raiiProp = RaiiProp(Opt.of(closeableFactory(value)?:Closeable{}))
+    fun closeableFactory(value:State):Closeable
+    {
+        val params = SessionFactoryParams(value)
+        sessionFactory(params)
+        return params.closeables
+    }
+    val raiiProp = RaiiProp(Opt.of(closeableFactory(value)))
+    val closeables = CloseableGroup()
     closeables += raiiProp
     closeables += listOf(this).listen(false)
     {
-        raiiProp.mutableNullableValue = {closeableFactory(value)?:Closeable{}}
+        raiiProp.mutableNullableValue = {closeableFactory(value)}
     }
     return closeables
-}
-
-fun <Context:Any,Value:Any> ReadOnlyProp<Context,Value>.withContext(contextFactory:()->Context):ReadOnlyProp<Unit,Value>
-{
-    val oldProp = this
-    return object:ReadOnlyProp<Unit,Value>
-    {
-        override fun get(context:Unit):Value
-        {
-            return oldProp.get(contextFactory())
-        }
-
-        override fun getChange():ReadOnlyProp.Change<Unit,Value> {
-            return ReadOnlyProp.Change(this,Unit,oldProp.getChange().oldValue,oldProp.getChange().newValue)
-        }
-
-        override fun listen(context:Unit,onChanged:(ReadOnlyProp.Change<Unit,Value>)->Unit):Closeable
-        {
-            return oldProp.listen(contextFactory()) {onChanged(it.map(this,Unit))}
-        }
-
-        override fun listen(onChanged:(ReadOnlyProp.Change<Unit,Value>)->Unit):Closeable
-        {
-            return oldProp.listen {onChanged(it.map(this,Unit))}
-        }
-    }
-}
-
-fun <Context:Any,Value:Any> MutableProp<Context,Value>.withContext(contextFactory:()->Context):MutableProp<Unit,Value>
-{
-    val oldProp = this
-    val readOnlyProp = this.let {it as ReadOnlyProp<Context,Value>}.withContext(contextFactory)
-    return object:MutableProp<Unit,Value>,ReadOnlyProp<Unit,Value> by readOnlyProp
-    {
-        override fun set(context:Unit,value:Value):Value
-        {
-            return oldProp.set(contextFactory(),value)
-        }
-    }
-}
-
-fun <OldContext:Any,NewContext:Any,Value:Any> ReadOnlyProp.Change<OldContext,Value>.map(newProp:ReadOnlyProp<NewContext,Value>,newContext:NewContext):ReadOnlyProp.Change<NewContext,Value>
-{
-    return ReadOnlyProp.Change(newProp,newContext,oldValue,newValue)
-}
-
-fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp<Context,OldValue>.map(transform:(OldValue)->NewValue):ReadOnlyProp<Context,NewValue>
-{
-    val oldProp = this
-    return object:ReadOnlyProp<Context,NewValue>
-    {
-        override fun get(context:Context):NewValue
-        {
-            return oldProp.get(context).let(transform)
-        }
-
-        override fun getChange():ReadOnlyProp.Change<Context,NewValue> {
-            return ReadOnlyProp.Change(this,oldProp.getChange().context,transform(oldProp.getChange().oldValue),transform(oldProp.getChange().newValue))
-        }
-
-        override fun listen(context:Context,onChanged:(ReadOnlyProp.Change<Context,NewValue>)->Unit):Closeable
-        {
-            return oldProp.listen(context) {onChanged(it.map(this,transform))}
-        }
-
-        override fun listen(onChanged:(ReadOnlyProp.Change<Context,NewValue>)->Unit):Closeable
-        {
-            return oldProp.listen {onChanged(it.map(this,transform))}
-        }
-    }
-}
-
-fun <Context:Any,OldValue:Any,NewValue:Any> ReadOnlyProp.Change<Context,OldValue>.map(newProp:ReadOnlyProp<Context,NewValue>,transform:(OldValue)->NewValue):ReadOnlyProp.Change<Context,NewValue>
-{
-    return ReadOnlyProp.Change(newProp,context,transform(oldValue),transform(newValue))
 }
 
 fun <Context:Any,Value:Any> MutableProp<Context,Value>.debounced() = Debouncer(this)

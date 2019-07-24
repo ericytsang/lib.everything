@@ -12,28 +12,12 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 {
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
-    private var change:ReadOnlyProp.Change<Context,Value>? = null
 
     final override operator fun get(context:Context):Value
     {
         return readWriteLock.read()
         {
             doGet(context)
-        }
-    }
-
-    final override fun getChange():ReadOnlyProp.Change<Context,Value>
-    {
-        return readWriteLock.write()
-        {
-            if (notifyingListenersLock.isHeldByCurrentThread)
-            {
-                change!!
-            }
-            else
-            {
-                throw IllegalAccessException("only allowed to access change from notified listener")
-            }
         }
     }
 
@@ -46,16 +30,8 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
             check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
             notifyingListenersLock.withLock()
             {
-                val oldValue = lazy {doGet(context)}
-                listeners.firstOrNull()?.let {oldValue.value}
-
                 doSet(context,value)
-
-                val newValue = lazy {doGet(context)}
-                val change = lazy {ReadOnlyProp.Change(this,context,oldValue.value,newValue.value)}
-                listeners.firstOrNull()?.let {this.change = change.value}
-                listeners.toList().forEach {it(change.value)}
-                this.change = null
+                listeners.toList().forEach {it(this)}
                 value
             }
         }
@@ -63,16 +39,15 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     protected abstract fun doSet(context:Context,value:Value)
 
-    private val listeners = mutableSetOf<(ReadOnlyProp.Change<Context,Value>)->Unit>()
+    private val listeners = mutableSetOf<(ReadOnlyProp<Context,Value>)->Unit>()
 
-    final override fun listen(context:Context,onChanged:(ReadOnlyProp.Change<Context,Value>)->Unit):Closeable
+    final override fun listen(context:Context,onChanged:(ReadOnlyProp<Context,Value>)->Unit):Closeable
     {
-        val value = get(context)
-        onChanged(ReadOnlyProp.Change(this,context,value,value))
+        onChanged(this)
         return listen(onChanged)
     }
 
-    final override fun listen(onChanged:(ReadOnlyProp.Change<Context,Value>)->Unit):Closeable
+    final override fun listen(onChanged:(ReadOnlyProp<Context,Value>)->Unit):Closeable
     {
         listeners += onChanged
         return Closeable {listeners -= onChanged}

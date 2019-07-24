@@ -32,8 +32,7 @@ class WriteThroughCachedPropTest
         cachedProp.value = 2
         assertEquals(
                 listOf(
-                        "set(2)",    // setting underlying prop
-                        "get() = 2"),// caching cached prop from underlying prop
+                        "set(2)"),  // setting underlying prop
                 getActions())
     }
 
@@ -45,10 +44,7 @@ class WriteThroughCachedPropTest
         cachedProp.value = 2
         assertEquals(
                 listOf(
-                        "get() = 1", // notifying underlying prop listeners
-                        "set(2)",    // setting underlying prop
-                        "get() = 2", // caching cached prop from underlying prop
-                        "get() = 2"),// notifying underlying prop listeners
+                        "set(2)"),  // setting underlying prop
                 getActions())
     }
 
@@ -60,9 +56,7 @@ class WriteThroughCachedPropTest
         cachedProp.value = 2
         assertEquals(
                 listOf(
-                        "get() = 1", // notifying cached prop listeners
-                        "set(2)",    // setting underlying prop
-                        "get() = 2"),// caching cached prop from underlying prop
+                        "set(2)"),  // setting underlying prop
                 getActions())
     }
 
@@ -75,12 +69,24 @@ class WriteThroughCachedPropTest
         cachedProp.value = 2
         assertEquals(
                 listOf(
-                        "get() = 1", // notifying underlying prop listeners
-                        "get() = 1", // notifying cached prop listeners
-                        "set(2)",    // setting underlying prop
-                        "get() = 2", // caching cached prop from underlying prop
-                        "get() = 2"),// notifying underlying prop listeners
+                        "set(2)"),  // setting underlying prop
                 getActions())
+    }
+
+    @Test
+    fun set_then_get_sets_underlying_property_get_underlying_prop_only_called_on_get_after_set()
+    {
+        assert(getActions().isEmpty())
+        cachedProp.value
+        assertEquals("get() = 1",getActions().single())
+        cachedProp.value
+        assert(getActions().isEmpty())
+        cachedProp.value = 2
+        assertEquals("set(2)",getActions().single())
+        cachedProp.value
+        assertEquals("get() = 2",getActions().single())
+        cachedProp.value
+        assert(getActions().isEmpty())
     }
 
     @Test
@@ -109,10 +115,9 @@ class WriteThroughCachedPropTest
     @Test
     fun get_does_not_call_get_from_underlying_prop_on_subsequent_get_calls()
     {
-
         assert(getActions().isEmpty())
         cachedProp.value
-        getActions()
+        assertEquals(listOf("get() = 1"),getActions())
         cachedProp.value
         assert(getActions().isEmpty())
     }

@@ -4,16 +4,16 @@ class WriteThroughCachedProp<Context:Any,Value:Any>(
         val underlyingProp:MutableProp<Context,Value>)
     :Prop<Context,Value>()
 {
-    private var isInitialized = false
+    private var isDirty = false
     private var field:Value? = null
         set(value)
         {
-            isInitialized = true
+            isDirty = true
             field = value
         }
     override fun doGet(context:Context):Value
     {
-        if (!isInitialized)
+        if (!isDirty)
         {
             field = underlyingProp.get(context)
         }
@@ -22,6 +22,6 @@ class WriteThroughCachedProp<Context:Any,Value:Any>(
     override fun doSet(context:Context,value:Value)
     {
         underlyingProp.set(context,value)
-        field = underlyingProp.get(context)
+        isDirty = false
     }
 }
