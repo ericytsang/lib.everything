@@ -10,6 +10,15 @@ import kotlin.concurrent.write
 
 abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 {
+    companion object
+    {
+        var debugMode = true
+        private fun debug(string:String)
+        {
+            if (debugMode) println(string)
+        }
+    }
+
     private val readWriteLock = ReentrantReadWriteLock()
     private val notifyingListenersLock = ReentrantLock()
 
@@ -17,7 +26,9 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
     {
         return readWriteLock.read()
         {
-            doGet(context)
+            val value = doGet(context)
+            debug("$this.get[$context] = $value")
+            value
         }
     }
 
@@ -25,6 +36,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     override operator fun set(context:Context,value:Value):Value
     {
+        debug("$this.set[$context] = $value")
         return readWriteLock.write()
         {
             check(notifyingListenersLock.isHeldByCurrentThread.not()) {throw RecursiveSettingIsNotAllowedException()}
