@@ -52,7 +52,7 @@ data class SessionFactoryParams<State>(
         val state:State,
         val closeables:CloseableGroup = CloseableGroup())
 
-fun <State:Any> ReadOnlyProp<Unit,State>.component(sessionFactory:(SessionFactoryParams<State>)->Unit):Closeable
+fun <State:Any> ReadOnlyProp<Unit,State>.statefulListen(sessionFactory:(SessionFactoryParams<State>)->Unit):Closeable
 {
     fun closeableFactory(value:State):Closeable
     {
