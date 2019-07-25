@@ -12,7 +12,7 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 {
     companion object
     {
-        var debugMode = true
+        var debugMode = false
         private fun debug(string:String)
         {
             if (debugMode) println(string)
