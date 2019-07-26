@@ -8,7 +8,7 @@ interface ReadOnlyProp<Context:Any,Value:Any>:Serializable
     /**
      * returns the value for this [ReadOnlyProp].
      */
-    fun get(context:Context):Value
+    operator fun get(context:Context):Value
 
     /**
      * will call [onChanged] before returning.
