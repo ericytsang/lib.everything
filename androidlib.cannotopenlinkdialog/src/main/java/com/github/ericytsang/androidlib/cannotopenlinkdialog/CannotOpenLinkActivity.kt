@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.activity__confirm_dialog.*
-import kotlinx.android.synthetic.main.notification_media_action.action0
 import java.io.Closeable
 import java.io.Serializable
 
@@ -45,9 +43,9 @@ class CannotOpenLinkActivity:AppCompatActivity()
             catch (e:Throwable)
             {
                 exceptionHandler(e)
-                CannotOpenLinkActivity.start(
+                start(
                         context,
-                        CannotOpenLinkActivity.Params(
+                        Params(
                                 title,
                                 linkLabel,
                                 link,
