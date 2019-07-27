@@ -30,14 +30,6 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
         return prop.get(context).let {{it}}
     }
 
-    override fun listen(context:Unit,onChanged:(ReadOnlyProp<Unit,()->Opt<Value>>)->Unit):Closeable
-    {
-        return prop.listen(context)
-        {
-            onChanged(this)
-        }
-    }
-
     override fun listen(onChanged:(ReadOnlyProp<Unit,()->Opt<Value>>)->Unit):Closeable
     {
         return prop.listen()

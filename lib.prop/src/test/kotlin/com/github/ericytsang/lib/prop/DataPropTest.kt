@@ -101,35 +101,6 @@ class DataPropTest
     }
 
     @Test
-    fun listener_is_notified_upon_subscribing()
-    {
-        val dataProp = DataProp(1)
-        val onChangedInvocations = LinkedBlockingQueue<Pair<ReadOnlyProp<Unit,Int>,Int>>()
-        fun getCallsSoFar() = generateSequence {onChangedInvocations.poll()}.toList()
-
-        dataProp.listen(Unit) {onChangedInvocations += it to it.value}
-        assertEquals(listOf(dataProp to 1),getCallsSoFar())
-
-        dataProp.value = 3
-        assertEquals(
-                listOf(
-                        dataProp to 3),
-                getCallsSoFar())
-
-        dataProp.value = 4
-        assertEquals(
-                listOf(
-                        dataProp to 4),
-                getCallsSoFar())
-
-        dataProp.value = 5
-        assertEquals(
-                listOf(
-                        dataProp to 5),
-                getCallsSoFar())
-    }
-
-    @Test
     fun get_does_not_notify_listeners()
     {
         val dataProp = DataProp(1)

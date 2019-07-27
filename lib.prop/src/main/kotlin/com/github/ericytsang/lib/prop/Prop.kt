@@ -53,12 +53,6 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
 
     private val listeners = mutableSetOf<(ReadOnlyProp<Context,Value>)->Unit>()
 
-    final override fun listen(context:Context,onChanged:(ReadOnlyProp<Context,Value>)->Unit):Closeable
-    {
-        onChanged(this)
-        return listen(onChanged)
-    }
-
     final override fun listen(onChanged:(ReadOnlyProp<Context,Value>)->Unit):Closeable
     {
         listeners += onChanged
