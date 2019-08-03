@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.github.ericytsang.androidlib.core.activity.ActivityIntent
+import com.github.ericytsang.androidlib.core.intent.ActivityIntent
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback

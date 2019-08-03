@@ -1,7 +1,6 @@
 package com.github.ericytsang.androidlib.cannotopenlinkdialog
 
 import android.content.ClipData
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,27 +8,31 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
-import com.github.ericytsang.androidlib.core.activity.ActivityIntent
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.clipboardManager
+import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.getStringCompat
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.activity__confirm_dialog.*
+import kotlinx.android.synthetic.main.activity__confirm_dialog.button__copy
+import kotlinx.android.synthetic.main.activity__confirm_dialog.button__retry
+import kotlinx.android.synthetic.main.activity__confirm_dialog.button__share
+import kotlinx.android.synthetic.main.activity__confirm_dialog.textview
 import java.io.Closeable
 import java.io.Serializable
 
 class CannotOpenLinkActivity:AppCompatActivity()
 {
-    companion object:ContextCompanionWithStart<CannotOpenLinkActivity,Params>(ActivityIntent.FACTORY)
+    companion object:ContextCompanionWithStart<CannotOpenLinkActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
         override val contextClass get() = CannotOpenLinkActivity::class.java
 
         fun tryOpenLink(
-                context:Context,
+                context:ForegroundContext,
                 link:String,
                 extraFlags:Int = 0,
                 title:String? = null,
@@ -38,7 +41,7 @@ class CannotOpenLinkActivity:AppCompatActivity()
         {
             try
             {
-                context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(link)))
+                context.context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(link)))
             }
             catch (e:Throwable)
             {
