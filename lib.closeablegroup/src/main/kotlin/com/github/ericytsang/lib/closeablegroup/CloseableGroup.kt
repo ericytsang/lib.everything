@@ -16,6 +16,12 @@ class CloseableGroup(
         return other
     }
 
+    operator fun <TCloseable:Closeable> plus(other:TCloseable):TCloseable
+    {
+        closeables += other
+        return other
+    }
+
     operator fun plusAssign(other:Closeable)
     {
         closeables += other
