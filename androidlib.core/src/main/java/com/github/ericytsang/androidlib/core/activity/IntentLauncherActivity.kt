@@ -3,11 +3,15 @@ package com.github.ericytsang.androidlib.core.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext
+import com.github.ericytsang.androidlib.core.context.wrap
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import java.io.Serializable
 
 class IntentLauncherActivity:AppCompatActivity()
 {
-    companion object:ContextCompanionWithStart<IntentLauncherActivity,Params>(ActivityIntent.FACTORY)
+    companion object:ContextCompanionWithStart<IntentLauncherActivity,BackgroundContext.ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
         override val contextClass:Class<IntentLauncherActivity> get() = IntentLauncherActivity::class.java
         override fun getFlagsForIntent(params:Params):Set<Int>
@@ -20,12 +24,12 @@ class IntentLauncherActivity:AppCompatActivity()
 
     class Params
     constructor(
-            val intents:List<StartableIntent>)
+            val intents:List<StartableForegroundIntent>)
         :Serializable
     {
         companion object
         {
-            fun of(vararg intents:StartableIntent):Params
+            fun of(vararg intents:StartableForegroundIntent):Params
             {
                 return Params(intents.toList())
             }
@@ -39,7 +43,7 @@ class IntentLauncherActivity:AppCompatActivity()
 
         // parse parameters, and start the intents
         val params = fromIntent(intent)
-        params.intents.forEach {it.start(this)}
+        params.intents.forEach {it.start(wrap())}
 
         // finish activity so it doesn't show up
         finish()

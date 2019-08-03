@@ -1,18 +1,20 @@
 package com.github.ericytsang.androidlib.core.activity
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.github.ericytsang.androidlib.core.context.WrappedContext
+import com.github.ericytsang.androidlib.core.intent.StartableIntent
 import java.io.Serializable
+import kotlin.reflect.KClass
 
-abstract class ContextCompanion<Contextt:Context,ContextParams:Serializable>(
-        val startableIntentFactory:((Context)->Intent)->StartableIntent)
+abstract class ContextCompanion<Subclass:Context,StartParams:Serializable,OIntent:StartableIntent<*>>(
+        private val startableIntentFactory:StartableIntent.StartableIntentFactory<OIntent>)
 {
     private val activityParamsExtraKey = "${ContextCompanion::class.qualifiedName}.activityParamsExtraKey"
-    protected abstract val contextClass:Class<Contextt>
-    fun toIntent(params:ContextParams,extraFlags:Int = 0):StartableIntent
+    protected abstract val contextClass:Class<Subclass>
+    fun toIntent(params:StartParams,extraFlags:Int = 0):OIntent
     {
-        return startableIntentFactory()
+        return startableIntentFactory.make()
         {
             context:Context->
             val intent = Intent(context,contextClass)
@@ -22,86 +24,11 @@ abstract class ContextCompanion<Contextt:Context,ContextParams:Serializable>(
                     .fold(0) {acc, i -> acc or i })
         }
     }
-    open fun getFlagsForIntent(params:ContextParams):Set<Int> = setOf(0)
-    fun fromIntent(startingIntent:Intent):ContextParams
+    open fun getFlagsForIntent(params:StartParams):Set<Int> = setOf(0)
+    fun fromIntent(startingIntent:Intent):StartParams
     {
-        return startingIntent.getSerializableExtra(
-                activityParamsExtraKey) as ContextParams
+        @Suppress("UNCHECKED_CAST")
+        return startingIntent.getSerializableExtra(activityParamsExtraKey) as StartParams
     }
 }
 
-interface StartableIntent:Serializable
-{
-    val intent:(Context)->Intent
-    fun start(context:Context)
-    fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent
-}
-
-class BroadcastIntent(
-        override val intent:(Context)->Intent)
-    :StartableIntent
-{
-    companion object
-    {
-        val FACTORY:((Context)->Intent)->BroadcastIntent = fun(intentFactory:(Context)->Intent):BroadcastIntent
-        {
-            return BroadcastIntent(intentFactory)
-        }
-    }
-
-    override fun start(context:Context)
-    {
-        context.sendBroadcast(intent(context))
-    }
-
-    override fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent
-    {
-        return PendingIntent.getBroadcast(context,requestCode,intent(context),flags)
-    }
-}
-
-class ServiceIntent(
-        override val intent:(Context)->Intent)
-    :StartableIntent
-{
-    companion object
-    {
-        val FACTORY:((Context)->Intent)->ServiceIntent = fun(intentFactory:(Context)->Intent):ServiceIntent
-        {
-            return ServiceIntent(intentFactory)
-        }
-    }
-
-    override fun start(context:Context)
-    {
-        context.startService(intent(context))
-    }
-
-    override fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent
-    {
-        return PendingIntent.getService(context,requestCode,intent(context),flags)
-    }
-}
-
-class ActivityIntent(
-        override val intent:(Context)->Intent)
-    :StartableIntent
-{
-    companion object
-    {
-        val FACTORY:((Context)->Intent)->ActivityIntent = fun(intentFactory:(Context)->Intent):ActivityIntent
-        {
-            return ActivityIntent(intentFactory)
-        }
-    }
-
-    override fun start(context:Context)
-    {
-        context.startActivity(intent(context))
-    }
-
-    override fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent
-    {
-        return PendingIntent.getActivity(context,requestCode,intent(context),flags)
-    }
-}

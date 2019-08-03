@@ -3,11 +3,10 @@ package com.github.ericytsang.androidlib.core.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.github.ericytsang.androidlib.core.context.wrap
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForResultIntent
 import java.io.Serializable
 
-
-// todo: i just changed this to use the more mature API: ActivityWithResultCompanion...need to make sure this
-//  class is implemented OK, and call sites are also OK...
 class IntentLauncherForResultActivity:AppCompatActivity()
 {
     companion object:ActivityWithResultCompanion<IntentLauncherForResultActivity,Params,Serializable>()
@@ -24,7 +23,7 @@ class IntentLauncherForResultActivity:AppCompatActivity()
 
     class Params
     constructor(
-            val intent:StartableIntent)
+            val intent:StartableForResultIntent)
         :Serializable
 
     override fun onCreate(savedInstanceState:Bundle?)
@@ -36,9 +35,7 @@ class IntentLauncherForResultActivity:AppCompatActivity()
         super.onCreate(savedInstanceState)
 
         // start the intents
-        startActivityForResult(
-                params.intent.intent(this),
-                THE_REQUEST_CODE)
+        params.intent.start(wrap(THE_REQUEST_CODE))
     }
 
     override fun onActivityResult(requestCode:Int,resultCode:Int,data:Intent?)
