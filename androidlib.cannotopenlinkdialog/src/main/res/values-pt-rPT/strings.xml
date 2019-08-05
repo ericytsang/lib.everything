@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="activity__cannot_open_link__title">Não foi possível abrir o link</string>
+    <string name="activity__cannot_open_link__clipboard_label">Hiperligação</string>
+    <string name="activity__cannot_open_link__clipboard_copied">\"%1$s\" copiado para a área de transferência</string>
+    <string name="activity__cannot_open_link__retry">Repetir</string>
+    <string name="activity__cannot_open_link__copy">Copiar</string>
+    <string name="activity__cannot_open_link__share">Partilhar</string>
+
+</resources>

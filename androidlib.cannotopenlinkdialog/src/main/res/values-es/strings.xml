@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="activity__cannot_open_link__title">No se pudo abrir el enlace</string>
+    <string name="activity__cannot_open_link__clipboard_label">Enlace</string>
+    <string name="activity__cannot_open_link__clipboard_copied">\"%1$s\" copiado en el portapapeles</string>
+    <string name="activity__cannot_open_link__retry">Reintentar</string>
+    <string name="activity__cannot_open_link__copy">Copiar</string>
+    <string name="activity__cannot_open_link__share">Compartir</string>
+
+</resources>

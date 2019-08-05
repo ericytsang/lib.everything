@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="activity__cannot_open_link__title">Tidak dapat membuka tautan</string>
+    <string name="activity__cannot_open_link__clipboard_label">Tautan</string>
+    <string name="activity__cannot_open_link__clipboard_copied">Menyalin \"%1$s\" ke clipboard</string>
+    <string name="activity__cannot_open_link__retry">Coba lagi</string>
+    <string name="activity__cannot_open_link__copy">Salin</string>
+    <string name="activity__cannot_open_link__share">Bagikan</string>
+
+</resources>

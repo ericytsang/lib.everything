@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    <string name="activity__cannot_open_link__title">Не удалось открыть ссылку</string>
+    <string name="activity__cannot_open_link__clipboard_label">Ссылка</string>
+    <string name="activity__cannot_open_link__clipboard_copied">\"%1$s\" скопировано в буфер обмена</string>
+    <string name="activity__cannot_open_link__retry">Повторить</string>
+    <string name="activity__cannot_open_link__copy">Копия</string>
+    <string name="activity__cannot_open_link__share">Поделиться</string>
+
+</resources>
