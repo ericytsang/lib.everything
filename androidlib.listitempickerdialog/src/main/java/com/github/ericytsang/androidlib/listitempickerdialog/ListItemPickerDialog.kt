@@ -99,19 +99,23 @@ class ListItemPickerDialog:AppCompatActivity()
         // set up recycler view
         init
         {
-            layout.recycler_view.layoutManager = LinearLayoutManager(activity)
-            layout.recycler_view.adapter = Adapter(params,object:ListItemViewHolder.Listener
+            closeables.chainedAddCloseables()
             {
-                override fun click(listItem:ListItem<Serializable>)
+                closeables ->
+                layout.recycler_view.layoutManager = LinearLayoutManager(activity)
+                layout.recycler_view.adapter = Adapter(params,object:ListItemViewHolder.Listener
                 {
-                    mediator.setOnActivityResult(activity,Result(params,listItem))
-                    activity.finish()
+                    override fun click(listItem:ListItem<Serializable>)
+                    {
+                        mediator.setOnActivityResult(activity,Result(params,listItem))
+                        activity.finish()
+                    }
+                })
+                closeables += Closeable()
+                {
+                    layout.recycler_view.layoutManager = null
+                    layout.recycler_view.adapter = null
                 }
-            })
-            closeables += fun()
-            {
-                layout.recycler_view.layoutManager = null
-                layout.recycler_view.adapter = null
             }
         }
     }

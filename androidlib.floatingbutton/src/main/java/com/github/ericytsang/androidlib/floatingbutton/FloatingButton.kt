@@ -105,23 +105,27 @@ class FloatingButton(
             // convert position when orientation or dimension changes.
             init
             {
-                thingsToClose += listOf(strategy.screenDimensions,strategy.dimensions).listen()
+                thingsToClose.chainedAddCloseables()
                 {
-                    val newDimensions = strategy.screenDimensions.value
-
-                    // convert position to scalar coordinates
-                    oldDimensions.doThenSet(newDimensions)
+                    thingsToClose->
+                    thingsToClose += listOf(strategy.screenDimensions,strategy.dimensions).listen()
                     {
-                        val newPosition = transformCoordinate(
-                                oldDimensions.oldValue.orientation,
-                                newDimensions.orientation,
-                                positionAsScalar,
-                                XyBounds(0f..1f,0f..1f))
-                        val screenBounds = newDimensions.dimensions.screenBoundsIncludingNavBar
-                        position.bounds = XyBounds(
-                                screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
-                                screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y})
-                        positionAsScalar = newPosition
+                        val newDimensions = strategy.screenDimensions.value
+
+                        // convert position to scalar coordinates
+                        oldDimensions.doThenSet(newDimensions)
+                        {
+                            val newPosition = transformCoordinate(
+                                    oldDimensions.oldValue.orientation,
+                                    newDimensions.orientation,
+                                    positionAsScalar,
+                                    XyBounds(0f..1f,0f..1f))
+                            val screenBounds = newDimensions.dimensions.screenBoundsIncludingNavBar
+                            position.bounds = XyBounds(
+                                    screenBounds.xBounds.run {start..endInclusive-strategy.dimensions.value.x},
+                                    screenBounds.yBounds.run {start..endInclusive-strategy.dimensions.value.y})
+                            positionAsScalar = newPosition
+                        }
                     }
                 }
             }
@@ -129,13 +133,17 @@ class FloatingButton(
             // save position when it is updated
             init
             {
-                thingsToClose += listOf(position.onChanged).listen()
+                thingsToClose.chainedAddCloseables()
                 {
-                    _portraitModePositionAsScalar.value = transformCoordinate(
-                            oldDimensions.oldValue.orientation,
-                            Orientation.REGULAR_PORTRAIT,
-                            positionAsScalar,
-                            XyBounds(0f..1f,0f..1f))
+                    thingsToClose ->
+                    thingsToClose += listOf(position.onChanged).listen()
+                    {
+                        _portraitModePositionAsScalar.value = transformCoordinate(
+                                oldDimensions.oldValue.orientation,
+                                Orientation.REGULAR_PORTRAIT,
+                                positionAsScalar,
+                                XyBounds(0f..1f,0f..1f))
+                    }
                 }
             }
         }
@@ -169,10 +177,14 @@ class FloatingButton(
             // add floating button to the window & remove it upon [FloatingButton.close].
             init
             {
-                rootView.context.windowManager.addView(rootView,layoutParams(position.position,strategy.dimensions.value))
-                thingsToClose += Closeable()
+                thingsToClose.chainedAddCloseables()
                 {
-                    rootView.context.windowManager.removeView(rootView)
+                    thingsToClose ->
+                    rootView.context.windowManager.addView(rootView,layoutParams(position.position,strategy.dimensions.value))
+                    thingsToClose += Closeable()
+                    {
+                        rootView.context.windowManager.removeView(rootView)
+                    }
                 }
             }
 
@@ -180,9 +192,13 @@ class FloatingButton(
             // position of floating button matches property
             init
             {
-                thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
+                thingsToClose.chainedAddCloseables()
                 {
-                    rootView.context.windowManager.updateViewLayout(rootView,layoutParams(position.position,strategy.dimensions.value))
+                    thingsToClose ->
+                    thingsToClose += listOf(strategy.dimensions,position.onChanged).listen()
+                    {
+                        rootView.context.windowManager.updateViewLayout(rootView,layoutParams(position.position,strategy.dimensions.value))
+                    }
                 }
             }
         }
@@ -201,9 +217,13 @@ class FloatingButton(
 
         init
         {
-            thingsToClose += Closeable()
+            thingsToClose.chainedAddCloseables()
             {
-                endAllOngoingAnimations()
+                thingsToClose ->
+                thingsToClose += Closeable()
+                {
+                    endAllOngoingAnimations()
+                }
             }
         }
 

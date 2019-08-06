@@ -47,28 +47,32 @@ abstract class AbstractTimePreference<T:Any>(
 
     init
     {
-        val isBeingSetViaListener = ReentrantLock()
-
-        // selectedTime is value of _selectedTime
-        closeables += listOf(_selectedTime).listen()
+        closeables.chainedAddCloseables()
         {
-            if (isBeingSetViaListener.isHeldByCurrentThread.not())
+            closeables ->
+            val isBeingSetViaListener = ReentrantLock()
+
+            // selectedTime is value of _selectedTime
+            closeables += listOf(_selectedTime).listen()
             {
-                isBeingSetViaListener.withLock()
+                if (isBeingSetViaListener.isHeldByCurrentThread.not())
                 {
-                    selectedTime.value = _selectedTime.value.value
+                    isBeingSetViaListener.withLock()
+                    {
+                        selectedTime.value = _selectedTime.value.value
+                    }
                 }
             }
-        }
 
-        // allow callers to set selectedTime, which will cascade and set _selectedTime
-        closeables += listOf(selectedTime).listen()
-        {
-            if (isBeingSetViaListener.isHeldByCurrentThread.not())
+            // allow callers to set selectedTime, which will cascade and set _selectedTime
+            closeables += listOf(selectedTime).listen()
             {
-                isBeingSetViaListener.withLock()
+                if (isBeingSetViaListener.isHeldByCurrentThread.not())
                 {
-                    _selectedTime.value = strategy.toPreferenceValue(selectedTime.value)
+                    isBeingSetViaListener.withLock()
+                    {
+                        _selectedTime.value = strategy.toPreferenceValue(selectedTime.value)
+                    }
                 }
             }
         }
@@ -77,13 +81,17 @@ abstract class AbstractTimePreference<T:Any>(
     // update summary when times are set
     init
     {
-        closeables += listOf(_selectedTime).listen()
+        closeables.chainedAddCloseables()
         {
-            summary = when(val selectedValue = _selectedTime.value)
+            closeables ->
+            closeables += listOf(_selectedTime).listen()
             {
-                is Selection.Time -> DateTimeFormat.shortTime().print(selectedValue.localTime)
-                is Selection.Custom -> selectedValue.customAction.buttonText
-                is Selection.Clear -> context.getStringCompat(R.string.not_set)
+                summary = when (val selectedValue = _selectedTime.value)
+                {
+                    is Selection.Time -> DateTimeFormat.shortTime().print(selectedValue.localTime)
+                    is Selection.Custom -> selectedValue.customAction.buttonText
+                    is Selection.Clear -> context.getStringCompat(R.string.not_set)
+                }
             }
         }
     }
@@ -91,15 +99,19 @@ abstract class AbstractTimePreference<T:Any>(
     // update persisted value when times are set
     init
     {
-        closeables += listOf(_selectedTime).listen(false)
+        closeables.chainedAddCloseables()
         {
-            val persistedInt = when(val selectedValue = _selectedTime.value)
+            closeables ->
+            closeables += listOf(_selectedTime).listen(false)
             {
-                is Selection.Time -> selectedValue.localTime.millisOfDay
-                is Selection.Custom -> CUSTOM_TIME_AS_INT
-                is Selection.Clear -> CLEAR_TIME_AS_INT
+                val persistedInt = when (val selectedValue = _selectedTime.value)
+                {
+                    is Selection.Time -> selectedValue.localTime.millisOfDay
+                    is Selection.Custom -> CUSTOM_TIME_AS_INT
+                    is Selection.Clear -> CLEAR_TIME_AS_INT
+                }
+                persistInt(persistedInt)
             }
-            persistInt(persistedInt)
         }
     }
 
