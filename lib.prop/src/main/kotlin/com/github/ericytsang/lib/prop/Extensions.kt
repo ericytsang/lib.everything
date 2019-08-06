@@ -37,10 +37,13 @@ interface AggregatedProp<State:Any>:ReadOnlyProp<Unit,State>,Closeable
 fun <State:Any> Iterable<ReadOnlyProp<*,*>>.aggregate(stateFactory:(ReadOnlyProp<*,*>?)->State):AggregatedProp<State>
 {
     val dataProp = DataProp(stateFactory(null)).debounced()
-    val closeables = CloseableGroup()
-    closeables += listen(false)
+    val closeables = CloseableGroup().chainedAddCloseables()
     {
-        dataProp.value = stateFactory(it)
+        closeables ->
+        closeables += listen(false)
+        {
+            dataProp.value = stateFactory(it)
+        }
     }
     return object:AggregatedProp<State>,ReadOnlyProp<Unit,State> by dataProp
     {
@@ -61,13 +64,15 @@ fun <State:Any> ReadOnlyProp<Unit,State>.statefulListen(sessionFactory:(SessionF
         return params.closeables
     }
     val raiiProp = RaiiProp(Opt.of(closeableFactory(value)))
-    val closeables = CloseableGroup()
-    closeables += raiiProp
-    closeables += listOf(this).listen(false)
+    return CloseableGroup().chainedAddCloseables()
     {
-        raiiProp.mutableNullableValue = {closeableFactory(value)}
+        closeables ->
+        closeables += raiiProp
+        closeables += listOf(this).listen(false)
+        {
+            raiiProp.mutableNullableValue = {closeableFactory(value)}
+        }
     }
-    return closeables
 }
 
 fun <Context:Any,Value:Any> MutableProp<Context,Value>.debounced() = Debouncer(this)

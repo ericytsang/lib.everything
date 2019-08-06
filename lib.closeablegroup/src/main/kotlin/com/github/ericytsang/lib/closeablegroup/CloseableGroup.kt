@@ -3,7 +3,6 @@ package com.github.ericytsang.lib.closeablegroup
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup.State.Active
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup.State.Closed
 import java.io.Closeable
-import java.lang.IllegalStateException
 import java.util.Stack
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -12,64 +11,73 @@ class CloseableGroup(
         vararg _closeables:Closeable)
     :Closeable
 {
-    private val lock = ReentrantLock()
-    private var state:State = Active(*_closeables)
+    fun chainedAddCloseables(block:(scope:AddCloseablesScope)->Unit):CloseableGroup = apply {coreApi.addCloseables(block)}
+    fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R? = coreApi.addCloseables(block)
+    override fun close() = coreApi.close()
 
-    private fun addCloseable(closeable:Closeable) = lock.withLock()
+    interface AddCloseablesScope
     {
-        state.addCloseable(closeable)
+        operator fun <TCloseable:Closeable> plus(other:TCloseable):TCloseable
+        operator fun <TCloseable:Closeable> plusAssign(other:TCloseable)
     }
 
-    override fun close() = lock.withLock()
+    private val coreApi = object
     {
-        state.close()
-        state = when(state)
+        private val lock = ReentrantLock()
+        private var state:State = Active(*_closeables)
+
+        fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R? = lock.withLock()
         {
-            is Active -> Closed()
-            is Closed -> state
+            state.addCloseables()
+            {
+                scope->
+                block(object:AddCloseablesScope
+                {
+                    override fun <TCloseable:Closeable> plus(other:TCloseable):TCloseable = other.also {scope.add(other)}
+                    override fun <TCloseable:Closeable> plusAssign(other:TCloseable) = Unit.also {scope.add(other)}
+                })
+            }
+        }
+
+        fun close() = lock.withLock()
+        {
+            state.close()
+            state = when(state)
+            {
+                is Active -> Closed()
+                is Closed -> state
+            }
         }
     }
 
-    fun <TCloseable:Closeable> add(other:TCloseable):TCloseable
+    private sealed class State
     {
-        addCloseable(other)
-        return other
-    }
-
-    operator fun <TCloseable:Closeable> plus(other:TCloseable):TCloseable
-    {
-        addCloseable(other)
-        return other
-    }
-
-    operator fun plusAssign(other:Closeable)
-    {
-        addCloseable(other)
-    }
-
-    operator fun <R> plusAssign(other:()->R)
-    {
-        addCloseable(Closeable {other()})
-    }
-
-    sealed class State
-    {
-        abstract fun addCloseable(closeable:Closeable)
+        abstract fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R?
         abstract fun close()
+
+        interface AddCloseablesScope
+        {
+            fun <TCloseable:Closeable> add(other:TCloseable):TCloseable
+        }
 
         class Active(
                 vararg _closeables:Closeable)
             :State()
         {
             private val closeables = Stack<Closeable>().apply {addAll(_closeables)}
-            override fun addCloseable(closeable:Closeable) = Unit.also {closeables.push(closeable)}
             override fun close() = generateSequence {closeables.runCatching {pop()}.getOrNull()}.forEach {it.close()}
+            override fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R
+            {
+                return block(object:AddCloseablesScope
+                {
+                    override fun <TCloseable:Closeable> add(other:TCloseable) = other.also {closeables += other}
+                })
+            }
         }
 
         class Closed:State()
         {
-            private val wasAlreadyClosedHere = IllegalStateException("was already closed here.")
-            override fun addCloseable(closeable:Closeable) = throw wasAlreadyClosedHere
+            override fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R? = null
             override fun close() = Unit
         }
     }
