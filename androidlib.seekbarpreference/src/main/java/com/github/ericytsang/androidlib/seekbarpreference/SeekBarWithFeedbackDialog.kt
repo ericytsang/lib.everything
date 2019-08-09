@@ -4,8 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.github.ericytsang.androidlib.core.intent.ActivityIntent
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
+import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback
 import com.github.ericytsang.lib.optional.Opt
@@ -18,7 +19,7 @@ import java.io.Serializable
 
 class SeekBarWithFeedbackDialog:AppCompatActivity()
 {
-    companion object:ContextCompanionWithStart<SeekBarWithFeedbackDialog,Params>(ActivityIntent.FACTORY)
+    companion object:ContextCompanionWithStart<SeekBarWithFeedbackDialog,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
         override val contextClass:Class<SeekBarWithFeedbackDialog> get() = SeekBarWithFeedbackDialog::class.java
     }

@@ -18,8 +18,8 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingStart="?attr/listPreferredItemPaddingEnd"
-    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
+    android:paddingStart="?dialogPreferredPadding"
+    android:paddingEnd="?dialogPreferredPadding"
     android:paddingTop="16dip"
     android:paddingBottom="16dip">
     <LinearLayout

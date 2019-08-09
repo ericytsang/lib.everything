@@ -1,9 +1,11 @@
 package com.github.ericytsang.androidlib.seekbarpreference
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
+import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.postOnUiThread
 import com.github.ericytsang.lib.noopclose.NoopClose
 import com.github.ericytsang.lib.optional.Opt
@@ -122,7 +124,7 @@ class SeekBarWithFeedbackPreference(
         fun onClick()
         {
             SeekBarWithFeedbackDialog.start(
-                    attached.sliderPreference.context,
+                    attached.sliderPreference.context.let {it as Activity}.wrap(),
                     SeekBarWithFeedbackDialog.Params(
                             attached.sliderPreference.title.toString(),
                             oldValue,

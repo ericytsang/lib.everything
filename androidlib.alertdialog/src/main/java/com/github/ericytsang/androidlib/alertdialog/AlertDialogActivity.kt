@@ -3,22 +3,23 @@ package com.github.ericytsang.androidlib.alertdialog
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.github.ericytsang.androidlib.core.intent.ActivityIntent
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
+import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.fromHtml
+import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import com.github.ericytsang.androidlib.core.layoutInflater
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.activity__alert_dialog.*
 import java.io.Closeable
 import java.io.Serializable
-import kotlinx.android.synthetic.main.activity__alert_dialog.*
 
 class AlertDialogActivity
     :BaseActivity<
         AlertDialogActivity.Created,
         BaseActivity.NoOpState<AlertDialogActivity>>()
 {
-    companion object:ContextCompanionWithStart<AlertDialogActivity,Params>(ActivityIntent.FACTORY)
+    companion object:ContextCompanionWithStart<AlertDialogActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
         override val contextClass:Class<AlertDialogActivity> get() = AlertDialogActivity::class.java
         override fun getFlagsForIntent(params:Params):Set<Int>
