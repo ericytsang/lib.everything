@@ -16,10 +16,14 @@ buildscript {
 
     dependencies {
 
-        // kotlin
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        // apply plugin: "kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        // android
+        // apply plugin: "robovm"
+        classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$robo_vm_version"
+
+        // apply plugin: "com.android.application"
+        // apply plugin: "kotlin-android"
         classpath("com.android.tools.build:gradle:$android_gradle_version")
 
         // crashlytics crash reporting
@@ -31,12 +35,16 @@ buildscript {
 allprojects {
 
     repositories {
-        mavenCentral()
         mavenLocal()
+        mavenCentral()
         jcenter()
 
         // firebase app analytics
         google()
+
+        // im not sure what these are for
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 
         // crashlytics crash reporting
         maven {url "https://maven.google.com/"}
