@@ -1,4 +1,4 @@
-package com.github.ericytsang.lib.prop
+package coroutines
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers

@@ -11,6 +11,10 @@ dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 
+    // kotlin co-routines
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version")
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$kotlin_coroutines_version")
+
     // test
     testCompile(project(":lib.testutils"))
 
