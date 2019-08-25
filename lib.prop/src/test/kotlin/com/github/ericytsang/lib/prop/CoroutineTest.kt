@@ -52,7 +52,6 @@ class CoroutineTest
     @Test
     fun cancellation_does_not_run_code_after_delay_even_on_immediate_dispatcher()
     {
-        val mainThread = Thread.currentThread()
         var asyncThread:Thread? = null
         var function = {}
         val deferred = GlobalScope.async(Dispatchers.Main.immediate)
@@ -69,8 +68,7 @@ class CoroutineTest
             // should throw exception here because the co-routine was cancelled earlier
             assertFailsWith(CancellationException::class) {println(deferred.await())}
             function()
-//            assertEquals(mainThread,Thread.currentThread())
-            assertEquals(mainThread,asyncThread)
+            assertEquals(asyncThread,Thread.currentThread())
         }
     }
 }
