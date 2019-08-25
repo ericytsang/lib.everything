@@ -33,11 +33,7 @@ dependencies {
     implementation "joda-time:joda-time:2.10.1"
 
     // paging
-    api "android.arch.paging:runtime:$paging_version"
-
-    // work manager
-    api "android.arch.work:work-runtime-ktx:1.0.1"
-    api "android.arch.work:work-firebase:1.0.0-alpha11"
+    api "androidx.paging:paging-runtime:2.1.0"
 
     // app compat
     api "androidx.legacy:legacy-support-v4:1.0.0"
