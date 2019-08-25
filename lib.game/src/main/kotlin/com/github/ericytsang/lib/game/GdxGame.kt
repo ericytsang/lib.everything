@@ -42,17 +42,18 @@ class GdxGame<GameContext:Closeable,ScreenParams:Serializable>(
         // create the game context
         created.mutableNullableValue = fun() = gameContextFactory(platformContext)
 
-        // monitor screen properties
+        // monitor the current screen's properties
         listOf(currentScreen).aggregate {currentScreen.value}.statefulListen()
         {
-            (state,closeables) ->
+            (currentScreen,closeableGroup) ->
 
             // keep track of whether the screen wants continuous rendering or not
-            closeables.addCloseables()
+            closeableGroup.addCloseables()
             {
-                it+listOf(state.shouldRenderContinuously).listen()
+                addCloseablesScope ->
+                addCloseablesScope+listOf(currentScreen.shouldRenderContinuously).listen()
                 {
-                    Gdx.graphics.isContinuousRendering = state.shouldRenderContinuously.value
+                    Gdx.graphics.isContinuousRendering = currentScreen.shouldRenderContinuously.value
                 }
             }
         }
@@ -104,13 +105,13 @@ class GdxGame<GameContext:Closeable,ScreenParams:Serializable>(
     }
     override fun resize(width:Int,height:Int) = currentScreen.value.resize(RectDimens(width,height))
 
-    interface Screen<ScreenParams:Serializable>:Raii<ScreenParams>
+    interface Screen<ScreenParams:Serializable>
     {
         val shouldRenderContinuously:ReadOnlyProp<Unit,Boolean>
         fun render(elapsedMillis:Long):AppRequest<ScreenParams>
         fun resize(dimensions:RectDimens)
         fun save():ScreenParams
-        override fun close():ScreenParams
+        fun close():ScreenParams
     }
 
     private class InitializeScreen<ScreenParams:Serializable>(
