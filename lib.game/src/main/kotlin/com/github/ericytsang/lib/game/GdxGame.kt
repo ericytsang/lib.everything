@@ -17,7 +17,7 @@ import com.github.ericytsang.lib.prop.value
 import java.io.Closeable
 import java.io.Serializable
 
-class GdxGame<GameContext:Closeable,ScreenParams:Serializable>(
+class GdxGame<PlatformContext,GameContext:Closeable,ScreenParams:Serializable>(
         val platformContext:PlatformContext,
         val gameContextFactory:(PlatformContext)->GameContext,
         val screenFactory:(GameContext,ScreenParams)->Screen<ScreenParams>,

@@ -6,7 +6,7 @@ import com.github.ericytsang.lib.prop.value
 import java.io.Serializable
 
 class ScreenLogger<ScreenParams:Serializable,Screen:GdxGame.Screen<ScreenParams>>(
-        val platformContext:PlatformContext,
+        val logger:(()->String)->Unit,
         val wrapee:Screen)
     :GdxGame.Screen<ScreenParams>
 {
@@ -36,6 +36,6 @@ class ScreenLogger<ScreenParams:Serializable,Screen:GdxGame.Screen<ScreenParams>
 
     private fun debug(text:()->String)
     {
-        platformContext.debug {"${wrapee::class.simpleName?:"noname"}: ${text()}"}
+        logger {"${wrapee::class.simpleName?:"noname"}: ${text()}"}
     }
 }
