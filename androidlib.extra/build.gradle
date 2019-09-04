@@ -13,10 +13,6 @@ android {
     lintOptions {
         checkTestSources true
     }
-    // TODO replace with https://issuetracker.google.com/issues/72050365 once released.
-    libraryVariants.all {
-        it.generateBuildConfig.enabled = false
-    }
 }
 
 androidExtensions {
@@ -34,6 +30,9 @@ dependencies {
 
     // paging
     api "androidx.paging:paging-runtime:2.1.0"
+
+    // work manager
+    api "androidx.work:work-runtime:2.2.0"
 
     // app compat
     api "androidx.legacy:legacy-support-v4:1.0.0"

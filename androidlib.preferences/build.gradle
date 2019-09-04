@@ -13,10 +13,6 @@ android {
     lintOptions {
         checkTestSources true
     }
-    // TODO replace with https://issuetracker.google.com/issues/72050365 once released.
-    libraryVariants.all {
-        it.generateBuildConfig.enabled = false
-    }
 }
 
 androidExtensions {
@@ -37,7 +33,6 @@ dependencies {
 
     // work manager
     api "androidx.work:work-runtime:2.2.0"
-    api "androidx.work:work-runtime-ktx:2.2.0"
 
     // app compat
     api "androidx.legacy:legacy-support-v4:1.0.0"

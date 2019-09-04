@@ -11,5 +11,4 @@ dependencies {
 
     // project dependencies
     compile(project(":lib.awaitable"))
-    compile("androidx.paging:paging-rxjava2:2.1.0")
 }
