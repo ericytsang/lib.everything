@@ -1,15 +1,6 @@
-apply plugin: "kotlin"
+configureKotlin(project)
 
 dependencies {
-
-    // kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
-
-    // test
-    testImplementation project(":lib.testutils")
-
-    // project dependencies
     api project(":lib.cipherstream")
     api project(":lib.simplepipestream")
     api project(":lib.concurrent")

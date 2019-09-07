@@ -1,5 +1,6 @@
 package com.github.ericytsang.androidlib.core.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -84,6 +85,8 @@ abstract class BaseActivity<Created:Closeable,Resumed:Closeable>:AppCompatActivi
 
     var onActivityResultHandler:(OnActivityResultHandler)->Unit = nullOnActivityResultHandler
 
+    @Deprecated("roll your own, bitch")
+    @SuppressLint("MissingSuperCall")
     final override fun onActivityResult(requestCode:Int,resultCode:Int,data:Intent?)
     {
         onActivityResultHandler(OnActivityResultHandler(requestCode,resultCode,data))

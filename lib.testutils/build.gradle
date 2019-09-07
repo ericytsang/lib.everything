@@ -3,8 +3,8 @@ apply plugin: "kotlin"
 dependencies {
 
     // kotlin
-    api deps.kotlin.stdlib
-    api deps.kotlin.reflect
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.reflect
 
     // kotlin co-routines
     // todo: add to versins.gradle

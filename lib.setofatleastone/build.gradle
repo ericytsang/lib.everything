@@ -1,11 +1,1 @@
-apply plugin: "kotlin"
-
-dependencies {
-
-    // kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
-
-    // test
-    testImplementation project(":lib.testutils")
-}
+configureKotlin(project)

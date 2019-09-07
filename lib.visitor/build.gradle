@@ -1,14 +1,8 @@
-apply plugin: "kotlin"
+configureKotlin(project)
+
 apply plugin: "kotlin-kapt"
 
 dependencies {
-
-    // kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
-
-    // test
-    testImplementation project(":lib.testutils")
 
     // generate kotlin code
     implementation "com.squareup:kotlinpoet:1.3.0" // todo: add to versions.gradle

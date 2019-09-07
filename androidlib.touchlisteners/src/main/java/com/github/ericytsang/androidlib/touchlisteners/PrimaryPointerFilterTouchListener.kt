@@ -3,7 +3,6 @@ package com.github.ericytsang.androidlib.touchlisteners
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import androidx.multidex.BuildConfig
 import com.github.ericytsang.androidlib.core.DoLog
 import com.github.ericytsang.androidlib.core.info
 import com.github.ericytsang.androidlib.core.postOnUiThread

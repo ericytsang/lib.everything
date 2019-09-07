@@ -1,35 +1,8 @@
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
-apply plugin: "kotlin-android-extensions"
-
-android {
-    compileSdkVersion 28
-    defaultConfig {
-        minSdkVersion 24
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
-
-    }
-    lintOptions {
-        checkTestSources true
-    }
-}
-
-androidExtensions {
-    experimental = true
-}
+configureAndroid(project)
 
 dependencies {
 
     api project(":androidlib.core")
 
     api deps.support.preference
-
-    // kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
-
-    // junit
-    testImplementation deps.junit
-    testImplementation deps.kotlin.test
 }

@@ -14,3 +14,72 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// for configuring plain kotlin projects
+static def configureKotlin(PluginAware p) {
+    p.with {
+        apply plugin: "kotlin"
+
+        dependencies {
+
+            // kotlin
+            implementation deps.kotlin.stdlib
+            implementation deps.kotlin.reflect
+
+            // test
+            testImplementation project(":lib.testutils")
+        }
+    }
+}
+ext.configureKotlin = this.&configureKotlin
+
+// for configuring android projects
+static def configureAndroid(PluginAware p) {
+    p.with {
+        apply plugin: "com.android.library"
+        apply plugin: "kotlin-android"
+        apply plugin: "kotlin-android-extensions"
+
+        android {
+            compileSdkVersion build_versions.target_sdk
+            buildToolsVersion build_versions.build_tools
+            defaultConfig {
+                minSdkVersion build_versions.min_sdk
+                targetSdkVersion build_versions.target_sdk
+                testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+                vectorDrawables.useSupportLibrary true
+            }
+//            dataBinding {
+//                enabled true
+//            }
+            compileOptions {
+                targetCompatibility JavaVersion.VERSION_1_8
+                sourceCompatibility JavaVersion.VERSION_1_8
+            }
+            lintOptions {
+                ignoreWarnings false
+                abortOnError true
+            }
+        }
+
+        androidExtensions {
+            experimental = true
+        }
+
+        dependencies {
+
+            // implementation "javax.xml.bind:jaxb-api:2.2.11"
+            // implementation "com.sun.xml.bind:jaxb-core:2.2.11"
+            // implementation "com.sun.xml.bind:jaxb-impl:2.2.11"
+            // implementation "javax.activation:activation:1.1.1"
+
+            // kotlin
+            implementation deps.kotlin.stdlib
+            implementation deps.kotlin.reflect
+
+            // test
+            testImplementation project(":lib.testutils")
+        }
+    }
+}
+ext.configureAndroid = this.&configureAndroid

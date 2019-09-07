@@ -1,16 +1,6 @@
-apply plugin: "kotlin"
+configureKotlin(project)
 
 dependencies {
-
-    // kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
-
-    api deps.rxjava2
-
-    // test
-    testImplementation project(":lib.testutils")
-
-    // project dependencies
     api project(":lib.awaitable")
+    api deps.rxjava2
 }
