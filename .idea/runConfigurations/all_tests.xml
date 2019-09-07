@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="all tests (when android modules are ignored)" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="all tests" type="JUnit" factoryName="JUnit">
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="pattern" />
