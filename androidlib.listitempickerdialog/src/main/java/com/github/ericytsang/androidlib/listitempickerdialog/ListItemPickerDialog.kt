@@ -63,7 +63,7 @@ class ListItemPickerDialog:AppCompatActivity()
         override fun close() = closeables.close()
 
         private val layout = DialogListBinding
-                .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)!!
+                .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)
                 .apply {activity.setContentView(root)}
 
         // default activity result value in case we are cancelled
