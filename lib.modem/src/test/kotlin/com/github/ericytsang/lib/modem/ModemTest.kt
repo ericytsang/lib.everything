@@ -117,7 +117,6 @@ class ModemTest
         hangingThreads.forEach {it.join()}
         m1.close()
         m2.close()
-        hangingThreads.forEach {it.stop()}
     }
 
     @Test

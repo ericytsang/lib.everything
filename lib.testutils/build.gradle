@@ -3,17 +3,18 @@ apply plugin: "kotlin"
 dependencies {
 
     // kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    api deps.kotlin.stdlib
+    api deps.kotlin.reflect
 
     // kotlin co-routines
-    testCompile("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version")
+    // todo: add to versins.gradle
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
 
     // project dependencies
-    compile(project(":lib.concurrent"))
+    api project(":lib.concurrent")
 
     // external dependencies
-    compile("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    compile("junit:junit:4.12")
-    compile("org.mockito:mockito-all:2.0.2-beta")
+    api deps.kotlin.test
+    api deps.junit
+    api deps.mockito.all
 }

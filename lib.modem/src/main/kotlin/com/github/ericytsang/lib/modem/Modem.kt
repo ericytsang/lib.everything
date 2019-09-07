@@ -114,7 +114,6 @@ private constructor(
         .serialized()
         .ignoreSubsequent()
         {
-            isClosedByRemote->
 
             // close connection
             multiplexedConnection.close()

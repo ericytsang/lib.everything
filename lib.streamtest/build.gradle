@@ -3,10 +3,10 @@ apply plugin: "kotlin"
 dependencies {
 
     // kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.reflect
 
     // project dependencies
-    compile(project(":lib.testutils"))
-    compile(project(":lib.concurrent"))
+    api project(":lib.testutils")
+    api project(":lib.concurrent")
 }

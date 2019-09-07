@@ -3,12 +3,12 @@ apply plugin: "kotlin"
 dependencies {
 
     // kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.reflect
 
     // test
-    testCompile(project(":lib.testutils"))
+    testImplementation project(":lib.testutils")
 
     // project dependencies
-    compile(project(":lib.prop"))
+    api project(":lib.prop")
 }

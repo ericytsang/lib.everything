@@ -3,14 +3,14 @@ apply plugin: "kotlin"
 dependencies {
 
     // kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.reflect
 
     // test
-    testCompile(project(":lib.testutils"))
+    testImplementation project(":lib.testutils")
 
     // project dependencies
-    compile(project(":lib.closeablegroup"))
-    compile(project(":lib.noopclose"))
-    compile(project(":lib.optional"))
+    api project(":lib.closeablegroup")
+    api project(":lib.noopclose")
+    api project(":lib.optional")
 }

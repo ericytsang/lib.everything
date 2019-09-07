@@ -1,6 +1,8 @@
 package com.github.ericytsang.lib.optional
 
 import org.junit.Test
+import java.io.ByteArrayOutputStream
+import java.io.ObjectOutputStream
 import java.io.Serializable
 import kotlin.test.assertEquals
 
@@ -24,13 +26,13 @@ class SerializableOptTest
     fun some_is_serializable()
     {
         val opt:Serializable = SerializableOpt.of(1)
-        assert(opt is Serializable)
+        ObjectOutputStream(ByteArrayOutputStream()).use {it.writeObject(opt)}
     }
 
     @Test
     fun none_is_serializable()
     {
         val opt:Serializable = SerializableOpt.of<Int>()
-        assert(opt is Serializable)
+        ObjectOutputStream(ByteArrayOutputStream()).use {it.writeObject(opt)}
     }
 }
