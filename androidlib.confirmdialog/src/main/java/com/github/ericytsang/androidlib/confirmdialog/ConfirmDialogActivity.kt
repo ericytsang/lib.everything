@@ -1,11 +1,9 @@
 package com.github.ericytsang.androidlib.confirmdialog
 
 import android.view.ViewGroup
+import com.github.ericytsang.androidlib.confirmdialog.databinding.ActivityConfirmDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.layoutInflater
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.activity__confirm_dialog.*
 import java.io.Closeable
 import java.io.Serializable
 
@@ -69,31 +67,32 @@ class ConfirmDialogActivity
             val params:Params<*>)
         :Closeable
     {
-        val layout = Layout(activity.findViewById(android.R.id.content))
+        val layout = ActivityConfirmDialogBinding
+                .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)
+                .apply {activity.setContentView(root)}
 
         init
         {
-            activity.setContentView(layout.containerView)
             if (params.title != null)
             {
                 activity.title = params.title
             }
             setOnActivityResult(activity,Result.Cancelled(params.extraUserData))
             layout.textview.text = params.prompt
-            layout.button__cancel.text = params.noButton.text
-            layout.button__cancel.isEnabled = params.noButton.isEnabled
-            layout.button__cancel.setTextColor(params.noButton.color?:layout.button__cancel.currentTextColor)
-            layout.button__cancel.visibility = params.noButton.visibility
-            layout.button__cancel.setOnClickListener()
+            layout.buttonCancel.text = params.noButton.text
+            layout.buttonCancel.isEnabled = params.noButton.isEnabled
+            layout.buttonCancel.setTextColor(params.noButton.color?:layout.buttonCancel.currentTextColor)
+            layout.buttonCancel.visibility = params.noButton.visibility
+            layout.buttonCancel.setOnClickListener()
             {
                 setOnActivityResult(activity,Result.ButtonPressed(ButtonId.NO_BUTTON,params.extraUserData))
                 activity.finish()
             }
-            layout.button__ok.text = params.yesButton.text
-            layout.button__ok.isEnabled = params.yesButton.isEnabled
-            layout.button__ok.setTextColor(params.yesButton.color?:layout.button__ok.currentTextColor)
-            layout.button__ok.visibility = params.yesButton.visibility
-            layout.button__ok.setOnClickListener()
+            layout.buttonOk.text = params.yesButton.text
+            layout.buttonOk.isEnabled = params.yesButton.isEnabled
+            layout.buttonOk.setTextColor(params.yesButton.color?:layout.buttonOk.currentTextColor)
+            layout.buttonOk.visibility = params.yesButton.visibility
+            layout.buttonOk.setOnClickListener()
             {
                 setOnActivityResult(activity,Result.ButtonPressed(ButtonId.YES_BUTTON,params.extraUserData))
                 activity.finish()
@@ -106,11 +105,4 @@ class ConfirmDialogActivity
     // Resumed
 
     override fun makeResumed(methodOverload:MethodOverload,created:Created) = NoOpState(this)
-
-    // Layout
-
-    class Layout(val parent:ViewGroup):LayoutContainer
-    {
-        override val containerView = parent.context.layoutInflater.inflate(R.layout.activity__confirm_dialog,parent,false)
-    }
 }

@@ -2,18 +2,15 @@ package com.github.ericytsang.androidlib.seekbarpreference
 
 import android.content.Context
 import android.os.Bundle
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
-import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback
+import com.github.ericytsang.androidlib.seekbarpreference.databinding.ActivitySeekBarWithFeedbackDialogBinding
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.activity__seek_bar_with_feedback_dialog.*
 import java.io.Closeable
 import java.io.Serializable
 
@@ -57,44 +54,38 @@ class SeekBarWithFeedbackDialog:AppCompatActivity()
         :Closeable
     {
         private var selectedColor = params.oldValue
-        val layout = Layout(activity.findViewById(android.R.id.content))
+        val layout = ActivitySeekBarWithFeedbackDialogBinding
+                .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)
+                .apply {activity.setContentView(root)}
+
         init
         {
-            activity.setContentView(layout.containerView)
             activity.title = params.title
-            layout.seekbar_with_feedback__dip.min.value = params.minValue
-            layout.seekbar_with_feedback__dip.max.value = params.maxValue
-            layout.seekbar_with_feedback__dip.progress.value = params.oldValue
-            layout.seekbar_with_feedback__dip.labelTemplate.value = params.labelTemplate
-            layout.seekbar_with_feedback__dip.listener = object:SeekBarWithFeedback.Listener
+            layout.seekbarWithFeedbackDip.min.value = params.minValue
+            layout.seekbarWithFeedbackDip.max.value = params.maxValue
+            layout.seekbarWithFeedbackDip.progress.value = params.oldValue
+            layout.seekbarWithFeedbackDip.labelTemplate.value = params.labelTemplate
+            layout.seekbarWithFeedbackDip.listener = object:SeekBarWithFeedback.Listener
             {
                 override fun onProgressChanged(source:SeekBarWithFeedback,progress:Int,fromUser:Boolean)
                 {
                     params.onSetValue(activity,progress)
                 }
             }
-            layout.button__cancel.setOnClickListener()
+            layout.buttonCancel.setOnClickListener()
             {
                 activity.finish()
             }
-            layout.button__ok.setOnClickListener()
+            layout.buttonOk.setOnClickListener()
             {
-                selectedColor = layout.seekbar_with_feedback__dip.progress.value
+                selectedColor = layout.seekbarWithFeedbackDip.progress.value
                 activity.finish()
             }
         }
+
         override fun close()
         {
             params.onSetValue(activity,selectedColor)
         }
-    }
-
-    // layout
-
-    private class Layout(
-            val parent:ViewGroup)
-        :LayoutContainer
-    {
-        override val containerView = parent.context.layoutInflater.inflate(R.layout.activity__seek_bar_with_feedback_dialog,parent,false)
     }
 }

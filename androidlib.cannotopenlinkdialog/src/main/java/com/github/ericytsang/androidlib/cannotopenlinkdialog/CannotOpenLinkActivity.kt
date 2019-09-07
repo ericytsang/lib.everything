@@ -8,20 +8,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
+import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityConfirmDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.clipboardManager
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
-import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.activity__confirm_dialog.button__copy
-import kotlinx.android.synthetic.main.activity__confirm_dialog.button__retry
-import kotlinx.android.synthetic.main.activity__confirm_dialog.button__share
-import kotlinx.android.synthetic.main.activity__confirm_dialog.textview
 import java.io.Closeable
 import java.io.Serializable
 
@@ -88,16 +83,18 @@ class CannotOpenLinkActivity:AppCompatActivity()
             val params:Params)
         :Closeable
     {
-        val layout = Layout(activity.findViewById(android.R.id.content))
-                .apply {activity.setContentView(containerView)}
+        private val layout = ActivityConfirmDialogBinding.inflate(
+                activity.layoutInflater,
+                activity.findViewById(android.R.id.content),
+                false)
 
         init
         {
-            activity.setContentView(layout.containerView)
+            activity.setContentView(layout.root)
             activity.title = params.title?:activity.getStringCompat(R.string.activity__cannot_open_link__title)
             layout.textview.text = params.link
             val linkLabel = params.linkLabel?:activity.getStringCompat(R.string.activity__cannot_open_link__clipboard_label)
-            layout.button__retry.setOnClickListener()
+            layout.buttonRetry.setOnClickListener()
             {
                 try
                 {
@@ -109,7 +106,7 @@ class CannotOpenLinkActivity:AppCompatActivity()
                     params.exceptionHandler(e)
                 }
             }
-            layout.button__copy.setOnClickListener()
+            layout.buttonCopy.setOnClickListener()
             {
                 activity.clipboardManager.primaryClip = ClipData.newPlainText(
                         linkLabel,
@@ -121,7 +118,7 @@ class CannotOpenLinkActivity:AppCompatActivity()
                                 params.link),
                         Toast.LENGTH_LONG).show()
             }
-            layout.button__share.setOnClickListener()
+            layout.buttonShare.setOnClickListener()
             {
                 ShareCompat.IntentBuilder.from(activity)
                         .setType("text/plain")
@@ -140,12 +137,5 @@ class CannotOpenLinkActivity:AppCompatActivity()
     {
         super.onPause()
         finish()
-    }
-
-    // Layout
-
-    class Layout(val parent:ViewGroup):LayoutContainer
-    {
-        override val containerView = parent.context.layoutInflater.inflate(R.layout.activity__confirm_dialog,parent,false)
     }
 }

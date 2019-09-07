@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
+import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.core.viewholder.ViewHolder
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
@@ -14,9 +15,8 @@ import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.mutableNullableValue
 import java.io.Closeable
 import java.io.Serializable
-import com.github.ericytsang.androidlib.layoutcontainer.LayoutContainer
-import kotlinx.android.synthetic.main.dialog__list.*
-import kotlinx.android.synthetic.main.list_item.*
+import com.github.ericytsang.androidlib.listitempickerdialog.databinding.DialogListBinding
+import com.github.ericytsang.androidlib.listitempickerdialog.databinding.ListItemBinding
 
 class ListItemPickerDialog:AppCompatActivity()
 {
@@ -62,13 +62,9 @@ class ListItemPickerDialog:AppCompatActivity()
         private val closeables = CloseableGroup()
         override fun close() = closeables.close()
 
-        private val layout = LayoutContainer(
-                R.layout.dialog__list,
-                activity.findViewById(android.R.id.content))
-                .apply()
-                {
-                    activity.setContentView(containerView)
-                }
+        private val layout = DialogListBinding
+                .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)!!
+                .apply {activity.setContentView(root)}
 
         // default activity result value in case we are cancelled
         init
@@ -87,12 +83,12 @@ class ListItemPickerDialog:AppCompatActivity()
         {
             if (params.leadInText != null)
             {
-                layout.lead_in_text.text = params.leadInText
-                layout.lead_in_text.visibility = View.VISIBLE
+                layout.leadInText.text = params.leadInText
+                layout.leadInText.visibility = View.VISIBLE
             }
             else
             {
-                layout.lead_in_text.visibility = View.GONE
+                layout.leadInText.visibility = View.GONE
             }
         }
 
@@ -102,8 +98,8 @@ class ListItemPickerDialog:AppCompatActivity()
             closeables.chainedAddCloseables()
             {
                 closeables ->
-                layout.recycler_view.layoutManager = LinearLayoutManager(activity)
-                layout.recycler_view.adapter = Adapter(params,object:ListItemViewHolder.Listener
+                layout.recyclerView.layoutManager = LinearLayoutManager(activity)
+                layout.recyclerView.adapter = Adapter(params,object:ListItemViewHolder.Listener
                 {
                     override fun click(listItem:ListItem<Serializable>)
                     {
@@ -113,8 +109,8 @@ class ListItemPickerDialog:AppCompatActivity()
                 })
                 closeables += Closeable()
                 {
-                    layout.recycler_view.layoutManager = null
-                    layout.recycler_view.adapter = null
+                    layout.recyclerView.layoutManager = null
+                    layout.recyclerView.adapter = null
                 }
             }
         }
@@ -138,22 +134,24 @@ class ListItemPickerDialog:AppCompatActivity()
 
     private class ListItemViewHolder
     private constructor(
-            val layout:LayoutContainer,
+            val layout:ListItemBinding,
             val listener:Listener)
         :ViewHolder<ListItemViewHolder.Model>(
-            layout.containerView)
+            layout.root)
     {
         companion object
         {
             fun from(parent:ViewGroup,onClickListener:Listener):ListItemViewHolder
             {
-                return ListItemViewHolder(LayoutContainer(R.layout.list_item,parent),onClickListener)
+                return ListItemViewHolder(
+                        ListItemBinding.inflate(parent.context.layoutInflater,parent,false),
+                        onClickListener)
             }
         }
 
         init
         {
-            layout.containerView.setOnClickListener()
+            layout.root.setOnClickListener()
             {
                 listener.click(model!!.listItem)
             }

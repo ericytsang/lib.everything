@@ -2,22 +2,20 @@ package com.github.ericytsang.androidlib.seekbar
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import com.github.ericytsang.androidlib.core.layoutInflater
+import com.github.ericytsang.androidlib.seekbar.databinding.ViewSeekBarWithFeedbackBinding
 import com.github.ericytsang.lib.prop.Prop
 import com.github.ericytsang.lib.prop.listen
 import com.github.ericytsang.lib.prop.value
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.view__seek_bar_with_feedback.*
 
 class SeekBarWithFeedback(
         context:Context,
         attrs:AttributeSet)
     :LinearLayout(context,attrs)
 {
-    private val layout = Layout(this)
+    private val layout = ViewSeekBarWithFeedbackBinding.inflate(context.layoutInflater,this,true)
 
     var listener:Listener? = null
 
@@ -25,10 +23,10 @@ class SeekBarWithFeedback(
     {
         override fun doGet(context:Unit):Int
         {
-            return (layout.SeekBarWithFeedback__seekbar.progress+min.value)*valueCoefficient.value
+            return (layout.SeekBarWithFeedbackSeekbar.progress+min.value)*valueCoefficient.value
         }
         override fun doSet(context:Unit,value:Int)
-        { layout.SeekBarWithFeedback__seekbar.progress = (value/valueCoefficient.value)-min.value }
+        { layout.SeekBarWithFeedbackSeekbar.progress = (value/valueCoefficient.value)-min.value }
     }
 
     val valueCoefficient = object:Prop<Unit,Int>()
@@ -75,15 +73,15 @@ class SeekBarWithFeedback(
         // updating min and max on the progress bar
         listOf(min,max).listen()
         {
-            layout.SeekBarWithFeedback__seekbar.max = max.value-min.value
+            layout.SeekBarWithFeedbackSeekbar.max = max.value-min.value
         }
 
         // updating text labels when needed
         listOf(progress,valueCoefficient,labelTemplate,min,max).listen()
         {
-            layout.SeekBarWithFeedback__label__min.text = createLabelText(labelTemplate.value,min.value*valueCoefficient.value)
-            layout.SeekBarWithFeedback__label__max.text = createLabelText(labelTemplate.value,max.value*valueCoefficient.value)
-            layout.SeekBarWithFeedback__label__value.text = createLabelText(labelTemplate.value,progress.value)
+            layout.SeekBarWithFeedbackLabelMin.text = createLabelText(labelTemplate.value,min.value*valueCoefficient.value)
+            layout.SeekBarWithFeedbackLabelMax.text = createLabelText(labelTemplate.value,max.value*valueCoefficient.value)
+            layout.SeekBarWithFeedbackLabelValue.text = createLabelText(labelTemplate.value,progress.value)
         }
 
         // adding listener to seekbar
@@ -91,23 +89,23 @@ class SeekBarWithFeedback(
         {
             override fun onProgressChanged(seekBar:SeekBar?,progress:Int,fromUser:Boolean)
             {
-                layout.SeekBarWithFeedback__label__value.text = createLabelText(labelTemplate.value,this@SeekBarWithFeedback.progress.value)
+                layout.SeekBarWithFeedbackLabelValue.text = createLabelText(labelTemplate.value,this@SeekBarWithFeedback.progress.value)
                 listener?.onProgressChanged(this@SeekBarWithFeedback,this@SeekBarWithFeedback.progress.value,fromUser)
             }
             override fun onStartTrackingTouch(seekBar:SeekBar?) = Unit
             override fun onStopTrackingTouch(seekBar:SeekBar?) = Unit
         }.apply {onProgressChanged(null,0,false)}
-        layout.SeekBarWithFeedback__seekbar.setOnSeekBarChangeListener(seekbarListener)
+        layout.SeekBarWithFeedbackSeekbar.setOnSeekBarChangeListener(seekbarListener)
 
         // adding listeners to buttons
-        layout.SeekBarWithFeedback__button__decrement.setOnClickListener()
+        layout.SeekBarWithFeedbackButtonDecrement.setOnClickListener()
         {
-            layout.SeekBarWithFeedback__seekbar.progress--
+            layout.SeekBarWithFeedbackSeekbar.progress--
             listener?.onProgressChanged(this@SeekBarWithFeedback,progress.value,true)
         }
-        layout.SeekBarWithFeedback__button__increment.setOnClickListener()
+        layout.SeekBarWithFeedbackButtonIncrement.setOnClickListener()
         {
-            layout.SeekBarWithFeedback__seekbar.progress++
+            layout.SeekBarWithFeedbackSeekbar.progress++
             listener?.onProgressChanged(this@SeekBarWithFeedback,progress.value,true)
         }
     }
@@ -119,20 +117,15 @@ class SeekBarWithFeedback(
 
     override fun setEnabled(enabled:Boolean)
     {
-        layout.SeekBarWithFeedback__label__min.isEnabled = enabled
-        layout.SeekBarWithFeedback__label__max.isEnabled = enabled
-        layout.SeekBarWithFeedback__label__value.isEnabled = enabled
-        layout.SeekBarWithFeedback__seekbar.isEnabled = enabled
+        layout.SeekBarWithFeedbackLabelMin.isEnabled = enabled
+        layout.SeekBarWithFeedbackLabelMax.isEnabled = enabled
+        layout.SeekBarWithFeedbackLabelValue.isEnabled = enabled
+        layout.SeekBarWithFeedbackSeekbar.isEnabled = enabled
         super.setEnabled(enabled)
     }
 
     private fun createLabelText(labelTemplateStringResId:String,value:Int):String
     {
         return labelTemplateStringResId.replace("{}",value.toString())
-    }
-
-    private class Layout(parent:ViewGroup):LayoutContainer
-    {
-        override val containerView = parent.context.layoutInflater.inflate(R.layout.view__seek_bar_with_feedback,parent,true)
     }
 }

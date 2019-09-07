@@ -1,16 +1,13 @@
 package com.github.ericytsang.androidlib.alertdialog
 
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
+import com.github.ericytsang.androidlib.alertdialog.databinding.ActivityAlertDialogBinding
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.fromHtml
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
-import com.github.ericytsang.androidlib.core.layoutInflater
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.activity__alert_dialog.*
 import java.io.Closeable
 import java.io.Serializable
 
@@ -61,14 +58,16 @@ class AlertDialogActivity
                 activity.title = params.title
             }
 
-            val layout = Layout(contentView).apply {activity.setContentView(containerView)}
+            val layout = ActivityAlertDialogBinding
+                    .inflate(activity.layoutInflater,contentView,false)
+                    .apply {activity.setContentView(root)}
 
             // textview
             layout.textview.text = fromHtml(params.bodyText)
 
             // button
-            layout.button__dismiss.text = params.buttonText?:activity.getText(android.R.string.ok)
-            layout.button__dismiss.setOnClickListener()
+            layout.buttonDismiss.text = params.buttonText?:activity.getText(android.R.string.ok)
+            layout.buttonDismiss.setOnClickListener()
             {
                 params.onButtonPress(activity)
                 activity.finish()
@@ -79,9 +78,4 @@ class AlertDialogActivity
     }
 
     override fun makeResumed(methodOverload:MethodOverload,created:AlertDialogActivity.Created) = NoOpState(this)
-
-    class Layout(root:ViewGroup):LayoutContainer
-    {
-        override val containerView:View = root.context.layoutInflater.inflate(R.layout.activity__alert_dialog,root,false)
-    }
 }

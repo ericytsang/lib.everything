@@ -1,3 +1,5 @@
+import kotlin.Unit
+
 buildscript {
     apply from: 'versions.gradle'
     addRepos(repositories)
@@ -49,9 +51,9 @@ static def configureAndroid(PluginAware p) {
                 testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
                 vectorDrawables.useSupportLibrary true
             }
-//            dataBinding {
-//                enabled true
-//            }
+            dataBinding {
+                enabled true
+            }
             compileOptions {
                 targetCompatibility JavaVersion.VERSION_1_8
                 sourceCompatibility JavaVersion.VERSION_1_8
@@ -62,16 +64,7 @@ static def configureAndroid(PluginAware p) {
             }
         }
 
-        androidExtensions {
-            experimental = true
-        }
-
         dependencies {
-
-            // implementation "javax.xml.bind:jaxb-api:2.2.11"
-            // implementation "com.sun.xml.bind:jaxb-core:2.2.11"
-            // implementation "com.sun.xml.bind:jaxb-impl:2.2.11"
-            // implementation "javax.activation:activation:1.1.1"
 
             // kotlin
             implementation deps.kotlin.stdlib

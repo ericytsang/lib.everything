@@ -4,11 +4,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.layoutInflater
-import kotlinx.android.extensions.LayoutContainer
+import com.github.ericytsang.androidlib.texinputdialog.databinding.ActivityTextInputDialogBinding
 import java.io.Closeable
 import java.io.Serializable
-import kotlinx.android.synthetic.main.activity__text_input_dialog.*
 
 class TextInputDialogActivity
     :BaseActivity<
@@ -31,7 +29,9 @@ class TextInputDialogActivity
             contentView:ViewGroup)
         :Closeable
     {
-        val layout = Layout(contentView).apply {activity.setContentView(containerView)}
+        val layout = ActivityTextInputDialogBinding
+                .inflate(activity.layoutInflater,contentView,false)
+                .apply {activity.setContentView(root)}
         init
         {
 
@@ -58,13 +58,13 @@ class TextInputDialogActivity
 
             // activity result
             setOnActivityResult(activity,ResultParams(startParams.text,true))
-            layout.button__ok.setOnClickListener()
+            layout.buttonOk.setOnClickListener()
             {
                 setOnActivityResult(activity,ResultParams(layout.edittext.text?.toString()?:"",false))
                 activity.finish()
             }
 
-            layout.button__cancel.setOnClickListener()
+            layout.buttonCancel.setOnClickListener()
             {
                 activity.finish()
             }
@@ -74,9 +74,4 @@ class TextInputDialogActivity
     }
 
     override fun makeResumed(methodOverload:MethodOverload,created:Created) = NoOpState(this)
-
-    class Layout(root:ViewGroup):LayoutContainer
-    {
-        override val containerView:View = root.context.layoutInflater.inflate(R.layout.activity__text_input_dialog,root,false)
-    }
 }
