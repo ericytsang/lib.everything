@@ -1,19 +1,17 @@
 package com.github.ericytsang.lib.awaitable
 
 import com.github.ericytsang.lib.concurrent.awaitSuspended
-import com.github.ericytsang.lib.testutils.TestUtils
-import org.junit.After
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.thread
 
 class SimpleAwaiterTest
 {
-    @After
-    fun teardown()
-    {
-        TestUtils.assertAllWorkerThreadsDead()
-    }
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
 
     @Test
     fun close_kills_worker_test()

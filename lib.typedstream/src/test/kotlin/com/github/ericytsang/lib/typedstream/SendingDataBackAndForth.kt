@@ -3,9 +3,9 @@ package com.github.ericytsang.lib.typedstream
 import com.github.ericytsang.lib.concurrent.awaitSuspended
 import com.github.ericytsang.lib.simplepipestream.SimplePipedInputStream
 import com.github.ericytsang.lib.simplepipestream.SimplePipedOutputStream
-import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
-import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -15,11 +15,9 @@ import kotlin.test.assertEquals
 
 class SendingDataBackAndForth
 {
-    @After
-    fun teardown()
-    {
-        TestUtils.assertAllWorkerThreadsDead()
-    }
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
 
     @Test
     fun can_instantiate_input_stream_without_being_blocked_in_the_constructor()

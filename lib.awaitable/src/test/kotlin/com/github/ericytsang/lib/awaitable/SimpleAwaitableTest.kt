@@ -1,9 +1,8 @@
 package com.github.ericytsang.lib.awaitable
 
 import com.github.ericytsang.lib.concurrent.awaitSuspended
-import com.github.ericytsang.lib.testutils.TestUtils.assertAllWorkerThreadsDead
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -15,13 +14,12 @@ class SimpleAwaitableTest
     @JvmField
     @Rule
     val errorCollector = ErrorCollector()
-    val simpleAwaitable = SimpleAwaitable()
 
-    @After
-    fun teardown()
-    {
-        assertAllWorkerThreadsDead()
-    }
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
+
+    val simpleAwaitable = SimpleAwaitable()
 
     @Test
     fun update_stamp_test()

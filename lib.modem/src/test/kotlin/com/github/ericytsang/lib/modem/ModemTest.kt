@@ -1,13 +1,11 @@
 package com.github.ericytsang.lib.modem
 
 import com.github.ericytsang.lib.concurrent.awaitSuspended
-import com.github.ericytsang.lib.concurrent.future
 import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.TcpClient
 import com.github.ericytsang.lib.net.host.TcpServer
-import com.github.ericytsang.lib.testutils.TestUtils.assertAllWorkerThreadsDead
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
-import org.hamcrest.CoreMatchers.`is`
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -27,11 +25,17 @@ class ModemTest
     {
         const val TEST_PORT = 55652
     }
+
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
+
     @JvmField
     @Rule
     val errorCollector = ErrorCollector()
     val conn1:Connection
     val conn2:Connection
+
     init
     {
         val tcpClient = TcpClient.anySrcPort()
@@ -53,7 +57,6 @@ class ModemTest
         println("fun teardown() ===============================")
         conn1.close()
         conn2.close()
-        assertAllWorkerThreadsDead()
     }
 
     @Test

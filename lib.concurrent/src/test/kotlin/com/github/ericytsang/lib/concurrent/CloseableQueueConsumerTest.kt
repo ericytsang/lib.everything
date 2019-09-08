@@ -1,8 +1,7 @@
 package com.github.ericytsang.lib.concurrent
 
-import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import org.hamcrest.CoreMatchers.`is`
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -13,15 +12,14 @@ class CloseableQueueConsumerTest
 {
     private val ENQUEUED_VALUE = 5
     private val fixture = CloseableQueue<Int>(ArrayBlockingQueue(5))
+
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
+
     @JvmField
     @Rule
     val errorCollector = ErrorCollector()
-
-    @After
-    fun teardown()
-    {
-        TestUtils.assertAllWorkerThreadsDead()
-    }
 
     private fun blocking_call_blocks_until_not_empty(blockingConsume:()->Unit)
     {

@@ -1,24 +1,19 @@
 package com.github.ericytsang.lib.datastore
 
-import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.internal.schedulers.ComputationScheduler
-import io.reactivex.internal.schedulers.ExecutorScheduler
 import io.reactivex.subjects.PublishSubject
-import org.junit.After
-import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 class RxJavaTests
 {
-    @After
-    fun teardown()
-    {
-        TestUtils.assertAllWorkerThreadsDead()
-    }
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
 
     @Test
     fun what_thread_does_rxjava_Observable_onNext_get_called_on()

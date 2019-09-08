@@ -3,9 +3,10 @@ package com.github.ericytsang.lib.rpc
 import com.github.ericytsang.lib.concurrent.future
 import com.github.ericytsang.lib.modem.Modem
 import com.github.ericytsang.lib.net.connection.TcpConnection
-import com.github.ericytsang.lib.testutils.TestUtils
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import com.github.ericytsang.lib.testutils.TestUtils.exceptionExpected
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -18,6 +19,10 @@ class RpcServerTest
     {
         val PORT = (50000..60000).toList().let {it[Math.floor(Math.random()*it.size).toInt()]}
     }
+
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
 
     val connectionMaker = future {
         ServerSocket(PORT).use {it.accept()}
@@ -43,7 +48,6 @@ class RpcServerTest
         rpcServer.close()
         con1.close()
         con2.close()
-        TestUtils.assertAllWorkerThreadsDead()
     }
 
     @Test

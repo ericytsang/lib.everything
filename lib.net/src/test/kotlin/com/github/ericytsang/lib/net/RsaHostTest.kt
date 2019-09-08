@@ -4,9 +4,9 @@ import com.github.ericytsang.lib.net.host.RsaHost
 import com.github.ericytsang.lib.net.host.TcpClient
 import com.github.ericytsang.lib.net.connection.Connection
 import com.github.ericytsang.lib.net.host.TcpServer
-import com.github.ericytsang.lib.testutils.TestUtils
-import org.junit.After
+import com.github.ericytsang.lib.testutils.NoZombiesAllowed
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -24,11 +24,9 @@ class RsaHostTest
         private const val TEST_PORT = 63294
     }
 
-    @After
-    fun teardown()
-    {
-        TestUtils.assertAllWorkerThreadsDead()
-    }
+    @JvmField
+    @Rule
+    val noZombieThreads = NoZombiesAllowed()
 
     @Test
     fun general_test()
