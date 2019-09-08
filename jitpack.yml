@@ -1,0 +1,2 @@
+before_install:
+  - curl https://raw.githubusercontent.com/ericytsang/lib.everything/lib.dev/licenses/android-sdk-license.sh | sh
