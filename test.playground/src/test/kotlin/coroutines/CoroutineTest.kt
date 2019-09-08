@@ -8,6 +8,8 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.setMain
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -46,29 +48,6 @@ class CoroutineTest
             deferred.await()
             deferred.cancelAndJoin()
             assertEquals(5,deferred.await())
-        }
-    }
-
-    @Test
-    fun cancellation_does_not_run_code_after_delay_even_on_immediate_dispatcher()
-    {
-        var asyncThread:Thread? = null
-        var function = {}
-        val deferred = GlobalScope.async(Dispatchers.Main.immediate)
-        {
-            asyncThread = Thread.currentThread()
-            delay(1000)
-            function = {throw Throwable("oh no, i was set!")}
-            5
-        }
-        runBlocking(Dispatchers.Main.immediate)
-        {
-            deferred.cancelAndJoin()
-
-            // should throw exception here because the co-routine was cancelled earlier
-            assertFailsWith(CancellationException::class) {println(deferred.await())}
-            function()
-            assertEquals(asyncThread,Thread.currentThread())
         }
     }
 }
