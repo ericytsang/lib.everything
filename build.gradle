@@ -4,6 +4,9 @@ buildscript {
     dependencies {
         classpath deps.android_gradle_plugin
         classpath deps.kotlin.plugin
+        classpath deps.robovm.plugin
+        classpath deps.crashlytics.google_services_plugin
+        classpath deps.crashlytics.fabric_plugin
     }
 }
 
