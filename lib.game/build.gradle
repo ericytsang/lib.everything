@@ -7,5 +7,4 @@ dependencies {
 
     // gdx dependencies
     api "com.badlogicgames.gdx:gdx:$gdx_version"
-    api "com.badlogicgames.gdx:gdx-box2d:$gdx_version"
 }
