@@ -133,7 +133,6 @@ class RsaHostTest
     }
 
     @Test
-    @Ignore
     fun timeout_test()
     {
         // generate keypairs
