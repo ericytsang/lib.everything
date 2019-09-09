@@ -1,5 +1,3 @@
-import kotlin.Unit
-
 buildscript {
     apply from: 'versions.gradle'
     addRepos(repositories)
@@ -37,7 +35,11 @@ ext.configureKotlin = this.&configureKotlin
 // for configuring plain kotlin projects
 static def configureKotlin(PluginAware p) {
     p.with {
+        apply plugin: "java-library"
         apply plugin: "kotlin"
+
+        sourceCompatibility = "8"
+        targetCompatibility = "8"
     }
     configureKotlinBase(p)
 }
@@ -49,6 +51,7 @@ static def configureAndroid(PluginAware p) {
         apply plugin: "com.android.library"
         apply plugin: "kotlin-android"
         apply plugin: "kotlin-android-extensions"
+        apply plugin: "kotlin-kapt"
 
         android {
             compileSdkVersion build_versions.target_sdk
