@@ -1,6 +1,6 @@
-/build/
+/build
 /.idea/*
 !/.idea/runConfigurations/
-/.gradle/
-/*.iml
+/.gradle
+*.iml
 /local.properties
