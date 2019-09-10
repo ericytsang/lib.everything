@@ -28,7 +28,18 @@ static def configureKotlinBase(PluginAware p) {
             implementation deps.kotlin.reflect
 
             // test
-            testImplementation project(":lib.testutils")
+            if ("lib.streamtest" in name)
+            {
+                api project(":lib.testutils")
+            }
+            else if ("lib.testutils" in name)
+            {
+                // don't add project(":lib.testutils")
+            }
+            else
+            {
+                testImplementation project(":lib.testutils")
+            }
         }
     }
     null

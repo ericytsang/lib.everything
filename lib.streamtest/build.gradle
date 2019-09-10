@@ -1,5 +1,1 @@
 configureKotlin(project)
-
-dependencies {
-    api project(":lib.testutils")
-}
