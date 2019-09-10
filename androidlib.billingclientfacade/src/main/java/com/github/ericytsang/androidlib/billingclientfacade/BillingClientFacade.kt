@@ -5,8 +5,11 @@ import android.content.Context
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ConsumeParams
 import com.android.billingclient.api.ConsumeResponseListener
 import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchaseHistoryRecord
 import com.android.billingclient.api.PurchaseHistoryResponseListener
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetails
@@ -26,6 +29,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
+// todo: look through and refactor this
 class BillingClientFacade
 private constructor(
         context:Context,
@@ -140,12 +144,12 @@ private constructor(
             billingClient.endConnection()
         }
 
-        override fun onConsumeResponse(responseCode:Int,purchaseToken:String?)
+        override fun onConsumeResponse(billingResult:BillingResult?,purchaseToken:String?)
         {
             refreshPurchases()
         }
 
-        override fun onPurchasesUpdated(responseCode:Int,purchases:MutableList<Purchase>?)
+        override fun onPurchasesUpdated(billingResult:BillingResult?,purchases:MutableList<Purchase>?)
         {
             refreshPurchases()
         }
@@ -159,32 +163,37 @@ private constructor(
         override fun onBillingServiceDisconnected()
         {
             if (billingClientFacade.opened.value.invoke().opt != this) return
-            onBillingSetupFinished(BillingClient.BillingResponse.SERVICE_DISCONNECTED)
+            onBillingSetupFinished(BillingResult.newBuilder()
+                    .setResponseCode(BillingClient.BillingResponseCode.SERVICE_DISCONNECTED)
+                    .setDebugMessage("Service connection is disconnected.")
+                    .build())
         }
 
-        override fun onBillingSetupFinished(responseCode:Int)
+        override fun onBillingSetupFinished(billingResult:BillingResult)
         {
             if (billingClientFacade.opened.value.invoke().opt != this) return
-            when(responseCode)
+            when(val responseCode = billingResult.responseCode)
             {
                 // connection failed
-                BillingClient.BillingResponse.FEATURE_NOT_SUPPORTED,
-                BillingClient.BillingResponse.SERVICE_DISCONNECTED,
-                BillingClient.BillingResponse.USER_CANCELED,
-                BillingClient.BillingResponse.SERVICE_UNAVAILABLE,
-                BillingClient.BillingResponse.BILLING_UNAVAILABLE,
-                BillingClient.BillingResponse.ITEM_UNAVAILABLE,
-                BillingClient.BillingResponse.DEVELOPER_ERROR,
-                BillingClient.BillingResponse.ERROR,
-                BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                BillingClient.BillingResponse.ITEM_NOT_OWNED -> Unit
+                BillingClient.BillingResponseCode.SERVICE_TIMEOUT,
+                BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED,
+                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
+                BillingClient.BillingResponseCode.USER_CANCELED,
+                BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
+                BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+                BillingClient.BillingResponseCode.ITEM_UNAVAILABLE,
+                BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                BillingClient.BillingResponseCode.ERROR,
+                BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED,
+                BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> Unit
 
                 // billing client connected
-                BillingClient.BillingResponse.OK ->
+                BillingClient.BillingResponseCode.OK ->
                 {
                     connected.value = {Opt.some(Connected(this,billingClient))}
                 }
-                else -> throw IllegalArgumentException("unknown billingResponseCode: $responseCode")
+                else -> throw IllegalArgumentException(
+                        "unknown billingResponseCode: ($responseCode) ${billingResult.debugMessage}")
             }.forceExhaustiveWhen
         }
     }
@@ -212,32 +221,34 @@ private constructor(
             offers.value = {Opt.none()}
         }
 
-        override fun onSkuDetailsResponse(responseCode:Int,skuDetailsList:MutableList<SkuDetails>?)
+        override fun onSkuDetailsResponse(billingResult:BillingResult,skuDetailsList:MutableList<SkuDetails>?)
         {
             if (opened.connected.value.invoke().opt != this) return
-            when(responseCode)
+            when(val responseCode = billingResult.responseCode)
             {
                 // connection failed
-                BillingClient.BillingResponse.FEATURE_NOT_SUPPORTED,
-                BillingClient.BillingResponse.SERVICE_DISCONNECTED,
-                BillingClient.BillingResponse.USER_CANCELED,
-                BillingClient.BillingResponse.SERVICE_UNAVAILABLE,
-                BillingClient.BillingResponse.BILLING_UNAVAILABLE,
-                BillingClient.BillingResponse.ITEM_UNAVAILABLE,
-                BillingClient.BillingResponse.DEVELOPER_ERROR,
-                BillingClient.BillingResponse.ERROR,
-                BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                BillingClient.BillingResponse.ITEM_NOT_OWNED -> Unit
+                BillingClient.BillingResponseCode.SERVICE_TIMEOUT,
+                BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED,
+                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
+                BillingClient.BillingResponseCode.USER_CANCELED,
+                BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
+                BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+                BillingClient.BillingResponseCode.ITEM_UNAVAILABLE,
+                BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                BillingClient.BillingResponseCode.ERROR,
+                BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED,
+                BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> Unit
 
                 // offers received
-                BillingClient.BillingResponse.OK ->
+                BillingClient.BillingResponseCode.OK ->
                 {
                     offers.value = {
                         Opt.some(Offers(this,skuDetailsList
                                 ?: listOf()))
                     }
                 }
-                else -> throw IllegalArgumentException("unknown billingResponseCode: $responseCode")
+                else -> throw IllegalArgumentException(
+                        "unknown billingResponseCode: ($responseCode) ${billingResult.debugMessage}")
             }.forceExhaustiveWhen
         }
     }
@@ -269,29 +280,31 @@ private constructor(
             readyToSellStuff.value = {Opt.none()}
         }
 
-        override fun onPurchaseHistoryResponse(responseCode:Int,purchasesList:MutableList<Purchase>?)
+        override fun onPurchaseHistoryResponse(billingResult:BillingResult,purchaseHistoryRecordList:List<PurchaseHistoryRecord>?)
         {
             if (connected.offers.value.invoke().opt != this) return
-            when(responseCode)
+            when(val responseCode = billingResult.responseCode)
             {
                 // connection failed
-                BillingClient.BillingResponse.FEATURE_NOT_SUPPORTED,
-                BillingClient.BillingResponse.SERVICE_DISCONNECTED,
-                BillingClient.BillingResponse.USER_CANCELED,
-                BillingClient.BillingResponse.SERVICE_UNAVAILABLE,
-                BillingClient.BillingResponse.BILLING_UNAVAILABLE,
-                BillingClient.BillingResponse.ITEM_UNAVAILABLE,
-                BillingClient.BillingResponse.DEVELOPER_ERROR,
-                BillingClient.BillingResponse.ERROR,
-                BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                BillingClient.BillingResponse.ITEM_NOT_OWNED -> Unit
+                BillingClient.BillingResponseCode.SERVICE_TIMEOUT,
+                BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED,
+                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
+                BillingClient.BillingResponseCode.USER_CANCELED,
+                BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
+                BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+                BillingClient.BillingResponseCode.ITEM_UNAVAILABLE,
+                BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                BillingClient.BillingResponseCode.ERROR,
+                BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED,
+                BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> Unit
 
                 // offers received
-                BillingClient.BillingResponse.OK ->
+                BillingClient.BillingResponseCode.OK ->
                 {
-                    readyToConsumeStuff.value = {Opt.some(ReadyToConsumeStuff(this,purchasesList?:listOf()))}
+                    readyToConsumeStuff.value = {Opt.some(ReadyToConsumeStuff(this,purchaseHistoryRecordList?:listOf()))}
                 }
-                else -> throw IllegalArgumentException("unknown billingResponseCode: $responseCode")
+                else -> throw IllegalArgumentException(
+                        "unknown billingResponseCode: ($responseCode) ${billingResult.debugMessage}")
             }.forceExhaustiveWhen
         }
     }
@@ -344,7 +357,7 @@ private constructor(
     // await calls to consume stuff
     private class ReadyToConsumeStuff(
             val offers:Offers,
-            val purchaseHistory:List<Purchase>)
+            val purchaseHistory:List<PurchaseHistoryRecord>)
         :Closeable
     {
         fun consume(sku:String)
@@ -358,7 +371,11 @@ private constructor(
             boughtThings.forEach()
             {
                 boughtThing ->
-                offers.connected.billingClient.consumeAsync(boughtThing.purchaseToken,offers.connected.opened)
+                offers.connected.billingClient.consumeAsync(
+                        ConsumeParams.newBuilder()
+                                .setPurchaseToken(boughtThing.purchaseToken)
+                                .build(),
+                        offers.connected.opened)
             }
         }
 
