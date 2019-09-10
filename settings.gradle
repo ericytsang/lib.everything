@@ -1,5 +1,5 @@
 include(":androidlib.alertdialog")
-//include(":androidlib.billingclientfacade")
+include(":androidlib.billingclientfacade")
 include(":androidlib.cannotopenlinkdialog")
 include(":androidlib.confirmdialog")
 include(":androidlib.core")
