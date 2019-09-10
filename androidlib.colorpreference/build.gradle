@@ -9,7 +9,7 @@ dependencies {
     api project(":lib.prop")
 
     // color picker
-    api 'com.github.QuadFlask:colorpicker:0.0.13'
+    api "com.github.QuadFlask:colorpicker:0.0.13"
 
     // androidx
     api deps.support.preference
