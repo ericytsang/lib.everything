@@ -18,8 +18,102 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+
+// for configuring android library projects
+static def configureAndroidLib(PluginAware p) {
+    p.with {
+        apply plugin: "com.android.library"
+    }
+    configureAndroidCommon(p)
+}
+ext.configureAndroidLib = this.&configureAndroidLib
+
+
+// for configuring android library projects
+static def configureAndroidApp(PluginAware p) {
+    p.with {
+        apply plugin: "com.android.application"
+    }
+    configureAndroidCommon(p)
+}
+ext.configureAndroidApp = this.&configureAndroidApp
+
+// get the git commit hash
+static def getGitHash(Project p) {
+    p.with {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+}
+
+
+// for configuring android projects
+static def configureAndroidCommon(PluginAware p) {
+    p.with {
+        apply plugin: "kotlin-android"
+        apply plugin: "kotlin-android-extensions"
+        apply plugin: "kotlin-kapt"
+
+        android {
+            compileSdkVersion build_versions.target_sdk
+            buildToolsVersion build_versions.build_tools
+            defaultConfig {
+                minSdkVersion build_versions.min_sdk
+                targetSdkVersion build_versions.target_sdk
+
+                testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+                vectorDrawables.useSupportLibrary true
+                multiDexEnabled true
+
+                buildConfigField "String", "GIT_HASH", "\"${getGitHash(p)}\""
+            }
+            dataBinding {
+                enabled true
+            }
+            compileOptions {
+                targetCompatibility JavaVersion.VERSION_1_8
+                sourceCompatibility JavaVersion.VERSION_1_8
+            }
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+            lintOptions {
+                ignoreWarnings false
+                abortOnError true
+            }
+            buildTypes {
+                release {
+                    minifyEnabled false
+                    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                }
+            }
+        }
+    }
+    configureKotlinDependencies(p)
+}
+
+
 // for configuring plain kotlin projects
-static def configureKotlinBase(PluginAware p) {
+static def configureKotlin(PluginAware p) {
+    p.with {
+        apply plugin: "java-library"
+        apply plugin: "kotlin"
+
+        sourceCompatibility = "8"
+        targetCompatibility = "8"
+    }
+    configureKotlinDependencies(p)
+}
+ext.configureKotlin = this.&configureKotlin
+
+
+// for configuring plain kotlin projects
+static def configureKotlinDependencies(PluginAware p) {
     p.with {
         dependencies {
 
@@ -42,56 +136,4 @@ static def configureKotlinBase(PluginAware p) {
             }
         }
     }
-    null
 }
-ext.configureKotlin = this.&configureKotlin
-
-// for configuring plain kotlin projects
-static def configureKotlin(PluginAware p) {
-    p.with {
-        apply plugin: "java-library"
-        apply plugin: "kotlin"
-
-        sourceCompatibility = "8"
-        targetCompatibility = "8"
-    }
-    configureKotlinBase(p)
-}
-ext.configureKotlin = this.&configureKotlin
-
-// for configuring android projects
-static def configureAndroid(PluginAware p) {
-    p.with {
-        apply plugin: "com.android.library"
-        apply plugin: "kotlin-android"
-        apply plugin: "kotlin-android-extensions"
-        apply plugin: "kotlin-kapt"
-
-        android {
-            compileSdkVersion build_versions.target_sdk
-            buildToolsVersion build_versions.build_tools
-            defaultConfig {
-                minSdkVersion build_versions.min_sdk
-                targetSdkVersion build_versions.target_sdk
-                testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-                vectorDrawables.useSupportLibrary true
-            }
-            dataBinding {
-                enabled true
-            }
-            compileOptions {
-                targetCompatibility JavaVersion.VERSION_1_8
-                sourceCompatibility JavaVersion.VERSION_1_8
-            }
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
-            lintOptions {
-                ignoreWarnings false
-                abortOnError true
-            }
-        }
-    }
-    configureKotlinBase(p)
-}
-ext.configureAndroid = this.&configureAndroid
