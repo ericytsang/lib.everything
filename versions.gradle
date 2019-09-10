@@ -46,9 +46,33 @@ versions.timber = "4.5.1"
 versions.work = "2.1.0"
 ext.versions = versions
 
+// top-level deps
 def deps = [:]
 deps.benchmark = "androidx.benchmark:benchmark-junit4:$versions.benchmark"
 deps.benchmark_gradle = "androidx.benchmark:benchmark-gradle-plugin:$versions.benchmark"
+deps.paging_ktx = "androidx.paging:paging-runtime-ktx:$versions.paging"
+deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
+deps.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
+deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.junit = "junit:junit:$versions.junit"
+deps.mock_web_server = "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
+deps.rxjava2 = "io.reactivex.rxjava2:rxjava:$versions.rxjava2"
+deps.rx_android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
+deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
+deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
+deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
+ext.deps = deps
+
+// android sdk build versions
+def build_versions = [:]
+build_versions.min_sdk = 14
+build_versions.target_sdk = 28
+build_versions.build_tools = "28.0.3"
+ext.build_versions = build_versions
+
+//////////////////
+// dependencies //
+//////////////////
 
 def support = [:]
 support.annotations = "androidx.annotation:annotation:$versions.support"
@@ -129,31 +153,6 @@ kotlin.test = "org.jetbrains.kotlin:kotlin-test-junit:$versions.kotlin"
 kotlin.plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
 kotlin.allopen = "org.jetbrains.kotlin:kotlin-allopen:$versions.kotlin"
 deps.kotlin = kotlin
-
-// top-level deps
-deps.paging_ktx = "androidx.paging:paging-runtime-ktx:$versions.paging"
-deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
-deps.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
-deps.timber = "com.jakewharton.timber:timber:$versions.timber"
-deps.junit = "junit:junit:$versions.junit"
-deps.mock_web_server = "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
-deps.rxjava2 = "io.reactivex.rxjava2:rxjava:$versions.rxjava2"
-deps.rx_android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
-deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
-deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
-deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
-ext.deps = deps
-
-// android sdk build versions
-def build_versions = [:]
-build_versions.min_sdk = 14
-build_versions.target_sdk = 28
-build_versions.build_tools = "28.0.3"
-ext.build_versions = build_versions
-
-//////////////////
-// dependencies //
-//////////////////
 
 def glide = [:]
 glide.runtime = "com.github.bumptech.glide:glide:$versions.glide"
