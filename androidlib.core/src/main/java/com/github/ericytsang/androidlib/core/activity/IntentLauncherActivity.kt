@@ -8,12 +8,14 @@ import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 class IntentLauncherActivity:AppCompatActivity()
 {
     companion object:ContextCompanionWithStart<IntentLauncherActivity,BackgroundContext.ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
-        override val contextClass:Class<IntentLauncherActivity> get() = IntentLauncherActivity::class.java
+        override val contextClass get() = kClass<IntentLauncherActivity>()
+        override val paramsClass get() = kClass<Params>()
         override fun getFlagsForIntent(params:Params):Set<Int>
         {
             return setOf(

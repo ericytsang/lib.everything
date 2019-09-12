@@ -1,6 +1,7 @@
 package com.github.ericytsang.androidlib.core
 
 import android.annotation.TargetApi
+import android.app.Activity
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -41,6 +42,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.ViewDataBinding
 import com.github.ericytsang.androidlib.core.HvOrientation.*
 import com.github.ericytsang.lib.domainobjects.serialize
 import java.io.ByteArrayInputStream

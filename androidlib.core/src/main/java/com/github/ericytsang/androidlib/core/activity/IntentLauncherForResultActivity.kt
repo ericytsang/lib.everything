@@ -6,13 +6,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForResultIntent
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 class IntentLauncherForResultActivity:AppCompatActivity()
 {
     companion object:ActivityWithResultCompanion<IntentLauncherForResultActivity,Params,Serializable>()
     {
         private const val THE_REQUEST_CODE = 2782
-        override val contextClass:Class<IntentLauncherForResultActivity> get() = IntentLauncherForResultActivity::class.java
+
+        override val contextClass get() = kClass<IntentLauncherForResultActivity>()
+        override val paramsClass get() = kClass<Params>()
+        override val resultClass get() = kClass<Serializable>()
+
         override fun getFlagsForIntent(params:Params):Set<Int>
         {
             return setOf(

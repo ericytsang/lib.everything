@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
+import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.core.viewholder.ViewHolder
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
@@ -17,6 +18,7 @@ import java.io.Closeable
 import java.io.Serializable
 import com.github.ericytsang.androidlib.listitempickerdialog.databinding.DialogListBinding
 import com.github.ericytsang.androidlib.listitempickerdialog.databinding.ListItemBinding
+import kotlin.reflect.KClass
 
 class ListItemPickerDialog:AppCompatActivity()
 {
@@ -28,7 +30,9 @@ class ListItemPickerDialog:AppCompatActivity()
             Params<UserData>,
             Result<UserData>>()
     {
-        override val contextClass get() = ListItemPickerDialog::class.java
+        override val contextClass get() = kClass<ListItemPickerDialog>()
+        override val paramsClass get() = kClass<Params<UserData>>()
+        override val resultClass get() = kClass<Result<UserData>>()
     }
 
     data class Params<UserData:Serializable>(

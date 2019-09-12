@@ -4,18 +4,26 @@ import android.view.ViewGroup
 import com.github.ericytsang.androidlib.confirmdialog.databinding.ActivityConfirmDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
+import com.github.ericytsang.androidlib.core.activity.kClass
 import java.io.Closeable
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 class ConfirmDialogActivity
     :BaseActivity<
         ConfirmDialogActivity.Created,
         BaseActivity.NoOpState<ConfirmDialogActivity>>()
 {
-    companion object:ActivityWithResultCompanion<ConfirmDialogActivity,Params<*>,Result<*>>()
+    class Companion<Payload:Serializable>:
+            ActivityWithResultCompanion
+            <ConfirmDialogActivity,Params<Payload>,Result<Payload>>()
     {
-        override val contextClass get() = ConfirmDialogActivity::class.java
+        override val contextClass get() = kClass<ConfirmDialogActivity>()
+        override val resultClass get() = kClass<Result<Payload>>()
+        override val paramsClass get() = kClass<Params<Payload>>()
     }
+
+    private val companion = Companion<Serializable>()
 
     enum class ButtonId:Serializable
     {
@@ -60,7 +68,7 @@ class ConfirmDialogActivity
 
     // Created
 
-    override fun makeCreated(methodOverload:MethodOverload,contentView:ViewGroup) = Created(this,fromIntent(intent))
+    override fun makeCreated(methodOverload:MethodOverload,contentView:ViewGroup) = Created(this,companion.fromIntent(intent))
 
     class Created(
             val activity:ConfirmDialogActivity,
@@ -77,7 +85,7 @@ class ConfirmDialogActivity
             {
                 activity.title = params.title
             }
-            setOnActivityResult(activity,Result.Cancelled(params.extraUserData))
+            activity.companion.setOnActivityResult(activity,Result.Cancelled(params.extraUserData))
             layout.textview.text = params.prompt
             layout.buttonCancel.text = params.noButton.text
             layout.buttonCancel.isEnabled = params.noButton.isEnabled
@@ -85,7 +93,7 @@ class ConfirmDialogActivity
             layout.buttonCancel.visibility = params.noButton.visibility
             layout.buttonCancel.setOnClickListener()
             {
-                setOnActivityResult(activity,Result.ButtonPressed(ButtonId.NO_BUTTON,params.extraUserData))
+                activity.companion.setOnActivityResult(activity,Result.ButtonPressed(ButtonId.NO_BUTTON,params.extraUserData))
                 activity.finish()
             }
             layout.buttonOk.text = params.yesButton.text
@@ -94,7 +102,7 @@ class ConfirmDialogActivity
             layout.buttonOk.visibility = params.yesButton.visibility
             layout.buttonOk.setOnClickListener()
             {
-                setOnActivityResult(activity,Result.ButtonPressed(ButtonId.YES_BUTTON,params.extraUserData))
+                activity.companion.setOnActivityResult(activity,Result.ButtonPressed(ButtonId.YES_BUTTON,params.extraUserData))
                 activity.finish()
             }
         }

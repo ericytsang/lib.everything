@@ -4,12 +4,12 @@ import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityCannotOpenLinkDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
+import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.core.clipboardManager
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.getStringCompat
@@ -24,7 +24,8 @@ class CannotOpenLinkActivity:AppCompatActivity()
 {
     companion object:ContextCompanionWithStart<CannotOpenLinkActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
-        override val contextClass get() = CannotOpenLinkActivity::class.java
+        override val contextClass get() = kClass<CannotOpenLinkActivity>()
+        override val paramsClass get() = kClass<Params>()
 
         fun tryOpenLink(
                 context:ForegroundContext,

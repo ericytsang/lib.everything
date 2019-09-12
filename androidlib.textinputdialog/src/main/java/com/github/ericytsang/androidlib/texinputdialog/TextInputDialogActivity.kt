@@ -4,9 +4,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
+import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.texinputdialog.databinding.ActivityTextInputDialogBinding
 import java.io.Closeable
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 class TextInputDialogActivity
     :BaseActivity<
@@ -15,7 +17,9 @@ class TextInputDialogActivity
 {
     companion object:ActivityWithResultCompanion<TextInputDialogActivity,StartParams,ResultParams>()
     {
-        override val contextClass:Class<TextInputDialogActivity> get() = TextInputDialogActivity::class.java
+        override val contextClass get() = kClass<TextInputDialogActivity>()
+        override val resultClass get() = kClass<ResultParams>()
+        override val paramsClass get() = kClass<StartParams>()
     }
 
     data class StartParams(val title:String?,val prompt:String?,val text:String):Serializable

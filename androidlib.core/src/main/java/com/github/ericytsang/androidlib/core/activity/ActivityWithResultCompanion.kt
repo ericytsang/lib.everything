@@ -7,11 +7,14 @@ import androidx.fragment.app.Fragment
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForResultIntent.ActivityForResultIntent
 import java.io.Serializable
+import kotlin.reflect.KClass
+import kotlin.reflect.full.cast
 
 abstract class ActivityWithResultCompanion<Subclass:Activity,ActivityParams:Serializable,ActivityResult:Serializable>
     :ContextCompanion<Subclass,ActivityParams,ActivityForResultIntent>(ActivityForResultIntent)
 {
     private val activityResultExtraKey = "${ActivityWithResultCompanion::class.qualifiedName}.activityResultExtraKey"
+    protected abstract val resultClass:KClass<ActivityResult>
     fun startActivityForResult(context:Activity,requestCode:Int,params:ActivityParams)
     {
         toIntent(params).start(context.wrap(requestCode))
@@ -22,7 +25,7 @@ abstract class ActivityWithResultCompanion<Subclass:Activity,ActivityParams:Seri
     }
     fun toIntent(context:Context,result:ActivityResult):Intent
     {
-        val intent = Intent(context,contextClass)
+        val intent = Intent(context,contextClass.java)
         intent.putExtra(activityResultExtraKey,result)
         return intent
     }
@@ -33,7 +36,7 @@ abstract class ActivityWithResultCompanion<Subclass:Activity,ActivityParams:Seri
     }
     fun parseOnActivityResult(intent:Intent):ActivityResult
     {
-        @Suppress("UNCHECKED_CAST")
-        return intent.getSerializableExtra(activityResultExtraKey)!! as ActivityResult
+        val serializable = intent.getSerializableExtra(activityResultExtraKey)
+        return resultClass.cast(serializable!!)
     }
 }

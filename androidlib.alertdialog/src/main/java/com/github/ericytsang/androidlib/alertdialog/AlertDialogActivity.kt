@@ -5,11 +5,13 @@ import android.view.ViewGroup
 import com.github.ericytsang.androidlib.alertdialog.databinding.ActivityAlertDialogBinding
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
+import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.fromHtml
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import java.io.Closeable
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 class AlertDialogActivity
     :BaseActivity<
@@ -18,7 +20,9 @@ class AlertDialogActivity
 {
     companion object:ContextCompanionWithStart<AlertDialogActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
     {
-        override val contextClass:Class<AlertDialogActivity> get() = AlertDialogActivity::class.java
+        override val contextClass get() = kClass<AlertDialogActivity>()
+        override val paramsClass get() = kClass<Params>()
+
         override fun getFlagsForIntent(params:Params):Set<Int>
         {
             return params.additionalIntentFlags
