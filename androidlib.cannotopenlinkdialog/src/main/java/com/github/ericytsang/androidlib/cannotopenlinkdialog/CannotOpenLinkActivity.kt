@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
-import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityConfirmDialogBinding
+import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityCannotOpenLinkDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.clipboardManager
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
@@ -83,10 +83,11 @@ class CannotOpenLinkActivity:AppCompatActivity()
             val params:Params)
         :Closeable
     {
-        private val layout = ActivityConfirmDialogBinding.inflate(
-                activity.layoutInflater,
-                activity.findViewById(android.R.id.content),
-                false)
+        private val layout = ActivityCannotOpenLinkDialogBinding
+                .inflate(
+                        activity.layoutInflater,
+                        activity.findViewById(android.R.id.content),
+                        false)
 
         init
         {
