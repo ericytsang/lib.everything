@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="activity__main_menu__open_link">open link</string>
+    <string name="activity__main_menu__link_to_open">link to open</string>
+    <string name="activity__main_menu__confirm_dialog">confirm dialog</string>
+
+</resources>

@@ -14,6 +14,7 @@ dependencies {
     // todo: add Koin!
 
     // ericytsang libraries
+    implementation project(":androidlib.confirmdialog")
     implementation project(":androidlib.billingclientfacade")
     implementation project(":androidlib.cannotopenlinkdialog")
     implementation project(":androidlib.colorpreference")

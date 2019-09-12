@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.github.ericytsang.app.example.android">
 
-    <application/>
+    <application
+        tools:ignore="GoogleAppIndexingWarning"
+        android:fullBackupContent="false"
+        android:allowBackup="false"
+        android:theme="@style/Theme.AppCompat">
+
+        <activity android:name="com.github.ericytsang.example.app.android.MainMenuActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"/>
+
+        <activity
+            android:name="com.github.ericytsang.androidlib.cannotopenlinkdialog.CannotOpenLinkActivity"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"/>
+
+    </application>
 
 </manifest>
