@@ -36,9 +36,4 @@ dependencies {
     debugImplementation "com.squareup.leakcanary:leakcanary-android:1.6.3"
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:1.6.3"
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:1.6.3"
-
-    // android testing
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 }

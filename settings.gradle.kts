@@ -1,3 +1,4 @@
+/*
 include(":androidlib.alertdialog")
 include(":androidlib.billingclientfacade")
 include(":androidlib.cannotopenlinkdialog")
@@ -36,7 +37,9 @@ include(":lib.mapwithprevious")
 include(":lib.modem")
 include(":lib.net")
 include(":lib.noopclose")
+*/
 include(":lib.onlycallonce")
+/*
 include(":lib.optional")
 include(":lib.prop")
 include(":lib.randomstream")
@@ -52,6 +55,9 @@ include(":lib.sync")
 include(":lib.testutils")
 include(":lib.typedstream")
 include(":lib.visitor")
+*/
 include(":lib.xy")
+/*
 include(":test.playground")
 include(":tools.libgdx")
+*/

@@ -13,6 +13,7 @@ versions.atsl_core = "1.2.0"
 versions.atsl_junit = "1.1.1"
 versions.atsl_rules = "1.2.0"
 versions.atsl_runner = "1.2.0"
+versions.atsl_uiautomator = "2.2.0"
 versions.benchmark = "1.0.0-alpha04"
 versions.constraint_layout = "2.0.0-alpha2"
 versions.core_ktx = "1.0.0"
@@ -28,7 +29,7 @@ versions.joda = "2.10.1"
 versions.junit = "4.12"
 versions.koin = "2.0.1"
 versions.kotlin = "1.3.41"
-versions.lifecycle = "2.2.0-alpha03"
+versions.lifecycle = "2.2.0-alpha04"
 versions.mockito = "2.25.0"
 versions.mockito_all = "1.10.19"
 versions.mockito_android = "2.25.0"
@@ -44,24 +45,27 @@ versions.rx_android = "2.0.1"
 versions.rxjava2 = "2.2.12"
 versions.support = "1.0.0"
 versions.timber = "4.5.1"
+versions.truth = "0.42"
 versions.work = "2.1.0"
 ext.versions = versions
 
 // top-level deps
 def deps = [:]
+deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
 deps.benchmark = "androidx.benchmark:benchmark-junit4:$versions.benchmark"
 deps.benchmark_gradle = "androidx.benchmark:benchmark-gradle-plugin:$versions.benchmark"
-deps.paging_ktx = "androidx.paging:paging-runtime-ktx:$versions.paging"
-deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
 deps.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
-deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
+deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
 deps.junit = "junit:junit:$versions.junit"
 deps.mock_web_server = "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
+deps.okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${versions.okhttp_logging_interceptor}"
+deps.paging_ktx = "androidx.paging:paging-runtime-ktx:$versions.paging"
+deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
 deps.rxjava2 = "io.reactivex.rxjava2:rxjava:$versions.rxjava2"
 deps.rx_android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
-deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
-deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
-deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
+deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.truth = "com.google.truth:truth:$versions.truth"
 ext.deps = deps
 
 // android sdk build versions
@@ -118,7 +122,6 @@ retrofit.runtime = "com.squareup.retrofit2:retrofit:$versions.retrofit"
 retrofit.gson = "com.squareup.retrofit2:converter-gson:$versions.retrofit"
 retrofit.mock = "com.squareup.retrofit2:retrofit-mock:$versions.retrofit"
 deps.retrofit = retrofit
-deps.okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${versions.okhttp_logging_interceptor}"
 
 def dagger = [:]
 dagger.runtime = "com.google.dagger:dagger:$versions.dagger"
@@ -139,6 +142,7 @@ atsl.core = "androidx.test:core:$versions.atsl_core"
 atsl.ext_junit = "androidx.test.ext:junit:$versions.atsl_junit"
 atsl.runner = "androidx.test:runner:$versions.atsl_runner"
 atsl.rules = "androidx.test:rules:$versions.atsl_rules"
+atsl.ui_automator = "androidx.test.uiautomator:uiautomator:$versions.atsl_uiautomator"
 deps.atsl = atsl
 
 def mockito = [:]
@@ -218,7 +222,6 @@ deps.koin_androidx = koin_androidx
 def koin_ktor = [:]
 koin_ktor.ext = /* implementation */ "org.koin:koin-ktor:$versions.koin"   // Koin for Ktor Kotlin
 deps.koin_ktor = koin_ktor
-
 
 ext.deps = deps
 
