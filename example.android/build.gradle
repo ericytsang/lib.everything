@@ -52,5 +52,6 @@ dependencies {
     androidTestImplementation deps.atsl.ui_automator
     androidTestImplementation deps.work.testing
     androidTestImplementation deps.truth
+    testImplementation deps.robolectric
     testImplementation deps.junit
 }
