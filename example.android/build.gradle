@@ -37,12 +37,6 @@ dependencies {
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:1.6.3"
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:1.6.3"
 
-    // declaring conflicted libraries for dependency resolution
-    implementation deps.arch_core.runtime
-    implementation "com.google.guava:guava:25.1-android"
-    implementation "org.checkerframework:checker-compat-qual:2.5.3"
-    implementation "com.google.errorprone:error_prone_annotations:2.3.1"
-
     // testing dependencies
     androidTestImplementation deps.arch_core.testing
     androidTestImplementation deps.espresso.core
@@ -54,4 +48,11 @@ dependencies {
     androidTestImplementation deps.truth
     testImplementation deps.robolectric
     testImplementation deps.junit
+
+    // resolve dependency conflicts
+    // https://medium.com/mindorks/avoiding-conflicts-in-android-gradle-dependencies-28e4200ca235#2b5e
+    implementation deps.arch_core.runtime
+    implementation "com.google.guava:guava:25.1-android"
+    implementation "org.checkerframework:checker-compat-qual:2.5.3"
+    implementation "com.google.errorprone:error_prone_annotations:2.3.1"
 }
