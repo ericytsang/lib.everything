@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="min_touchable_separation_half">4dp</dimen>
+    <dimen name="min_touchable_separation">8dp</dimen>
+
+</resources>

@@ -14,6 +14,7 @@ dependencies {
     // todo: add Koin!
 
     // ericytsang libraries
+    implementation project(":androidlib.alertdialog")
     implementation project(":androidlib.confirmdialog")
     implementation project(":androidlib.billingclientfacade")
     implementation project(":androidlib.cannotopenlinkdialog")
@@ -29,8 +30,11 @@ dependencies {
 
     // app compat
     api deps.support.core_utils
+    api deps.support.core_ktx
     api deps.support.app_compat
     api deps.support.recyclerview
+    api deps.support.cardview
+    api deps.support.design
 
     // leak canary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:1.6.3"

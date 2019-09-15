@@ -3,11 +3,15 @@ package com.github.ericytsang.example.app.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.github.ericytsang.androidlib.alertdialog.AlertDialogActivity
 import com.github.ericytsang.androidlib.cannotopenlinkdialog.CannotOpenLinkActivity
 import com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.forceExhaustiveWhen
+import com.github.ericytsang.androidlib.core.getStringCompat
+import com.github.ericytsang.app.example.android.R
 import com.github.ericytsang.app.example.android.databinding.ActivityMainMenuBinding
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
@@ -56,9 +60,25 @@ class MainMenuActivity:AppCompatActivity()
         private val closeable = CloseableGroup()
         override fun close() = closeable.close()
 
-        val contentView = ActivityMainMenuBinding
+        val contentView:ActivityMainMenuBinding = ActivityMainMenuBinding
                 .inflate(activity.layoutInflater,activity.findViewById(android.R.id.content),false)
                 .apply {activity.setContentView(root)}
+
+        // alert dialog
+        init
+        {
+            contentView.alertDialogButton.setOnClickListener()
+            {
+                AlertDialogActivity.startActivityForResult(
+                        activity,
+                        OnActivityResultCode.AlertDialog.toResultCodeInt(),
+                        AlertDialogActivity.Params(
+                                null,
+                                contentView.alertTitleInput.text.toString().takeIf {it.isNotBlank()},
+                                contentView.alertPromptInput.text.toString(),
+                                activity.getStringCompat(android.R.string.ok)))
+            }
+        }
 
         // confirm dialog
         init
@@ -67,20 +87,12 @@ class MainMenuActivity:AppCompatActivity()
             {
                 activity.confirmDialogTest.startActivityForResult(
                         activity,
-                        OnActivityResultCode.ConfirmDialog.ordinal,
+                        OnActivityResultCode.ConfirmDialog.toResultCodeInt(),
                         ConfirmDialogActivity.Params(
-                                "title",
-                                "prompt",
-                                ConfirmDialogActivity.ButtonConfig(
-                                        true,
-                                        "yes",
-                                        null,
-                                        View.VISIBLE),
-                                ConfirmDialogActivity.ButtonConfig(
-                                        true,
-                                        "no",
-                                        null,
-                                        View.VISIBLE),
+                                contentView.confirmTitleInput.text.toString().takeIf {it.isNotBlank()},
+                                contentView.confirmPromptInput.text.toString(),
+                                ConfirmDialogActivity.ButtonConfig(true,"yes",null,View.VISIBLE),
+                                ConfirmDialogActivity.ButtonConfig(true,"no",null,View.VISIBLE),
                                 0))
             }
         }
@@ -102,7 +114,15 @@ class MainMenuActivity:AppCompatActivity()
             {
                 is OnActivityResult.ConfirmDialog ->
                 {
-                    activityResult.result.extraUserData
+                    contentView.confirmResultOutput.text = when(val result = activityResult.result)
+                    {
+                        is ConfirmDialogActivity.Result.ButtonPressed -> result.buttonId.name
+                        is ConfirmDialogActivity.Result.Cancelled -> activity.getString(R.string.activity__main_menu__confirm__cancelled)
+                    }
+                }
+                is OnActivityResult.AlertDialog ->
+                {
+                    contentView.alertResultOutput.text = activityResult.result.name
                 }
             }.forceExhaustiveWhen
         }
@@ -113,11 +133,15 @@ class MainMenuActivity:AppCompatActivity()
         data class ConfirmDialog(
                 val result:ConfirmDialogActivity.Result<Int>
         ):OnActivityResult()
+        data class AlertDialog(
+                val result:AlertDialogActivity.Result
+        ):OnActivityResult()
     }
 
     private enum class OnActivityResultCode
     {
         ConfirmDialog,
+        AlertDialog,
         ;
 
         companion object
@@ -135,6 +159,9 @@ class MainMenuActivity:AppCompatActivity()
         {
             ConfirmDialog -> OnActivityResult.ConfirmDialog(
                     activity.confirmDialogTest.parseOnActivityResult(intent)
+            )
+            AlertDialog -> OnActivityResult.AlertDialog(
+                    AlertDialogActivity.parseOnActivityResult(intent)
             )
         }
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -8,26 +9,155 @@
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:orientation="vertical"
+            app:divider="@drawable/touchable_separator"
+            app:showDividers="middle"
+            android:padding="@dimen/min_touchable_separation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/confirm_dialog_button"
-                android:text="@string/activity__main_menu__confirm_dialog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
 
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/link_to_open_input"
-                android:hint="@string/activity__main_menu__link_to_open"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/open_link_button"
-                android:text="@string/activity__main_menu__open_link"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:orientation="vertical"
+                    app:divider="@drawable/touchable_separator"
+                    app:showDividers="middle"
+                    android:padding="@dimen/min_touchable_separation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/alert_title_input"
+                            android:hint="@string/activity__main_menu__title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/alert_prompt_input"
+                            android:hint="@string/activity__main_menu__prompt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/alert_dialog_button"
+                        android:text="@string/activity__main_menu__alert_dialog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/alert_result_output"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.cardview.widget.CardView>
+
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:orientation="vertical"
+                    app:divider="@drawable/touchable_separator"
+                    app:showDividers="middle"
+                    android:padding="@dimen/min_touchable_separation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/confirm_title_input"
+                            android:hint="@string/activity__main_menu__title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/confirm_prompt_input"
+                            android:hint="@string/activity__main_menu__prompt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/confirm_dialog_button"
+                        android:text="@string/activity__main_menu__confirm_dialog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/confirm_result_output"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.cardview.widget.CardView>
+
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:orientation="vertical"
+                    app:divider="@drawable/touchable_separator"
+                    app:showDividers="middle"
+                    android:padding="@dimen/min_touchable_separation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/link_to_open_input"
+                            android:hint="@string/activity__main_menu__link_to_open"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/open_link_button"
+                        android:text="@string/activity__main_menu__open_link"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.cardview.widget.CardView>
+
+
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
