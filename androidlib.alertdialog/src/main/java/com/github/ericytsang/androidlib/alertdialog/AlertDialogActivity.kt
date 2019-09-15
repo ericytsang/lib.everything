@@ -3,25 +3,23 @@ package com.github.ericytsang.androidlib.alertdialog
 import android.os.Bundle
 import android.view.ViewGroup
 import com.github.ericytsang.androidlib.alertdialog.databinding.ActivityAlertDialogBinding
+import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.activity.kClass
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.fromHtml
-import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import java.io.Closeable
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 class AlertDialogActivity
     :BaseActivity<
         AlertDialogActivity.Created,
         BaseActivity.NoOpState<AlertDialogActivity>>()
 {
-    companion object:ContextCompanionWithStart<AlertDialogActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
+    companion object:ActivityWithResultCompanion<AlertDialogActivity,Params,Result>()
     {
         override val contextClass get() = kClass<AlertDialogActivity>()
         override val paramsClass get() = kClass<Params>()
+        override val resultClass get() = kClass<Result>()
 
         override fun getFlagsForIntent(params:Params):Set<Int>
         {
@@ -30,18 +28,28 @@ class AlertDialogActivity
     }
 
     data class Params(
-            val themeResId:Int,
+            val themeResId:Int? = null,
             val title:String? = null,
             val bodyText:String,
             val buttonText:String? = null,
-            val additionalIntentFlags:Set<Int> = emptySet(),
-            val onButtonPress:(AlertDialogActivity)->Unit = {})
+            val additionalIntentFlags:Set<Int> = emptySet())
         :Serializable
+
+    enum class Result:Serializable
+    {
+        Ok,
+        Cancelled,
+        ;
+    }
 
     override fun onCreate(savedInstanceState:Bundle?)
     {
         // set activity theme
-        setTheme(fromIntent(intent).themeResId)
+        val themeResId = fromIntent(intent).themeResId
+        if (themeResId != null)
+        {
+            setTheme(themeResId)
+        }
 
         // do onCreate
         super.onCreate(savedInstanceState)
@@ -73,9 +81,12 @@ class AlertDialogActivity
             layout.buttonDismiss.text = params.buttonText?:activity.getText(android.R.string.ok)
             layout.buttonDismiss.setOnClickListener()
             {
-                params.onButtonPress(activity)
+                setOnActivityResult(activity,Result.Ok)
                 activity.finish()
             }
+
+            // default result
+            setOnActivityResult(activity,Result.Cancelled)
         }
 
         override fun close() = Unit

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
@@ -10,9 +10,9 @@
 
         <ImageButton
             android:id="@+id/SeekBarWithFeedback__button__decrement"
-            android:src="@drawable/ic_remove_circle_black_24dp"
+            app:srcCompat="@drawable/ic_remove_circle_black_24dp"
             android:contentDescription="@string/decrement"
-            style="?android:buttonBarPositiveButtonStyle"
+            style="?buttonBarPositiveButtonStyle"
             android:layout_width="@dimen/min_touchable_length"
             android:layout_height="match_parent"
             android:padding="@dimen/min_touchable_separation"/>
@@ -60,9 +60,9 @@
 
         <ImageButton
             android:id="@+id/SeekBarWithFeedback__button__increment"
-            android:src="@drawable/ic_add_circle_black_24dp"
+            app:srcCompat="@drawable/ic_add_circle_black_24dp"
             android:contentDescription="@string/increment"
-            style="?android:buttonBarNegativeButtonStyle"
+            style="?buttonBarNegativeButtonStyle"
             android:layout_width="@dimen/min_touchable_length"
             android:layout_height="match_parent"
             android:padding="@dimen/min_touchable_separation"/>
