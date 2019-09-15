@@ -1,6 +1,7 @@
 package com.github.ericytsang.androidlib.floatingbutton
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.View
@@ -162,6 +163,7 @@ class FloatingButton(
                         .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)
                         .or(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
                         .or(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                @SuppressLint("RtlHardcoded") // place view relative to top left origin. it is not locale-related.
                 gravity = Gravity.TOP or Gravity.LEFT
             }
 

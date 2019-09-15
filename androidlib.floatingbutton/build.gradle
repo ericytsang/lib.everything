@@ -1,5 +1,11 @@
 configureAndroidLib(project)
 
+android {
+    defaultConfig {
+        minSdkVersion 22
+    }
+}
+
 dependencies {
     api project(":androidlib.screenmeasurer")
     api project(":androidlib.touchlisteners")

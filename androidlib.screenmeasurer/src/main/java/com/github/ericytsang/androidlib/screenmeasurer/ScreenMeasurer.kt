@@ -1,6 +1,7 @@
 package com.github.ericytsang.androidlib.screenmeasurer
 
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -52,10 +53,12 @@ class ScreenMeasurer(
     init
     {
         // add views
-        //@SuppressLint("RtlHardcoded") // we use Gravity.RIGHT, because we are interested in the x coordinate, not the layout...
-        context.windowManager.addView(bottomRightView,layoutParams(Gravity.RIGHT or Gravity.BOTTOM))
-        //@SuppressLint("RtlHardcoded") // we use Gravity.LEFT, because we are interested in the x coordinate, not the layout...
-        context.windowManager.addView(topLeftView,layoutParams(Gravity.LEFT or Gravity.TOP))
+        context.windowManager.addView(bottomRightView,layoutParams {
+            @SuppressLint("RtlHardcoded") // we use Gravity.RIGHT, because we are interested in the x coordinate, not the layout...
+            it.gravity = Gravity.RIGHT or Gravity.BOTTOM})
+        context.windowManager.addView(topLeftView,layoutParams {
+            @SuppressLint("RtlHardcoded") // we use Gravity.LEFT, because we are interested in the x coordinate, not the layout...
+            it.gravity = Gravity.LEFT or Gravity.TOP})
 
         // add layout change listeners to views to capture orientation changes
         bottomRightView.viewTreeObserver.addOnGlobalLayoutListener(layoutChangeListener)
@@ -109,7 +112,7 @@ class ScreenMeasurer(
         }
     }
 
-    private fun layoutParams(gravity:Int) = WindowManager.LayoutParams().also()
+    private fun layoutParams(config:(WindowManager.LayoutParams)->Unit) = WindowManager.LayoutParams().also()
     {
         layoutParameters ->
         layoutParameters.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
@@ -121,6 +124,6 @@ class ScreenMeasurer(
                 .or(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         layoutParameters.width = 2
         layoutParameters.height = 2
-        layoutParameters.gravity = gravity
+        config(layoutParameters)
     }
 }

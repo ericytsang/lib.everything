@@ -1,5 +1,6 @@
 package com.github.ericytsang.androidlib.core
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Activity
 import android.app.ActivityManager
@@ -176,6 +177,7 @@ val Context.manifestMetaData:Bundle get()
 
 // SharedPreferences
 
+@SuppressLint("ApplySharedPref")
 fun <Result> SharedPreferences.editAndCommit(block:(SharedPreferences.Editor)->Result):Result
 {
     val editor = edit()

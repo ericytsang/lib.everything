@@ -9,6 +9,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
+import com.github.ericytsang.androidlib.core.getDrawableCompat
 import com.github.ericytsang.lib.noopclose.NoopClose
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
@@ -91,7 +92,7 @@ class ColorPreference(
         init
         {
             checkeredBackgroundView.background = TilingDrawable(
-                    colorPreference.context.getDrawable(R.drawable.checkers)!!,
+                    colorPreference.context.getDrawableCompat(R.drawable.checkers)!!,
                     TilingDrawable.RepeatMode.FROM_CENTER)
         }
         override fun close() = Unit
