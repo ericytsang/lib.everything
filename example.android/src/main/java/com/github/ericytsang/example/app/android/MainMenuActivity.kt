@@ -3,7 +3,6 @@ package com.github.ericytsang.example.app.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.github.ericytsang.androidlib.alertdialog.AlertDialogActivity
 import com.github.ericytsang.androidlib.cannotopenlinkdialog.CannotOpenLinkActivity
@@ -71,7 +70,7 @@ class MainMenuActivity:AppCompatActivity()
             {
                 AlertDialogActivity.startActivityForResult(
                         activity,
-                        OnActivityResultCode.AlertDialog.toResultCodeInt(),
+                        OnActivityResultCode.AlertDialog.ordinal,
                         AlertDialogActivity.Params(
                                 null,
                                 contentView.alertTitleInput.text.toString().takeIf {it.isNotBlank()},
@@ -87,7 +86,7 @@ class MainMenuActivity:AppCompatActivity()
             {
                 activity.confirmDialogTest.startActivityForResult(
                         activity,
-                        OnActivityResultCode.ConfirmDialog.toResultCodeInt(),
+                        OnActivityResultCode.ConfirmDialog.ordinal,
                         ConfirmDialogActivity.Params(
                                 contentView.confirmTitleInput.text.toString().takeIf {it.isNotBlank()},
                                 contentView.confirmPromptInput.text.toString(),
@@ -143,13 +142,6 @@ class MainMenuActivity:AppCompatActivity()
         ConfirmDialog,
         AlertDialog,
         ;
-
-        companion object
-        {
-            fun fromResultCodeInt(requestCode:Int) = values().getOrNull(requestCode)
-        }
-
-        fun toResultCodeInt() = ordinal
 
         fun parseIntent(
                 activity:MainMenuActivity,
