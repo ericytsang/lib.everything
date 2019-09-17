@@ -197,7 +197,7 @@
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/list_item_picker_button"
-                        android:text="@string/activity__main_menu__list_item_picker"
+                        android:text="@string/activity__main_menu__list_item_picker_dialog"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
