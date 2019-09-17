@@ -6,14 +6,19 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="12dp">
 
         <TextView
             android:id="@+id/lead_in_text"
             tools:text="lead-in text"
             android:textAppearance="?textAppearancePopupMenuHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingLeft="?dialogPreferredPadding"
+            android:paddingRight="?dialogPreferredPadding"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
