@@ -16,7 +16,7 @@
             android:paddingEnd="?dialogPreferredPadding"/>
 
         <LinearLayout
-            style="?android:attr/buttonBarButtonStyle"
+            style="?buttonBarButtonStyle"
             android:clickable="false"
             android:orientation="horizontal"
             android:gravity="end"
@@ -25,21 +25,21 @@
 
             <Button
                 android:id="@+id/button__retry"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?buttonBarButtonStyle"
                 android:text="@string/activity__cannot_open_link__retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/button__copy"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?buttonBarButtonStyle"
                 android:text="@string/activity__cannot_open_link__copy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/button__share"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?buttonBarButtonStyle"
                 android:text="@string/activity__cannot_open_link__share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
