@@ -3,7 +3,6 @@ configureAndroidApp(project)
 
 android {
     defaultConfig {
-        applicationId "com.github.ericytsang.screenfilter.app.android"
         versionCode 1
         versionName "1.0.0"
     }
