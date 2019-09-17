@@ -19,6 +19,11 @@ import com.github.ericytsang.lib.prop.mutableNullableValue
 import com.github.ericytsang.lib.prop.nullableValue
 import java.io.Closeable
 
+// todo: fix all lint problems
+// todo: make this project use all androidlib libraries
+// todo: add UI unit tests
+// todo: make the note-taking application
+
 class MainMenuActivity:AppCompatActivity()
 {
     private val confirmDialogTest = ConfirmDialogActivity.Companion<Int>()
