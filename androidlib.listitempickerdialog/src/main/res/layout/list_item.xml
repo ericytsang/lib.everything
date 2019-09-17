@@ -32,6 +32,7 @@
             <TextView
                 android:id="@+id/text1"
                 android:textAppearance="?textAppearanceListItem"
+                android:textColor="?android:textColorPrimary"
                 android:gravity="center_vertical"
                 android:ellipsize="marquee"
                 android:layout_width="match_parent"
@@ -40,6 +41,7 @@
             <TextView
                 android:id="@+id/text2"
                 android:textAppearance="?textAppearanceListItemSecondary"
+                android:textColor="?android:textColorSecondary"
                 android:gravity="center_vertical"
                 android:ellipsize="marquee"
                 android:layout_width="match_parent"

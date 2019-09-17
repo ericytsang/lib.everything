@@ -13,6 +13,7 @@
             android:id="@+id/lead_in_text"
             tools:text="lead-in text"
             android:textAppearance="?textAppearancePopupMenuHeader"
+            android:textColor="?android:textColorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="12dp"
