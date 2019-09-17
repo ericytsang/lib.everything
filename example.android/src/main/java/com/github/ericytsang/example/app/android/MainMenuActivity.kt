@@ -10,6 +10,7 @@ import com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.forceExhaustiveWhen
 import com.github.ericytsang.androidlib.core.getStringCompat
+import com.github.ericytsang.androidlib.listitempickerdialog.ListItemPickerDialogActivity
 import com.github.ericytsang.app.example.android.R
 import com.github.ericytsang.app.example.android.databinding.ActivityMainMenuBinding
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
@@ -27,6 +28,7 @@ import java.io.Closeable
 class MainMenuActivity:AppCompatActivity()
 {
     private val confirmDialogCompanion = ConfirmDialogActivity.Companion<Int>()
+    private val listItemPickerDialogCompanion = ListItemPickerDialogActivity.Mediator<Int>()
 
     // created lifecycle
     private val created = RaiiProp(Opt.of<Created>())
@@ -112,6 +114,30 @@ class MainMenuActivity:AppCompatActivity()
             }
         }
 
+        // list item picker dialog
+        var selectedInt:ListItemPickerDialogActivity.ListItem<Int>? = null
+        init
+        {
+            contentView.listItemPickerButton.setOnClickListener()
+            {
+                activity.listItemPickerDialogCompanion.startActivityForResult(
+                        activity,
+                        OnActivityResultCode.ListItemPickerDialog.ordinal,
+                        ListItemPickerDialogActivity.Params(
+                                contentView.listItemPickerTitleInput.text.toString(),
+                                contentView.listItemPickerPromptInput.text.toString(),
+                                listOf(
+                                        ListItemPickerDialogActivity.ListItem("Option 1","The number 1",1),
+                                        ListItemPickerDialogActivity.ListItem("Option 2","The number 2",2),
+                                        ListItemPickerDialogActivity.ListItem("Option 3","The number 3",3),
+                                        ListItemPickerDialogActivity.ListItem("Option 4","The number 4",4)
+                                ),
+                                selectedInt
+                        )
+                )
+            }
+        }
+
         fun onActivityResult(resultCode:Int,activityResult:OnActivityResult)
         {
             when(activityResult)
@@ -128,6 +154,11 @@ class MainMenuActivity:AppCompatActivity()
                 {
                     contentView.alertResultOutput.text = activityResult.result.name
                 }
+                is OnActivityResult.ListItemPickerDialog ->
+                {
+                    selectedInt = activityResult.result.selected
+                    contentView.listItemPickerResultOutput.text = selectedInt?.toString()?:"null"
+                }
             }.forceExhaustiveWhen
         }
     }
@@ -140,12 +171,16 @@ class MainMenuActivity:AppCompatActivity()
         data class AlertDialog(
                 val result:AlertDialogActivity.Result
         ):OnActivityResult()
+        data class ListItemPickerDialog(
+                val result:ListItemPickerDialogActivity.Result<Int>
+        ):OnActivityResult()
     }
 
     private enum class OnActivityResultCode
     {
         ConfirmDialog,
         AlertDialog,
+        ListItemPickerDialog,
         ;
 
         fun parseIntent(
@@ -159,6 +194,9 @@ class MainMenuActivity:AppCompatActivity()
             )
             AlertDialog -> OnActivityResult.AlertDialog(
                     AlertDialogActivity.parseOnActivityResult(intent)
+            )
+            ListItemPickerDialog -> OnActivityResult.ListItemPickerDialog(
+                    activity.listItemPickerDialogCompanion.parseOnActivityResult(intent)
             )
         }
     }
