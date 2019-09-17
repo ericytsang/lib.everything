@@ -26,7 +26,7 @@ import java.io.Closeable
 
 class MainMenuActivity:AppCompatActivity()
 {
-    private val confirmDialogTest = ConfirmDialogActivity.Companion<Int>()
+    private val confirmDialogCompanion = ConfirmDialogActivity.Companion<Int>()
 
     // created lifecycle
     private val created = RaiiProp(Opt.of<Created>())
@@ -89,7 +89,7 @@ class MainMenuActivity:AppCompatActivity()
         {
             contentView.confirmDialogButton.setOnClickListener()
             {
-                activity.confirmDialogTest.startActivityForResult(
+                activity.confirmDialogCompanion.startActivityForResult(
                         activity,
                         OnActivityResultCode.ConfirmDialog.ordinal,
                         ConfirmDialogActivity.Params(
@@ -155,7 +155,7 @@ class MainMenuActivity:AppCompatActivity()
                 OnActivityResult = when(this)
         {
             ConfirmDialog -> OnActivityResult.ConfirmDialog(
-                    activity.confirmDialogTest.parseOnActivityResult(intent)
+                    activity.confirmDialogCompanion.parseOnActivityResult(intent)
             )
             AlertDialog -> OnActivityResult.AlertDialog(
                     AlertDialogActivity.parseOnActivityResult(intent)
