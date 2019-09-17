@@ -18,19 +18,18 @@ import java.io.Closeable
 import java.io.Serializable
 import com.github.ericytsang.androidlib.listitempickerdialog.databinding.DialogListBinding
 import com.github.ericytsang.androidlib.listitempickerdialog.databinding.ListItemBinding
-import kotlin.reflect.KClass
 
-class ListItemPickerDialog:AppCompatActivity()
+class ListItemPickerDialogActivity:AppCompatActivity()
 {
     // start & on-result
 
     class Mediator<UserData:Serializable>
         :ActivityWithResultCompanion<
-            ListItemPickerDialog,
+            ListItemPickerDialogActivity,
             Params<UserData>,
             Result<UserData>>()
     {
-        override val contextClass get() = kClass<ListItemPickerDialog>()
+        override val contextClass get() = kClass<ListItemPickerDialogActivity>()
         override val paramsClass get() = kClass<Params<UserData>>()
         override val resultClass get() = kClass<Result<UserData>>()
     }
@@ -59,7 +58,7 @@ class ListItemPickerDialog:AppCompatActivity()
 
     private class Created(
             val mediator:Mediator<Serializable>,
-            val activity:ListItemPickerDialog,
+            val activity:ListItemPickerDialogActivity,
             val params:Params<Serializable>)
         :Closeable
     {
