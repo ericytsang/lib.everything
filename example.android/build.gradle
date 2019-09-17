@@ -21,6 +21,7 @@ dependencies {
     implementation project(":androidlib.listitempickerdialog")
     implementation project(":androidlib.seekbarpreferenceinline")
     implementation project(":androidlib.shakelistener")
+    implementation project(":androidlib.textinputdialog")
     implementation project(":androidlib.timepreference")
     implementation project(":lib.closeablegroup")
     implementation project(":lib.domainobjects")

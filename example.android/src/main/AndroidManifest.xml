@@ -36,6 +36,10 @@
             android:name="com.github.ericytsang.androidlib.listitempickerdialog.ListItemPickerDialogActivity"
             android:theme="@style/Theme.AppCompat.Dialog.MinWidth"/>
 
+        <activity
+            android:name="com.github.ericytsang.androidlib.texinputdialog.TextInputDialogActivity"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"/>
+
     </application>
 
 </manifest>

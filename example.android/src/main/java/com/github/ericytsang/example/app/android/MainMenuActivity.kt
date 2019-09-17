@@ -11,6 +11,7 @@ import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.forceExhaustiveWhen
 import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.listitempickerdialog.ListItemPickerDialogActivity
+import com.github.ericytsang.androidlib.texinputdialog.TextInputDialogActivity
 import com.github.ericytsang.app.example.android.R
 import com.github.ericytsang.app.example.android.databinding.ActivityMainMenuBinding
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
@@ -138,6 +139,23 @@ class MainMenuActivity:AppCompatActivity()
             }
         }
 
+        // text input dialog
+        init
+        {
+            contentView.textInputButton.setOnClickListener()
+            {
+                TextInputDialogActivity.startActivityForResult(
+                        activity,
+                        OnActivityResultCode.TextInputDialog.ordinal,
+                        TextInputDialogActivity.StartParams(
+                                contentView.textInputDialogTitleInput.text.toString(),
+                                contentView.textInputDialogPromptInput.text.toString(),
+                                contentView.textInputDialogTextInput.text.toString()
+                        )
+                )
+            }
+        }
+
         fun onActivityResult(resultCode:Int,activityResult:OnActivityResult)
         {
             when(activityResult)
@@ -159,6 +177,10 @@ class MainMenuActivity:AppCompatActivity()
                     selectedInt = activityResult.result.selected
                     contentView.listItemPickerResultOutput.text = selectedInt?.toString()?:"null"
                 }
+                is OnActivityResult.TextInputDialog ->
+                {
+                    contentView.textInputResultOutput.text = activityResult.result.toString()
+                }
             }.forceExhaustiveWhen
         }
     }
@@ -174,6 +196,9 @@ class MainMenuActivity:AppCompatActivity()
         data class ListItemPickerDialog(
                 val result:ListItemPickerDialogActivity.Result<Int>
         ):OnActivityResult()
+        data class TextInputDialog(
+                val result:TextInputDialogActivity.ResultParams
+        ):OnActivityResult()
     }
 
     private enum class OnActivityResultCode
@@ -181,6 +206,7 @@ class MainMenuActivity:AppCompatActivity()
         ConfirmDialog,
         AlertDialog,
         ListItemPickerDialog,
+        TextInputDialog,
         ;
 
         fun parseIntent(
@@ -197,6 +223,9 @@ class MainMenuActivity:AppCompatActivity()
             )
             ListItemPickerDialog -> OnActivityResult.ListItemPickerDialog(
                     activity.listItemPickerDialogCompanion.parseOnActivityResult(intent)
+            )
+            TextInputDialog -> OnActivityResult.TextInputDialog(
+                    TextInputDialogActivity.parseOnActivityResult(intent)
             )
         }
     }
