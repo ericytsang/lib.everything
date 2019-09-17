@@ -5,11 +5,11 @@
     package="com.github.ericytsang.app.example.android">
 
     <application
-        tools:ignore="GoogleAppIndexingWarning"
-        android:fullBackupContent="false"
         android:allowBackup="false"
+        android:fullBackupContent="false"
         android:label="@string/app_title"
-        android:theme="@style/Theme.AppCompat">
+        android:theme="@style/Theme.AppCompat"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <activity android:name="com.github.ericytsang.example.app.android.MainMenuActivity">
             <intent-filter>
@@ -20,13 +20,13 @@
 
         <activity
             android:name="com.github.ericytsang.androidlib.alertdialog.AlertDialogActivity"
-            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"
-            android:label="@string/app_title"/>
+            android:label="@string/app_title"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth" />
 
         <activity
             android:name="com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity"
-            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"
-            android:label="@string/app_title"/>
+            android:label="@string/app_title"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth" />
 
         <activity
             android:name="com.github.ericytsang.androidlib.cannotopenlinkdialog.CannotOpenLinkActivity"
