@@ -52,7 +52,7 @@ class MainMenuActivity:AppCompatActivity()
                 ?.parseIntent(this,data!!)
         if (activityResult != null)
         {
-            created.nullableValue?.onActivityResult(resultCode,activityResult)
+            created.nullableValue?.onActivityResult(activityResult)
         }
         else
         {
@@ -156,7 +156,7 @@ class MainMenuActivity:AppCompatActivity()
             }
         }
 
-        fun onActivityResult(resultCode:Int,activityResult:OnActivityResult)
+        fun onActivityResult(activityResult:OnActivityResult)
         {
             when(activityResult)
             {
