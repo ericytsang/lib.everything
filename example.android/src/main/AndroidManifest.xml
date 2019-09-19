@@ -12,6 +12,10 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" />
+
+        <activity
             android:name="com.github.ericytsang.example.app.android.MainMenuActivity"
             android:label="@string/app_title">
             <intent-filter>

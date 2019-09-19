@@ -13,6 +13,8 @@ import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.listitempickerdialog.ListItemPickerDialogActivity
 import com.github.ericytsang.androidlib.texinputdialog.TextInputDialogActivity
 import com.github.ericytsang.app.example.android.R
+import com.github.ericytsang.app.example.android.SUnit
+import com.github.ericytsang.app.example.android.SettingsActivity
 import com.github.ericytsang.app.example.android.databinding.ActivityMainMenuBinding
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
@@ -153,6 +155,15 @@ class MainMenuActivity:AppCompatActivity()
                                 contentView.textInputDialogTextInput.text.toString()
                         )
                 )
+            }
+        }
+
+        // go to the preferences activity button
+        init
+        {
+            contentView.gotoActivityPreferences.setOnClickListener()
+            {
+                SettingsActivity.start(activity.wrap(),SUnit())
             }
         }
 

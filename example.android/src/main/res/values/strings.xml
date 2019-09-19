@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
 
-    <string name="app_title">example</string>
+    <string name="app_title">Example</string>
+
+    <!-- MainMenuActivity -->
 
     <string name="activity__main_menu__title">title</string>
     <string name="activity__main_menu__prompt">prompt</string>
     <string name="activity__main_menu__text">text</string>
+    <string name="activity__main_menu__link_to_open">link to open</string>
+    <string name="activity__main_menu__preferences_activity">preferences activity</string>
 
     <string name="activity__main_menu__alert_dialog">alert dialog</string>
     <string name="activity__main_menu__confirm_dialog">confirm dialog</string>
     <string name="activity__main_menu__list_item_picker_dialog">list item picker dialog</string>
     <string name="activity__main_menu__text_input_dialog">text input dialog</string>
-
     <string name="activity__main_menu__open_link">open link</string>
-    <string name="activity__main_menu__link_to_open">link to open</string>
 
     <string name="activity__main_menu__confirm__cancelled">cancelled</string>
+
+    <!-- SettingsActivity -->
+
+    <string name="title_activity_settings">Settings</string>
 
 </resources>

@@ -35,6 +35,7 @@ dependencies {
     api deps.support.recyclerview
     api deps.support.cardview
     api deps.support.design
+    api deps.support.preference
 
     // leak canary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:1.6.3"
