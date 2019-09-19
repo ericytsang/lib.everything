@@ -92,7 +92,7 @@ class ColorPreference(
         init
         {
             checkeredBackgroundView.background = TilingDrawable(
-                    colorPreference.context.getDrawableCompat(R.drawable.checkers)!!,
+                    colorPreference.context.getDrawableCompat(R.drawable.checkers),
                     TilingDrawable.RepeatMode.FROM_CENTER)
         }
         override fun close() = Unit
