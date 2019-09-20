@@ -178,7 +178,7 @@ class VisitableProcessor : AbstractProcessor()
                             className.simpleName)
                     .addType(unionTypeVisitor.toTypeSpec(processingEnv))
                     .build()
-                    .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
+                    .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]!!))
         }
 
         unionTypeHierarchies.forEach()
@@ -192,7 +192,7 @@ class VisitableProcessor : AbstractProcessor()
                     .addFunction(unionTypeElement.toFunSpec())
                     .addType(unionTypeElement.toTypeSpec(processingEnv))
                     .build()
-                    .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
+                    .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]!!))
         }
 
         return true
