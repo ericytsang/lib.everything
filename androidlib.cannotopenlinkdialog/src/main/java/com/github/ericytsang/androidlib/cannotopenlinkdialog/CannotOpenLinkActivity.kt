@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityCannotOpenLinkDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
-import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.core.clipboardManager
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
+import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value

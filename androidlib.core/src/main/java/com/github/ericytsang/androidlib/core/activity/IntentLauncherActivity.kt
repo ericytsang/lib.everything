@@ -7,8 +7,8 @@ import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundCo
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
+import com.github.ericytsang.androidlib.core.kClass
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 class IntentLauncherActivity:AppCompatActivity()
 {

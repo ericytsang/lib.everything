@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import com.github.ericytsang.androidlib.alertdialog.databinding.ActivityAlertDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.activity.kClass
+import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.core.fromHtml
 import java.io.Closeable
 import java.io.Serializable

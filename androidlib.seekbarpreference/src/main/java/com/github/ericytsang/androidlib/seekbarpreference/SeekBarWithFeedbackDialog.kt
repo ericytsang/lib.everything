@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
-import com.github.ericytsang.androidlib.core.activity.kClass
 import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
+import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import com.github.ericytsang.androidlib.seekbar.SeekBarWithFeedback
 import com.github.ericytsang.androidlib.seekbarpreference.databinding.ActivitySeekBarWithFeedbackDialogBinding
@@ -14,7 +14,6 @@ import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
 import java.io.Closeable
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 class SeekBarWithFeedbackDialog:AppCompatActivity()
 {

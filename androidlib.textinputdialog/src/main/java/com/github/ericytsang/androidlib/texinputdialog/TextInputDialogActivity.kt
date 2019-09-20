@@ -4,7 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.activity.kClass
+import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.texinputdialog.databinding.ActivityTextInputDialogBinding
 import java.io.Closeable
 import java.io.Serializable

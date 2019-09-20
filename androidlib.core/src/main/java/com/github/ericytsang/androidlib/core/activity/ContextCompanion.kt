@@ -7,8 +7,6 @@ import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
-inline fun <reified R:Any> kClass() = R::class
-
 abstract class ContextCompanion<Subclass:Context,StartParams:Serializable,OIntent:StartableIntent<*>>(
         private val startableIntentFactory:StartableIntent.StartableIntentFactory<OIntent>)
 {

@@ -54,6 +54,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
+import kotlin.reflect.KClass
 
 // Context
 
@@ -390,3 +391,6 @@ inline fun <reified R:Serializable> String.decodeFromString():R
             .readObject()
             .let {it as R}
 }
+
+// todo: move to library
+inline fun <reified R:Any> kClass() = R::class

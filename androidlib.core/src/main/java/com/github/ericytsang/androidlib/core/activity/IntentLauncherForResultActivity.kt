@@ -5,8 +5,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForResultIntent
+import com.github.ericytsang.androidlib.core.kClass
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 class IntentLauncherForResultActivity:AppCompatActivity()
 {

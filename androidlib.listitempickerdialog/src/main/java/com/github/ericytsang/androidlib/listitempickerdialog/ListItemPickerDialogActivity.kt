@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
-import com.github.ericytsang.androidlib.core.activity.kClass
+import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.core.viewholder.ViewHolder
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup

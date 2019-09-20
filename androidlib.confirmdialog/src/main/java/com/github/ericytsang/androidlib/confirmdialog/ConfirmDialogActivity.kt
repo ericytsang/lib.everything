@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import com.github.ericytsang.androidlib.confirmdialog.databinding.ActivityConfirmDialogBinding
 import com.github.ericytsang.androidlib.core.activity.ActivityWithResultCompanion
 import com.github.ericytsang.androidlib.core.activity.BaseActivity
-import com.github.ericytsang.androidlib.core.activity.kClass
+import com.github.ericytsang.androidlib.core.kClass
 import java.io.Closeable
 import java.io.Serializable
 import kotlin.reflect.KClass
