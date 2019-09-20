@@ -5,18 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext
-import com.github.ericytsang.androidlib.core.context.WrappedContext
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext.ForResultCtx
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext
+import com.github.ericytsang.androidlib.core.context.TypedContext
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext.ForResultContext
 import java.io.Serializable
 
-sealed class StartableIntent<TContext:WrappedContext>:Serializable
+sealed class StartableIntent<TContext:TypedContext>:Serializable
 {
     abstract fun start(context:TContext)
     abstract fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent
 
-    sealed class StartableForResultIntent:StartableIntent<ForResultCtx>()
+    sealed class StartableForResultIntent:StartableIntent<ForResultContext>()
     {
         class ActivityForResultIntent
         internal constructor(
@@ -28,10 +28,10 @@ sealed class StartableIntent<TContext:WrappedContext>:Serializable
                 override fun make(intentFactory:(Context)->Intent) = ActivityForResultIntent(intentFactory)
             }
 
-            override fun start(context:ForResultCtx) = when(context)
+            override fun start(context:ForResultContext) = when(context)
             {
-                is ForResultCtx.ActivityForResultCtx -> context.activityContext.context.startActivityForResult(intent(context.context),context.requestCode)
-                is ForResultCtx.FragmentForResultCtx -> context.fragmentContext.fragment.startActivityForResult(intent(context.context),context.requestCode)
+                is ForResultContext.ActivityForResultContext -> context.activityContext.context.startActivityForResult(intent(context.context),context.requestCode)
+                is ForResultContext.FragmentForResultContext -> context.fragmentContext.fragment.startActivityForResult(intent(context.context),context.requestCode)
             }
 
             override fun toPendingIntent(context:Context,requestCode:Int,flags:Int):PendingIntent

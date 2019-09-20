@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.fragment.app.Fragment
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext.ForResultContext
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForResultIntent.ActivityForResultIntent
 import java.io.Serializable
@@ -11,7 +12,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
 abstract class ActivityWithResultCompanion<Subclass:Activity,ActivityParams:Serializable,ActivityResult:Serializable>
-    :ContextCompanion<Subclass,ActivityParams,ActivityForResultIntent>(ActivityForResultIntent)
+    :ContextCompanion<Subclass,ForResultContext,ActivityParams,ActivityForResultIntent>(ActivityForResultIntent)
 {
     private val activityResultExtraKey = "${ActivityWithResultCompanion::class.qualifiedName}.activityResultExtraKey"
     protected abstract val resultClass:KClass<ActivityResult>

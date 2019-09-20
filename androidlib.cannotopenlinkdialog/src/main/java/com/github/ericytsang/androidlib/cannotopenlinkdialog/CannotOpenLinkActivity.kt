@@ -8,11 +8,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import com.github.ericytsang.androidlib.cannotopenlinkdialog.databinding.ActivityCannotOpenLinkDialogBinding
-import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
+import com.github.ericytsang.androidlib.core.activity.ActivityWithStartCompanion
 import com.github.ericytsang.androidlib.core.clipboardManager
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.getStringCompat
-import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
@@ -22,7 +21,7 @@ import java.io.Serializable
 
 class CannotOpenLinkActivity:AppCompatActivity()
 {
-    companion object:ContextCompanionWithStart<CannotOpenLinkActivity,ForegroundContext,Params,ActivityIntent>(ActivityIntent)
+    companion object:ActivityWithStartCompanion<CannotOpenLinkActivity,Params>()
     {
         override val contextClass get() = kClass<CannotOpenLinkActivity>()
         override val paramsClass get() = kClass<Params>()

@@ -3,7 +3,7 @@ package com.github.ericytsang.androidlib.core.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext
 import com.github.ericytsang.androidlib.core.context.wrap
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent

@@ -5,8 +5,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
-import com.github.ericytsang.androidlib.core.context.WrappedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.kClass
+import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
 
 class SettingsActivity:AppCompatActivity()
