@@ -6,6 +6,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.rule.ActivityTestRule
+import com.github.ericytsang.app.example.android.MainMenuActivity
 import com.github.ericytsang.androidlib.confirmdialog.R as ConfirmDialogR
 import com.github.ericytsang.app.example.android.R
 import org.junit.Rule

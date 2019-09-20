@@ -1,4 +1,4 @@
-package com.github.ericytsang.example.app.android
+package com.github.ericytsang.app.example.android
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,9 +12,6 @@ import com.github.ericytsang.androidlib.core.forceExhaustiveWhen
 import com.github.ericytsang.androidlib.core.getStringCompat
 import com.github.ericytsang.androidlib.listitempickerdialog.ListItemPickerDialogActivity
 import com.github.ericytsang.androidlib.texinputdialog.TextInputDialogActivity
-import com.github.ericytsang.app.example.android.R
-import com.github.ericytsang.app.example.android.SUnit
-import com.github.ericytsang.app.example.android.SettingsActivity
 import com.github.ericytsang.app.example.android.databinding.ActivityMainMenuBinding
 import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt

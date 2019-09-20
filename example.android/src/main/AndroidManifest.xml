@@ -16,7 +16,7 @@
             android:label="@string/title_activity_settings" />
 
         <activity
-            android:name="com.github.ericytsang.example.app.android.MainMenuActivity"
+            android:name=".MainMenuActivity"
             android:label="@string/app_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
