@@ -55,6 +55,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 import kotlin.reflect.KClass
+import kotlin.reflect.full.cast
 
 // Context
 
@@ -394,3 +395,6 @@ inline fun <reified R:Serializable> String.decodeFromString():R
 
 // todo: move to library
 inline fun <reified R:Any> kClass() = R::class
+
+// todo: move to library
+inline fun <reified C:Any> Any.cast():C = C::class.cast(this)
