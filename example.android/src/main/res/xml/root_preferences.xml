@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.github.ericytsang.androidlib.colorpreference.ColorPreference
+        android:title="Color Preference"
+        android:summary="Some summary"
+        app:showAlphaSlider="true"
+        app:persistenceStrategy="com.github.ericytsang.app.example.android.SettingsActivity$ColorPersistenceStrategy"/>
 
 </PreferenceScreen>

@@ -1,9 +1,11 @@
 package com.github.ericytsang.app.example.android
 
+import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import com.github.ericytsang.androidlib.colorpreference.ColorPreference
 import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext
@@ -46,6 +48,26 @@ class SettingsActivity:AppCompatActivity()
         override fun onCreatePreferences(savedInstanceState:Bundle?,rootKey:String?)
         {
             setPreferencesFromResource(R.xml.root_preferences,rootKey)
+        }
+    }
+
+
+
+
+    /* persistence strategies */
+
+    class ColorPersistenceStrategy:ColorPreference.PersistenceStrategy
+    {
+        private var color:Int = 0
+
+        override fun save(context:Context,newColor:Int)
+        {
+            color = newColor
+        }
+
+        override fun load(context:Context):Int
+        {
+            return color
         }
     }
 }
