@@ -11,6 +11,7 @@ import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import com.github.ericytsang.androidlib.core.cast
 import com.github.ericytsang.androidlib.core.getDrawableCompat
+import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
@@ -88,7 +89,7 @@ class ColorPreference(
     interface PersistenceStrategy
     {
         fun save(context:Context,newColor:Int)
-        fun load(context:Context):Int
+        fun load(context:Context,block:(Int)->Unit):Closeable
     }
 
     private class Attached(
@@ -96,6 +97,9 @@ class ColorPreference(
             holder:PreferenceViewHolder)
         :Closeable
     {
+        private val closeables = CloseableGroup()
+        override fun close() = closeables.close()
+
         val previewView = holder.itemView.findViewById<View>(R.id.color_sample)!!
         val checkeredBackgroundView = holder.itemView.findViewById<View>(R.id.checkered_background)!!
 
@@ -107,14 +111,20 @@ class ColorPreference(
                     TilingDrawable.RepeatMode.FROM_CENTER)
         }
 
-        // show preview color
+        // bind preview to color
+        private var color:Int = 0
         init
         {
-            val color = colorPreference.persistenceStrategy.load(colorPreference.context)
-            setPreviewColor(color)
+            closeables.addCloseables()
+            {
+                it+colorPreference.persistenceStrategy.load(colorPreference.context)
+                {
+                    newColor ->
+                    color = newColor
+                    setPreviewColor(newColor)
+                }
+            }
         }
-
-        override fun close() = Unit
 
         fun setPreviewColor(newColor:Int)
         {
@@ -124,11 +134,10 @@ class ColorPreference(
 
         fun onClick()
         {
-            var selectedColor = colorPreference.persistenceStrategy.load(colorPreference.context)
+            var selectedColor = color
             val setColor = fun(newColor:Int)
             {
                 colorPreference.persistenceStrategy.save(colorPreference.context,newColor)
-                setPreviewColor(newColor)
             }
             ColorPickerDialogBuilder
                     .with(colorPreference.context)
