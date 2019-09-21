@@ -9,4 +9,12 @@
         app:showAlphaSlider="true"
         app:persistenceStrategy="com.github.ericytsang.app.example.android.SettingsActivity$ColorPersistenceStrategy"/>
 
+    <com.github.ericytsang.androidlib.seekbarpreferenceinline.InlineSeekBarWithFeedbackPreference
+        android:title="Inline Seek Bar Preference"
+        android:summary="Some summary"
+        app:min="50"
+        app:max="150"
+        app:labelTemplate="{} units"
+        app:persistenceStrategy="com.github.ericytsang.app.example.android.SettingsActivity$SeekBarPersistenceStrategy"/>
+
 </PreferenceScreen>

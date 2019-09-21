@@ -10,6 +10,7 @@ import com.github.ericytsang.androidlib.core.activity.ContextCompanionWithStart
 import com.github.ericytsang.androidlib.core.kClass
 import com.github.ericytsang.androidlib.core.context.TypedContext.BackgroundContext.ForegroundContext
 import com.github.ericytsang.androidlib.core.intent.StartableIntent.StartableForegroundIntent.ActivityIntent
+import com.github.ericytsang.androidlib.seekbarpreferenceinline.InlineSeekBarWithFeedbackPreference
 import com.github.ericytsang.lib.prop.DataProp
 import com.github.ericytsang.lib.prop.listen
 import com.github.ericytsang.lib.prop.value
@@ -67,6 +68,12 @@ class SettingsActivity:AppCompatActivity()
         override fun load(context:Context,block:(Int)->Unit) = intPersistenceStrategy.load(context, block)
     }
 
+    class SeekBarPersistenceStrategy:InlineSeekBarWithFeedbackPreference.PersistenceStrategy
+    {
+        private val intPersistenceStrategy = IntPersistenceStrategy()
+        override fun save(context:Context,value:Int) = intPersistenceStrategy.save(context, value)
+        override fun load(context:Context,block:(Int)->Unit) = intPersistenceStrategy.load(context, block)
+    }
 
     private class IntPersistenceStrategy
     {

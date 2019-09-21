@@ -5,6 +5,7 @@
         <attr name="min" format="integer"/>
         <attr name="max" format="integer"/>
         <attr name="labelTemplate" format="string"/>
+        <attr name="persistenceStrategy"/>
     </declare-styleable>
 
 </resources>
