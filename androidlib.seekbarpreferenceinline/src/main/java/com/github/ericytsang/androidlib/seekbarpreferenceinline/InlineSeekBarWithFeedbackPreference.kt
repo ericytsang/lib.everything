@@ -49,7 +49,7 @@ class InlineSeekBarWithFeedbackPreference(
     // set preference layout
     init
     {
-        layoutResource = R.layout.pref__inline_seek_bar_with_feedback_dialog
+        layoutResource = R.layout.pref__inline_seek_bar_with_feedback
     }
 
 
