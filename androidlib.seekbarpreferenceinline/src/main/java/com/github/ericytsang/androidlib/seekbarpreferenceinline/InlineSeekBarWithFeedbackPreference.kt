@@ -104,7 +104,10 @@ class InlineSeekBarWithFeedbackPreference(
                 addCloseablesScope+preference.persistenceStrategy.load(preference.context)
                 {
                     newValue ->
-                    seekBar.progress.value = newValue
+                    if (seekBar.progress.value != newValue)
+                    {
+                        seekBar.progress.value = newValue
+                    }
                 }
             }
             seekBar.listener = object:SeekBarWithFeedback.Listener
