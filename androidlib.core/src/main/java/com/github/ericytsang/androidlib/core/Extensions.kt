@@ -50,10 +50,12 @@ import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
 import java.io.Serializable
 import java.lang.RuntimeException
+import java.lang.StringBuilder
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
+import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
@@ -398,3 +400,8 @@ inline fun <reified R:Any> kClass() = R::class
 
 // todo: move to library
 inline fun <reified C:Any> Any.cast():C = C::class.cast(this)
+
+fun Random.randomString(length:Int):String
+{
+    return (1..length).map {nextInt(32,127)}.map {it.toChar()}.fold("") {a,e->a+e}
+}
