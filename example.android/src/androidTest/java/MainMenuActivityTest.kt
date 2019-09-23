@@ -56,12 +56,12 @@ class MainMenuActivityTest
     }
 
     @Test
-    fun confirmDialog_summary_displays_summary()
+    fun confirmDialog_summary_displays_entered_summary()
     {
-        val titleText = Random.Default.randomString(randomInputStringLength)
-        onView(withId(R.id.confirm_prompt_input)).perform(typeText(titleText))
+        val promptText = Random.Default.randomString(randomInputStringLength)
+        onView(withId(R.id.confirm_prompt_input)).perform(typeText(promptText))
         confirmDialog_opens_on_button_clicked()
-        onView(withId(ConfirmDialogR.id.textview)).check(matches(isDisplayed()))
+        onView(withId(ConfirmDialogR.id.textview)).check(matches(withText(promptText)))
     }
 
     @Test
