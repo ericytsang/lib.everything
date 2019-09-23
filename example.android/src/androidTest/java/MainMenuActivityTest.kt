@@ -41,6 +41,61 @@ class MainMenuActivityTest
 
 
 
+
+    /* alert dialog tests */
+
+    @Test
+    fun alertDialog_opens_on_button_clicked()
+    {
+        onView(withId(R.id.alert_dialog_button)).perform(click())
+        onView(withId(AlertDialogR.id.textview)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun alertDialog_title_displays_entered_title()
+    {
+        val titleText = Random.Default.randomString(randomInputStringLength)
+        onView(withId(R.id.alert_title_input)).perform(typeText(titleText))
+        alertDialog_opens_on_button_clicked()
+        onView(withText(titleText)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun alertDialog_summary_displays_entered_summary()
+    {
+        val promptText = Random.Default.randomString(randomInputStringLength)
+        onView(withId(R.id.alert_prompt_input)).perform(typeText(promptText))
+        alertDialog_opens_on_button_clicked()
+        onView(withId(AlertDialogR.id.textview)).check(matches(withText(promptText)))
+    }
+
+    @Test
+    fun alertDialog_OnActivityResult_negative_button()
+    {
+        alertDialog_opens_on_button_clicked()
+        onView(withId(AlertDialogR.id.button__dismiss)).perform(click())
+        onView(withId(R.id.alert_result_output)).check(matches(withText("Ok")))
+    }
+
+    @Test
+    fun alertDialog_OnActivityResult_back_cancels()
+    {
+        alertDialog_opens_on_button_clicked()
+        pressBack()
+        onView(withId(R.id.alert_result_output)).check(matches(withText("Cancelled")))
+    }
+
+    @Test
+    fun alertDialog_OnActivityResult_tap_outside_cancels()
+    {
+        alertDialog_opens_on_button_clicked()
+        clickOutsideDialog()
+        onView(withId(R.id.alert_result_output)).check(matches(withText("Cancelled")))
+    }
+
+
+
+
     /* confirm dialog tests */
 
     @Test
