@@ -16,10 +16,12 @@ import com.github.ericytsang.androidlib.core.randomString
 import com.github.ericytsang.app.example.android.MainMenuActivity
 import com.github.ericytsang.androidlib.confirmdialog.R as ConfirmDialogR
 import com.github.ericytsang.androidlib.alertdialog.R as AlertDialogR
-import com.github.ericytsang.app.example.android.R
+import com.github.ericytsang.androidlib.texinputdialog.R as TextInputDialogR
 import org.junit.Rule
 import org.junit.Test
 import kotlin.random.Random
+import com.github.ericytsang.app.example.android.R
+
 
 class MainMenuActivityTest
 {
@@ -47,7 +49,7 @@ class MainMenuActivityTest
     @Test
     fun alertDialog_opens_on_button_clicked()
     {
-        onView(withId(R.id.alert_dialog_button)).perform(click())
+        onView(withId(R.id.alert_dialog_button)).perform(betterScrollTo(),click())
         onView(withId(AlertDialogR.id.textview)).check(matches(isDisplayed()))
     }
 
@@ -55,7 +57,7 @@ class MainMenuActivityTest
     fun alertDialog_title_displays_entered_title()
     {
         val titleText = Random.Default.randomString(randomInputStringLength)
-        onView(withId(R.id.alert_title_input)).perform(typeText(titleText))
+        onView(withId(R.id.alert_title_input)).perform(betterScrollTo(),typeText(titleText))
         alertDialog_opens_on_button_clicked()
         onView(withText(titleText)).check(matches(isDisplayed()))
     }
@@ -64,7 +66,7 @@ class MainMenuActivityTest
     fun alertDialog_summary_displays_entered_summary()
     {
         val promptText = Random.Default.randomString(randomInputStringLength)
-        onView(withId(R.id.alert_prompt_input)).perform(typeText(promptText))
+        onView(withId(R.id.alert_prompt_input)).perform(betterScrollTo(),typeText(promptText))
         alertDialog_opens_on_button_clicked()
         onView(withId(AlertDialogR.id.textview)).check(matches(withText(promptText)))
     }
@@ -101,7 +103,7 @@ class MainMenuActivityTest
     @Test
     fun confirmDialog_opens_on_button_clicked()
     {
-        onView(withId(R.id.confirm_dialog_button)).perform(click())
+        onView(withId(R.id.confirm_dialog_button)).perform(betterScrollTo(),click())
         onView(withId(ConfirmDialogR.id.textview)).check(matches(isDisplayed()))
     }
 
@@ -109,7 +111,7 @@ class MainMenuActivityTest
     fun confirmDialog_title_displays_entered_title()
     {
         val titleText = Random.Default.randomString(randomInputStringLength)
-        onView(withId(R.id.confirm_title_input)).perform(typeText(titleText))
+        onView(withId(R.id.confirm_title_input)).perform(betterScrollTo(),typeText(titleText))
         confirmDialog_opens_on_button_clicked()
         onView(withText(titleText)).check(matches(isDisplayed()))
     }
@@ -118,7 +120,7 @@ class MainMenuActivityTest
     fun confirmDialog_summary_displays_entered_summary()
     {
         val promptText = Random.Default.randomString(randomInputStringLength)
-        onView(withId(R.id.confirm_prompt_input)).perform(typeText(promptText))
+        onView(withId(R.id.confirm_prompt_input)).perform(betterScrollTo(),typeText(promptText))
         confirmDialog_opens_on_button_clicked()
         onView(withId(ConfirmDialogR.id.textview)).check(matches(withText(promptText)))
     }
@@ -153,5 +155,17 @@ class MainMenuActivityTest
         confirmDialog_opens_on_button_clicked()
         clickOutsideDialog()
         onView(withId(R.id.confirm_result_output)).check(matches(withText("cancelled")))
+    }
+
+
+
+
+    /* text input dialog tests */
+
+    @Test
+    fun textInputDialog_opens_on_button_clicked()
+    {
+        onView(withId(R.id.text_input_button)).perform(betterScrollTo(),click())
+        onView(withId(TextInputDialogR.id.edittext)).check(matches(isDisplayed()))
     }
 }
