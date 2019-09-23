@@ -28,6 +28,12 @@ class MainMenuActivityTest
     @JvmField
     var activityTestRule = ActivityTestRule(MainMenuActivity::class.java)
 
+    private val uiDevice = UiDevice.getInstance(getInstrumentation())
+
+    private fun clickOutsideDialog()
+    {
+        uiDevice.click(5,uiDevice.displayHeight/2) // click outside dialog
+    }
 
 
 
@@ -72,5 +78,21 @@ class MainMenuActivityTest
         confirmDialog_opens_on_button_clicked()
         onView(withId(ConfirmDialogR.id.button__ok)).perform(click())
         onView(withId(R.id.confirm_result_output)).check(matches(withText(ConfirmDialogActivity.ButtonId.YES_BUTTON.name)))
+    }
+
+    @Test
+    fun confirmDialog_OnActivityResult_back_cancels()
+    {
+        confirmDialog_opens_on_button_clicked()
+        pressBack()
+        onView(withId(R.id.confirm_result_output)).check(matches(withText("cancelled")))
+    }
+
+    @Test
+    fun confirmDialog_OnActivityResult_tap_outside_cancels()
+    {
+        confirmDialog_opens_on_button_clicked()
+        clickOutsideDialog()
+        onView(withId(R.id.confirm_result_output)).check(matches(withText("cancelled")))
     }
 }
