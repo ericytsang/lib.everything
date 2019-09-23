@@ -47,7 +47,7 @@ class MainMenuActivityTest
     }
 
     @Test
-    fun confirmDialog_title_displays_title()
+    fun confirmDialog_title_displays_entered_title()
     {
         val titleText = Random.Default.randomString(randomInputStringLength)
         onView(withId(R.id.confirm_title_input)).perform(typeText(titleText))
