@@ -1,17 +1,21 @@
 package com.github.ericytsang.example.app.android
 
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.ActivityTestRule
+import androidx.test.uiautomator.UiDevice
 import com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity
 import com.github.ericytsang.androidlib.core.randomString
 import com.github.ericytsang.app.example.android.MainMenuActivity
 import com.github.ericytsang.androidlib.confirmdialog.R as ConfirmDialogR
+import com.github.ericytsang.androidlib.alertdialog.R as AlertDialogR
 import com.github.ericytsang.app.example.android.R
 import org.junit.Rule
 import org.junit.Test
