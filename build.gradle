@@ -8,6 +8,9 @@ buildscript {
         classpath deps.crashlytics.google_services_plugin
         classpath deps.crashlytics.fabric_plugin
     }
+    repositories {
+        google()
+    }
 }
 
 allprojects {
