@@ -403,5 +403,5 @@ inline fun <reified C:Any> Any.cast():C = C::class.cast(this)
 
 fun Random.randomString(length:Int):String
 {
-    return (1..length).map {nextInt(32,127)}.map {it.toChar()}.fold("") {a,e->a+e}
+    return (1..length).map {"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".random()}.fold("") {a,e->a+e}
 }
