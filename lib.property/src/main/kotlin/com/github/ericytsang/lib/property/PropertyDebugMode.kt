@@ -11,13 +11,13 @@ internal fun debugDo(block: () -> Unit) {
 }
 
 internal fun debugPrintln(debugString: String) {
-    if (PropertyDebugMode.debugMode) {
-        println(debugString)
+    debugDo {
+        debugPrintln {debugString}
     }
 }
 
 internal fun debugPrintln(debugString: () -> String) {
-    if (PropertyDebugMode.debugMode) {
-        println(debugString())
+    debugDo {
+        Throwable(debugString()).printStackTrace(System.out)
     }
 }

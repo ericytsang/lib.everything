@@ -36,4 +36,5 @@ dependencies {
     api "com.thoughtworks.xstream:xstream:1.4.2"
     api "org.apache.commons:commons-lang3:3.4"
     api "com.google.collections:google-collections:1.0-rc2"
+    api "com.google.code.gson:gson:2.8.5"
 }

@@ -80,8 +80,8 @@ class PropertyTest
                     }
                 }
             }
+            assertEquals(listOf(2),emittedValuesSoFar())
         }
-        assertEquals(listOf(2,2,2),emittedValuesSoFar())
     }
 
     @Test

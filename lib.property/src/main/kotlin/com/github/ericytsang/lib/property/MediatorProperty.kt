@@ -28,64 +28,17 @@ private class RegisteredSource<Value>(
     fun stopListening() = closeable.close()
 }
 
-private interface MediatorPropertyState<Value>:MutableProperty<Value> {
-    fun <I> addSource(source:Property<I>, onChanged:(I)->Unit)
-    fun <I> removeSource(source:Property<I>)
-}
-
-private class Inactive<Value>(initialSources:Iterable<RegisteredSource<*>>):MediatorPropertyState<Value> {
-
-    private val sources = mutableMapOf<Any,RegisteredSource<*>>()
-
-    init
-    {
-        initialSources.forEach {addSource(it)}
-    }
-
-    private fun <I> addSource(registeredSource:RegisteredSource<I>)
-    {
-        addSource(registeredSource.source, registeredSource.onChanged)
-    }
-
-    override fun <I> addSource(source:Property<I>, onChanged:(I)->Unit)
-    {
-        removeSource(source)
-        sources[source] = RegisteredSource(source,onChanged)
-    }
-
-    override fun <I> removeSource(source:Property<I>)
-    {
-        sources.remove(source)?.stopListening()
-    }
-
-    override fun set(value:Value)
-    {
-        throw UnsupportedOperationException("not implemented") // todo
-    }
-
-    override val listeners:Set<Any>
-        get() = TODO("Not yet implemented")
-
-    override fun listen(activeScope:AddCloseablesScope,onChanged:(Value)->Unit)
-    {
-        throw UnsupportedOperationException("not implemented") // todo
-    }
-}
-
-private class Active<Value>(val initialValue:Value) {
-
-}
-
 
 class MediatorProperty<Value>:MutableProperty<Value>
 {
     private val sources = mutableMapOf<Any,RegisteredSource<*>>()
 
-    private val backingProperty: MutableProperty<Value> = EventProperty()
+    private val backingProperty: MutableProperty<Value> = NullableDataProperty.uninitialized()
     override val listeners:Set<Any> get() = backingProperty.listeners
 
     fun <I> addSource(source:Property<I>, onChanged:(I)->Unit)
     {
+        removeSource(source)
         val newSource = RegisteredSource(source,onChanged)
         sources[source] = newSource
         listeningToSourcesScope.addCloseables()
