@@ -5,5 +5,5 @@ dependencies {
     api project(":androidlib.core")
     
     // androidx preferences
-    api "androidx.preference:preference:1.1.0"
+    api "androidx.preference:preference:1.1.1"
 }

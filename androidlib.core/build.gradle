@@ -8,6 +8,6 @@ dependencies {
 
     // app compat
     api "androidx.legacy:legacy-support-core-utils:1.0.0"
-    api "androidx.appcompat:appcompat:1.1.0-rc01"
-    api "androidx.recyclerview:recyclerview:1.0.0"
+    api "androidx.appcompat:appcompat:1.2.0-beta01"
+    api "androidx.recyclerview:recyclerview:1.1.0"
 }

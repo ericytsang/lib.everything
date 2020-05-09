@@ -7,5 +7,5 @@ dependencies {
     api project(":lib.simpletask")
 
     // android billing
-    implementation "com.android.billingclient:billing:2.0.3"
+    implementation "com.android.billingclient:billing:2.2.0"
 }

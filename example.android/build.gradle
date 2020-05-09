@@ -30,33 +30,33 @@ dependencies {
 
     // app compat
     api "androidx.legacy:legacy-support-core-utils:1.0.0"
-    api "androidx.core:core-ktx:1.0.0"
-    api "androidx.appcompat:appcompat:1.1.0-rc01"
-    api "androidx.recyclerview:recyclerview:1.0.0"
+    api "androidx.core:core-ktx:1.2.0"
+    api "androidx.appcompat:appcompat:1.2.0-beta01"
+    api "androidx.recyclerview:recyclerview:1.1.0"
     api "androidx.cardview:cardview:1.0.0"
-    api "com.google.android.material:material:1.0.0"
-    api "androidx.preference:preference:1.1.0"
+    api "com.google.android.material:material:1.1.0"
+    api "androidx.preference:preference:1.1.1"
 
     // leak canary
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:1.6.3"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:2.0"
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:1.6.3"
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:1.6.3"
 
     // testing dependencies
-    androidTestImplementation "androidx.arch.core:core-testing:2.0.1"
+    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:3.2.0"
     androidTestImplementation "androidx.test.espresso:espresso-intents:3.2.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "androidx.test.uiautomator:uiautomator:2.2.0"
-    androidTestImplementation "androidx.work:work-testing:2.1.0"
+    androidTestImplementation "androidx.work:work-testing:2.3.4"
     androidTestImplementation "com.google.truth:truth:0.42"
     testImplementation "org.robolectric:robolectric:4.3"
     testImplementation "junit:junit:4.12"
 
     // resolve dependency conflicts
     // https://medium.com/mindorks/avoiding-conflicts-in-android-gradle-dependencies-28e4200ca235#2b5e
-    implementation "androidx.arch.core:core-runtime:2.0.1"
+    implementation "androidx.arch.core:core-runtime:2.1.0"
     implementation "com.google.guava:guava:25.1-android"
     implementation "org.checkerframework:checker-compat-qual:2.5.3"
     implementation "com.google.errorprone:error_prone_annotations:2.3.1"
