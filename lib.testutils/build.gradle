@@ -10,7 +10,7 @@ dependencies {
     api project(":lib.concurrent")
 
     // external dependencies
-    api deps.kotlin.test
-    api deps.junit
-    api deps.mockito.all
+    api "org.jetbrains.kotlin:kotlin-test-junit:1.3.61"
+    api "junit:junit:4.12"
+    api "org.mockito:mockito-all:2.25.0_all"
 }

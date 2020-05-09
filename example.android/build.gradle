@@ -29,13 +29,13 @@ dependencies {
     implementation project(":lib.setofatleastone")
 
     // app compat
-    api deps.support.core_utils
-    api deps.support.core_ktx
-    api deps.support.app_compat
-    api deps.support.recyclerview
-    api deps.support.cardview
-    api deps.support.design
-    api deps.support.preference
+    api "androidx.legacy:legacy-support-core-utils:1.0.0"
+    api "androidx.core:core-ktx:1.0.0"
+    api "androidx.appcompat:appcompat:1.1.0-rc01"
+    api "androidx.recyclerview:recyclerview:1.0.0"
+    api "androidx.cardview:cardview:1.0.0"
+    api "com.google.android.material:material:1.0.0"
+    api "androidx.preference:preference:1.1.0"
 
     // leak canary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:1.6.3"
@@ -43,20 +43,20 @@ dependencies {
     debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:1.6.3"
 
     // testing dependencies
-    androidTestImplementation deps.arch_core.testing
-    androidTestImplementation deps.espresso.core
-    androidTestImplementation deps.espresso.contrib
-    androidTestImplementation deps.espresso.intents
-    androidTestImplementation deps.atsl.ext_junit
-    androidTestImplementation deps.atsl.ui_automator
-    androidTestImplementation deps.work.testing
-    androidTestImplementation deps.truth
-    testImplementation deps.robolectric
-    testImplementation deps.junit
+    androidTestImplementation "androidx.arch.core:core-testing:2.0.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.2.0"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:3.2.0"
+    androidTestImplementation "androidx.test.ext:junit:1.1.1"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.2.0"
+    androidTestImplementation "androidx.work:work-testing:2.1.0"
+    androidTestImplementation "com.google.truth:truth:0.42"
+    testImplementation "org.robolectric:robolectric:4.3"
+    testImplementation "junit:junit:4.12"
 
     // resolve dependency conflicts
     // https://medium.com/mindorks/avoiding-conflicts-in-android-gradle-dependencies-28e4200ca235#2b5e
-    implementation deps.arch_core.runtime
+    implementation "androidx.arch.core:core-runtime:2.0.1"
     implementation "com.google.guava:guava:25.1-android"
     implementation "org.checkerframework:checker-compat-qual:2.5.3"
     implementation "com.google.errorprone:error_prone_annotations:2.3.1"

@@ -2,5 +2,5 @@ configureKotlin(project)
 
 dependencies {
     api project(":lib.awaitable")
-    api deps.rxjava2
+    api "io.reactivex.rxjava2:rxjava:2.2.12"
 }

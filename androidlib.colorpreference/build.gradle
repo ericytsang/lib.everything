@@ -12,5 +12,5 @@ dependencies {
     api "com.github.QuadFlask:colorpicker:0.0.13"
 
     // androidx
-    api deps.support.preference
+    api "androidx.preference:preference:1.1.0"
 }
