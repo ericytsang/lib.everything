@@ -8,8 +8,8 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 class CloseableGroup(
-        vararg _closeables:Closeable)
-    :Closeable
+        vararg _closeables:Closeable
+):Closeable
 {
     fun chainedAddCloseables(block:(scope:AddCloseablesScope)->Unit):CloseableGroup = apply {coreApi.addCloseables(block)}
     fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R? = coreApi.addCloseables(block)
@@ -24,7 +24,8 @@ class CloseableGroup(
     private val coreApi = object
     {
         private val lock = ReentrantLock()
-        private var state:State = Active(*_closeables)
+        var state:State = Active(*_closeables)
+            private set
 
         fun <R:Any> addCloseables(block:(scope:AddCloseablesScope)->R):R? = lock.withLock()
         {
@@ -48,6 +49,12 @@ class CloseableGroup(
                 is Closed -> state
             }
         }
+    }
+
+    val isClosed get() = when (coreApi.state)
+    {
+        is Active -> false
+        is Closed -> true
     }
 
     private sealed class State

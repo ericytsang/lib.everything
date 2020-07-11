@@ -3,7 +3,7 @@
 
     <declare-styleable name="ColorPreference">
         <attr name="showAlphaSlider" format="boolean"/>
-        <attr name="persistenceStrategy"/>
+        <attr name="persistenceStrategy" format="string"/>
     </declare-styleable>
 
 </resources>

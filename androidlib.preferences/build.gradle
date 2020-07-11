@@ -8,13 +8,13 @@ dependencies {
     api project(":lib.domainobjects")
 
     // joda time
-    api deps.joda.time
+    api "joda-time:joda-time:2.10.1"
 
     // work manager
-    api deps.work.runtime_ktx
+    api "androidx.work:work-runtime-ktx:2.3.4"
 
     // app compat
-    api deps.support.core_utils
-    api deps.support.app_compat
-    api deps.support.recyclerview
+    api "androidx.legacy:legacy-support-core-utils:1.0.0"
+    api "androidx.appcompat:appcompat:1.2.0-beta01"
+    api "androidx.recyclerview:recyclerview:1.1.0"
 }

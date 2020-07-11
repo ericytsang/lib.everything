@@ -8,5 +8,5 @@ dependencies {
     api project(":androidlib.dialogpreference")
 
     // time library
-    implementation deps.joda.time
+    implementation "joda-time:joda-time:2.10.1"
 }
