@@ -2,7 +2,6 @@ package com.github.ericytsang.androidlib.core
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.Activity
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -16,7 +15,6 @@ import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.content.res.TypedArray
 import android.graphics.Point
-import android.view.LayoutInflater
 import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.location.LocationManager
@@ -36,6 +34,7 @@ import android.util.AttributeSet
 import android.util.Base64
 import android.util.Log
 import android.view.Display
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
@@ -43,20 +42,17 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.databinding.ViewDataBinding
-import com.github.ericytsang.androidlib.core.HvOrientation.*
+import com.github.ericytsang.androidlib.core.HvOrientation.HORIZONTAL
+import com.github.ericytsang.androidlib.core.HvOrientation.VERTICAL
 import com.github.ericytsang.lib.domainobjects.serialize
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
 import java.io.Serializable
-import java.lang.RuntimeException
-import java.lang.StringBuilder
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 import kotlin.random.Random
-import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
 
 // Context

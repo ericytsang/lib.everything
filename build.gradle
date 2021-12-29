@@ -2,10 +2,10 @@ buildscript {
     apply from: 'versions.gradle'
     addRepos(repositories)
     dependencies {
-        classpath "com.android.tools.build:gradle:3.6.3"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72"
+        classpath "com.android.tools.build:gradle:4.0.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:2.3.7"
-        classpath "com.google.gms:google-services:4.3.3"
+        classpath "com.google.gms:google-services:4.3.10"
         classpath "io.fabric.tools:gradle:1.29.0"
     }
     repositories {
@@ -57,25 +57,25 @@ static def getGitHash(Project p) {
 // for configuring android projects
 static def configureAndroidCommon(PluginAware p) {
     p.with {
+
+        // kotlin x android
         apply plugin: "kotlin-android"
-        apply plugin: "kotlin-android-extensions"
-        apply plugin: "kotlin-kapt"
+
+        // data binding
+        apply plugin: 'kotlin-kapt'
 
         android {
-            compileSdkVersion 29
-            buildToolsVersion "28.0.3"
+            compileSdkVersion 32
+            buildToolsVersion "30.0.2"
             defaultConfig {
                 minSdkVersion 18
-                targetSdkVersion 29
-
+                targetSdkVersion 32
                 testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
                 vectorDrawables.useSupportLibrary true
                 multiDexEnabled true
-
                 buildConfigField "String", "GIT_HASH", "\"${getGitHash(p)}\""
             }
-            dataBinding {
+            viewBinding {
                 enabled true
             }
             compileOptions {
@@ -107,8 +107,8 @@ static def configureKotlin(PluginAware p) {
         apply plugin: "java-library"
         apply plugin: "kotlin"
 
-        sourceCompatibility = "8"
-        targetCompatibility = "8"
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
     configureKotlinDependencies(p)
 }
@@ -121,8 +121,8 @@ static def configureKotlinDependencies(PluginAware p) {
         dependencies {
 
             // kotlin
-            implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72"
-            implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.72"
+            implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.10"
+            implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.10"
 
             // test
             if ("lib.streamtest" in name)

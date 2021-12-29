@@ -11,10 +11,10 @@ dependencies {
     api "joda-time:joda-time:2.10.1"
 
     // work manager
-    api "androidx.work:work-runtime-ktx:2.3.4"
+    api "androidx.work:work-runtime-ktx:2.7.1"
 
     // app compat
     api "androidx.legacy:legacy-support-core-utils:1.0.0"
-    api "androidx.appcompat:appcompat:1.2.0-beta01"
-    api "androidx.recyclerview:recyclerview:1.1.0"
+    api "androidx.appcompat:appcompat:1.4.0"
+    api "androidx.recyclerview:recyclerview:1.2.1"
 }
