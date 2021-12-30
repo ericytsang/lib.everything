@@ -6,7 +6,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:2.3.7"
         classpath "com.google.gms:google-services:4.3.10"
-        classpath "io.fabric.tools:gradle:1.29.0"
+        classpath "io.fabric.tools:gradle:1.31.2"
     }
     repositories {
         google()
@@ -75,8 +75,8 @@ static def configureAndroidCommon(PluginAware p) {
                 multiDexEnabled true
                 buildConfigField "String", "GIT_HASH", "\"${getGitHash(p)}\""
             }
-            viewBinding {
-                enabled true
+            buildFeatures {
+                viewBinding true
             }
             compileOptions {
                 targetCompatibility JavaVersion.VERSION_1_8
