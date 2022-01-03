@@ -8,9 +8,6 @@ buildscript {
         classpath 'com.google.gms:google-services:4.3.10'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'
     }
-    repositories {
-        google()
-    }
 }
 
 allprojects {
@@ -76,12 +73,11 @@ static def configureAndroidCommon(PluginAware p) {
                 buildConfigField "String", "GIT_HASH", "\"${getGitHash(p)}\""
             }
             buildFeatures {
-                viewBinding true
                 dataBinding true
             }
             compileOptions {
-                targetCompatibility JavaVersion.VERSION_1_8
-                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_11
+                sourceCompatibility JavaVersion.VERSION_11
             }
             kotlinOptions {
                 jvmTarget = "1.8"
@@ -108,8 +104,8 @@ static def configureKotlin(PluginAware p) {
         apply plugin: "java-library"
         apply plugin: "kotlin"
 
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 11
+        targetCompatibility = 11
     }
     configureKotlinDependencies(p)
 }

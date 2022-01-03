@@ -237,7 +237,7 @@ class DefaultTouchSessionFactory(
                                     is Opt.None -> 0
                                 }
                             }
-                            .max()!!
+                            .maxOrNull()!!
 
                     return {
                         event:MotionEvent ->

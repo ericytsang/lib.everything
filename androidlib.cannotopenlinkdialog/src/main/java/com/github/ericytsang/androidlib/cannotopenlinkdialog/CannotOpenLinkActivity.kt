@@ -109,9 +109,9 @@ class CannotOpenLinkActivity:AppCompatActivity()
             }
             layout.buttonCopy.setOnClickListener()
             {
-                activity.clipboardManager.primaryClip = ClipData.newPlainText(
-                        linkLabel,
-                        params.link)
+                activity.clipboardManager.setPrimaryClip(
+                    ClipData.newPlainText(linkLabel,params.link)
+                )
                 Toast.makeText(
                         activity,
                         activity.getStringCompat(

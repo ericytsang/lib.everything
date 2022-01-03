@@ -144,12 +144,12 @@ private constructor(
             billingClient.endConnection()
         }
 
-        override fun onConsumeResponse(billingResult:BillingResult?,purchaseToken:String?)
+        override fun onConsumeResponse(billingResult:BillingResult,purchaseToken:String)
         {
             refreshPurchases()
         }
 
-        override fun onPurchasesUpdated(billingResult:BillingResult?,purchases:MutableList<Purchase>?)
+        override fun onPurchasesUpdated(billingResult:BillingResult,purchases:MutableList<Purchase>?)
         {
             refreshPurchases()
         }
@@ -347,7 +347,7 @@ private constructor(
             return offers.connected.billingClient
                     .queryPurchases(BillingClient.SkuType.INAPP)
                     .run {purchasesList?:listOf()}
-                    .filter {it.sku == sku}
+                    .filter {sku in it.skus}
                     .let {it.firstOrNull() != null}
         }
 
@@ -365,7 +365,7 @@ private constructor(
             if (offers.readyToConsumeStuff.value.invoke().opt != this) return
 
             // get the thing we want to buy
-            val boughtThings = purchaseHistory.filter {it.sku == sku}
+            val boughtThings = purchaseHistory.filter {sku in it.skus}
 
             // consume it
             boughtThings.forEach()
