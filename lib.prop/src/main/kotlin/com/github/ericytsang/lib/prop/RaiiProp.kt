@@ -1,11 +1,20 @@
 package com.github.ericytsang.lib.prop
 
 import com.github.ericytsang.lib.optional.Opt
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.io.Closeable
 
 class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Opt<Value>>,Closeable
 {
     private val prop = DataProp(initialValue)
+
+    override fun asFlow():Flow<(Unit) -> (() -> Opt<Value>)>
+    {
+        return prop.asFlow().map {
+            { _: Unit -> {it(Unit)} }
+        }
+    }
 
     override fun set(context:Unit,value:()->Opt<Value>):()->Opt<Value>
     {
@@ -13,21 +22,21 @@ class RaiiProp<Value:Closeable>(initialValue:Opt<Value>):MutableProp<Unit,()->Op
         val previousValue = get(context)
 
         // set value to nothing (to notify listeners so that they can clean up if required)
-        prop.set(context,Opt.none())
+        prop[context] = Opt.none()
 
         // close the previous value
         previousValue.invoke().opt?.close()
 
         // fetch and set the value to the new given value
         val fetchedValue = value.invoke()
-        prop.set(context,fetchedValue)
+        prop[context] = fetchedValue
 
         return {fetchedValue}
     }
 
     override fun get(context:Unit):()->Opt<Value>
     {
-        return prop.get(context).let {{it}}
+        return prop[context].let {{it}}
     }
 
     override fun listen(onChanged:(ReadOnlyProp<Unit,()->Opt<Value>>)->Unit):Closeable

@@ -4,58 +4,76 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import androidx.lifecycle.lifecycleScope
 import com.github.ericytsang.androidlib.core.layoutInflater
 import com.github.ericytsang.androidlib.seekbar.databinding.ViewSeekBarWithFeedbackBinding
-import com.github.ericytsang.lib.prop.Prop
-import com.github.ericytsang.lib.prop.listen
-import com.github.ericytsang.lib.prop.value
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class SeekBarWithFeedback(
-        context:Context,
-        attrs:AttributeSet)
-    :LinearLayout(context,attrs)
+    context:Context,
+    attrs:AttributeSet
+):LinearLayout(context,attrs)
 {
     private val layout = ViewSeekBarWithFeedbackBinding.inflate(context.layoutInflater,this,true)
 
-    var listener:Listener? = null
+    val listener = mutableSetOf<Listener>()
 
-    val progress = object:Prop<Unit,Int>()
-    {
-        override fun doGet(context:Unit):Int
-        {
-            return (layout.SeekBarWithFeedbackSeekbar.progress+min.value)*valueCoefficient.value
+    // region get/set progress
+
+    private val progressListener = CompositeSeekBarChangedListener().also()
+    {compositeSeekBarChangedListener ->
+        layout.SeekBarWithFeedbackSeekbar.setOnSeekBarChangeListener(compositeSeekBarChangedListener)
+
+        // notify listeners if there are any
+        compositeSeekBarChangedListener.delegates += OnSeekBarProgressChangeListener()
+        { _,_, fromUser ->
+            listener.forEach()
+            {
+                it.onProgressChanged(
+                    source = this@SeekBarWithFeedback,
+                    progress = progress,
+                    fromUser = fromUser
+                )
+            }
         }
-        override fun doSet(context:Unit,value:Int)
-        { layout.SeekBarWithFeedbackSeekbar.progress = (value/valueCoefficient.value)-min.value }
     }
 
-    val valueCoefficient = object:Prop<Unit,Int>()
+    var progress:Int
+    get() = (layout.SeekBarWithFeedbackSeekbar.progress+min.value)*valueCoefficient.value
+    set(value)
     {
-        private var field = 1
-        override fun doGet(context:Unit):Int = field
-        override fun doSet(context:Unit,value:Int) {field = value}
+        layout.SeekBarWithFeedbackSeekbar.progress = (value/valueCoefficient.value)-min.value
     }
 
-    val labelTemplate = object:Prop<Unit,String>()
+    val progressFlow:Flow<Int> get() = callbackFlow()
     {
-        private var field = "{}"
-        override fun doGet(context:Unit):String = field
-        override fun doSet(context:Unit,value:String) {field = value}
-    }
+        trySendBlocking(progress)
+        val listener = OnSeekBarProgressChangeListener { _,_,_ -> trySendBlocking(progress) }
+        progressListener.delegates += listener
+        awaitClose()
+        {
+            progressListener.delegates -= listener
+        }
+    }.buffer(CONFLATED)
 
-    val min = object:Prop<Unit,Int>()
-    {
-        private var internalValue:Int = 0
-        override fun doGet(context:Unit):Int = internalValue
-        override fun doSet(context:Unit,value:Int) {internalValue = value}
-    }
+    // endregion
 
-    val max = object:Prop<Unit,Int>()
-    {
-        private var internalValue:Int = 0
-        override fun doGet(context:Unit):Int = internalValue
-        override fun doSet(context:Unit,value:Int) {internalValue = value}
-    }
+    val valueCoefficient = MutableStateFlow(1)
+    val labelTemplate = MutableStateFlow("{}")
+    val min = MutableStateFlow(0)
+    val max = MutableStateFlow(0)
 
     init
     {
@@ -68,51 +86,85 @@ class SeekBarWithFeedback(
         styledAttributes.recycle()
     }
 
-    init
+    // region view coroutine scope
+
+    private var coroutineScope = CoroutineScope(Dispatchers.Main)
+    override fun onAttachedToWindow()
     {
+        super.onAttachedToWindow()
+        coroutineScope = CoroutineScope(Dispatchers.Main)
+        coroutineScope.launch { setupListeners() }
+    }
+
+    override fun onDetachedFromWindow()
+    {
+        coroutineScope.cancel()
+        super.onDetachedFromWindow()
+    }
+
+    private suspend fun setupListeners()
+    {
+        layout.lifecycleOwner?.lifecycleScope
         // updating min and max on the progress bar
-        listOf(min,max).listen()
-        {
-            layout.SeekBarWithFeedbackSeekbar.max = max.value-min.value
-        }
+        combine(min, max)
+        { min, max ->
+            layout.SeekBarWithFeedbackSeekbar.max = max-min
+        }.collect()
 
         // updating text labels when needed
-        listOf(progress,valueCoefficient,labelTemplate,min,max).listen()
-        {
-            layout.SeekBarWithFeedbackLabelMin.text = createLabelText(labelTemplate.value,min.value*valueCoefficient.value)
-            layout.SeekBarWithFeedbackLabelMax.text = createLabelText(labelTemplate.value,max.value*valueCoefficient.value)
-            layout.SeekBarWithFeedbackLabelValue.text = createLabelText(labelTemplate.value,progress.value)
-        }
+        combine(progressFlow,valueCoefficient,labelTemplate,min,max)
+        { progressFlow,valueCoefficient,labelTemplate,min,max ->
+            layout.SeekBarWithFeedbackLabelMin.text = createLabelText(
+                labelTemplateStringResId = labelTemplate,
+                value = min*valueCoefficient
+            )
+            layout.SeekBarWithFeedbackLabelMax.text = createLabelText(
+                labelTemplateStringResId = labelTemplate,
+                value = max*valueCoefficient
+            )
+            layout.SeekBarWithFeedbackLabelValue.text = createLabelText(
+                labelTemplateStringResId = labelTemplate,
+                value = progressFlow
+            )
+        }.collect()
 
         // adding listener to seekbar
-        val seekbarListener = object:SeekBar.OnSeekBarChangeListener
-        {
-            override fun onProgressChanged(seekBar:SeekBar?,progress:Int,fromUser:Boolean)
-            {
-                layout.SeekBarWithFeedbackLabelValue.text = createLabelText(labelTemplate.value,this@SeekBarWithFeedback.progress.value)
-                listener?.onProgressChanged(this@SeekBarWithFeedback,this@SeekBarWithFeedback.progress.value,fromUser)
-            }
-            override fun onStartTrackingTouch(seekBar:SeekBar?) = Unit
-            override fun onStopTrackingTouch(seekBar:SeekBar?) = Unit
-        }.apply {onProgressChanged(null,0,false)}
-        layout.SeekBarWithFeedbackSeekbar.setOnSeekBarChangeListener(seekbarListener)
+        progressFlow.collect()
+        { progressFlow ->
+            layout.SeekBarWithFeedbackLabelValue.text = createLabelText(
+                labelTemplateStringResId = labelTemplate.value,
+                value = progressFlow
+            )
+        }
 
         // adding listeners to buttons
         layout.SeekBarWithFeedbackButtonDecrement.setOnClickListener()
         {
             layout.SeekBarWithFeedbackSeekbar.progress--
-            listener?.onProgressChanged(this@SeekBarWithFeedback,progress.value,true)
+            listener.forEach()
+            {
+                it.onProgressChanged(this@SeekBarWithFeedback,progress,true)
+            }
         }
         layout.SeekBarWithFeedbackButtonIncrement.setOnClickListener()
         {
             layout.SeekBarWithFeedbackSeekbar.progress++
-            listener?.onProgressChanged(this@SeekBarWithFeedback,progress.value,true)
+            listener.forEach()
+            {
+                it.onProgressChanged(this@SeekBarWithFeedback,progress,true)
+            }
         }
     }
 
+    // endregion
+
     interface Listener
     {
-        fun onProgressChanged(source:SeekBarWithFeedback,progress:Int,fromUser:Boolean)
+        fun onProgressChanged(
+            source:SeekBarWithFeedback,
+            progress:Int,
+            fromUser:Boolean
+        )
     }
 
     override fun setEnabled(enabled:Boolean)
@@ -124,8 +176,41 @@ class SeekBarWithFeedback(
         super.setEnabled(enabled)
     }
 
-    private fun createLabelText(labelTemplateStringResId:String,value:Int):String
+    private fun createLabelText(
+        labelTemplateStringResId:String,
+        value:Int
+    ):String
     {
         return labelTemplateStringResId.replace("{}",value.toString())
+    }
+}
+
+fun OnSeekBarProgressChangeListener(
+    onProgressChanged:(seekBar:SeekBar,progress:Int,fromUser:Boolean) -> Unit
+) = object:SeekBar.OnSeekBarChangeListener
+{
+    override fun onProgressChanged(seekBar:SeekBar,progress:Int,fromUser:Boolean)
+    {
+        onProgressChanged(seekBar,progress,fromUser)
+    }
+    override fun onStartTrackingTouch(seekBar:SeekBar) = Unit
+    override fun onStopTrackingTouch(seekBar:SeekBar) = Unit
+}
+
+class CompositeSeekBarChangedListener(
+    val delegates: MutableSet<SeekBar.OnSeekBarChangeListener> = mutableSetOf()
+) : SeekBar.OnSeekBarChangeListener
+{
+    override fun onProgressChanged(seekBar:SeekBar,progress:Int,fromUser:Boolean)
+    {
+        delegates.forEach { it.onProgressChanged(seekBar, progress, fromUser) }
+    }
+    override fun onStartTrackingTouch(p0:SeekBar?)
+    {
+        delegates.forEach { it.onStartTrackingTouch(p0) }
+    }
+    override fun onStopTrackingTouch(p0:SeekBar?)
+    {
+        delegates.forEach { it.onStopTrackingTouch(p0) }
     }
 }

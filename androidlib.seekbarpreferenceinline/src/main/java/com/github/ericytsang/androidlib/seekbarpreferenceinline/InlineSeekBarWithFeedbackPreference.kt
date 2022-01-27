@@ -10,6 +10,7 @@ import com.github.ericytsang.lib.closeablegroup.CloseableGroup
 import com.github.ericytsang.lib.optional.Opt
 import com.github.ericytsang.lib.prop.RaiiProp
 import com.github.ericytsang.lib.prop.value
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.Closeable
 
 class InlineSeekBarWithFeedbackPreference(
@@ -104,13 +105,13 @@ class InlineSeekBarWithFeedbackPreference(
                 addCloseablesScope+preference.persistenceStrategy.load(preference.context)
                 {
                     newValue ->
-                    if (seekBar.progress.value != newValue)
+                    if (seekBar.progress != newValue)
                     {
-                        seekBar.progress.value = newValue
+                        seekBar.progress = newValue
                     }
                 }
             }
-            seekBar.listener = object:SeekBarWithFeedback.Listener
+            seekBar.listener += object:SeekBarWithFeedback.Listener
             {
                 override fun onProgressChanged(source:SeekBarWithFeedback,progress:Int,fromUser:Boolean)
                 {

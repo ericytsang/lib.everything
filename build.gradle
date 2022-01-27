@@ -93,6 +93,9 @@ static def configureAndroidCommon(PluginAware p) {
                 }
             }
         }
+        dependencies {
+            implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
+        }
     }
     configureKotlinDependencies(p)
 }
@@ -120,6 +123,7 @@ static def configureKotlinDependencies(PluginAware p) {
             // kotlin
             implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.10"
             implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.10"
+            implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
 
             // test
             if ("lib.streamtest" in name)

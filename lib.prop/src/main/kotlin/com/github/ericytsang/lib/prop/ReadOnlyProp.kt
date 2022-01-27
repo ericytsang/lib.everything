@@ -1,5 +1,6 @@
 package com.github.ericytsang.lib.prop
 
+import kotlinx.coroutines.flow.Flow
 import java.io.Closeable
 import java.io.Serializable
 
@@ -16,4 +17,10 @@ interface ReadOnlyProp<Context:Any,Value:Any>:Serializable
      * events so that it will not receive any more change events in the future.
      */
     fun listen(onChanged:(ReadOnlyProp<Context,Value>)->Unit):Closeable
+
+    /**
+     * returns a way to access the underlying data for this [Prop] via a [Flow]
+     * interface.
+     */
+    fun asFlow(): Flow<(Context) -> Value>
 }

@@ -1,5 +1,9 @@
 package com.github.ericytsang.lib.prop
 
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.io.Closeable
 import java.lang.Exception
 import java.util.concurrent.locks.ReentrantLock
@@ -16,6 +20,17 @@ abstract class Prop<Context:Any,Value:Any>:MutableProp<Context,Value>
         private fun debug(string:String)
         {
             if (debugMode) println(string)
+        }
+    }
+
+    final override fun asFlow():Flow<(Context) -> Value> = callbackFlow()
+    {
+        val listener = listen {readOnlyProp ->
+            sendBlocking { context: Context -> readOnlyProp[context]}
+        }
+        awaitClose()
+        {
+            listener.close()
         }
     }
 
