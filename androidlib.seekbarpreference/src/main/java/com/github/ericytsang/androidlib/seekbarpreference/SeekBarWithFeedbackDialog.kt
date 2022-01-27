@@ -65,9 +65,9 @@ class SeekBarWithFeedbackDialog:AppCompatActivity()
             activity.title = params.title
             layout.seekbarWithFeedbackDip.min.value = params.minValue
             layout.seekbarWithFeedbackDip.max.value = params.maxValue
-            layout.seekbarWithFeedbackDip.progress.value = params.oldValue
+            layout.seekbarWithFeedbackDip.progress = params.oldValue
             layout.seekbarWithFeedbackDip.labelTemplate.value = params.labelTemplate
-            layout.seekbarWithFeedbackDip.listener = object:SeekBarWithFeedback.Listener
+            layout.seekbarWithFeedbackDip.listener += object:SeekBarWithFeedback.Listener
             {
                 override fun onProgressChanged(source:SeekBarWithFeedback,progress:Int,fromUser:Boolean)
                 {
@@ -80,7 +80,7 @@ class SeekBarWithFeedbackDialog:AppCompatActivity()
             }
             layout.buttonOk.setOnClickListener()
             {
-                selectedColor = layout.seekbarWithFeedbackDip.progress.value
+                selectedColor = layout.seekbarWithFeedbackDip.progress
                 activity.finish()
             }
         }
