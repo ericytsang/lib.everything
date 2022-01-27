@@ -10,7 +10,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.github.ericytsang.androidlib.confirmdialog.ConfirmDialogActivity
 import com.github.ericytsang.androidlib.core.randomString
 import com.github.ericytsang.app.example.android.MainMenuActivity
@@ -30,9 +30,8 @@ class MainMenuActivityTest
         private const val randomInputStringLength = 5
     }
 
-    @Rule
-    @JvmField
-    var activityTestRule = ActivityTestRule(MainMenuActivity::class.java)
+    @get:Rule
+    val activityTestRule = ActivityScenarioRule(MainMenuActivity::class.java)
 
 
 
